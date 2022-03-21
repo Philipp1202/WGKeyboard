@@ -20,6 +20,7 @@ public class WGKTest : MonoBehaviour {
     Vector3 LRCPos;
     Vector3 vec1;
     Vector3 vec2;
+    Vector3 forward;
     Vector3 keyboardNorm;
     LineRenderer LR;
     int pointCount = 0;
@@ -67,6 +68,7 @@ public class WGKTest : MonoBehaviour {
         print(LRCPos);
         vec1 = URCPos - ULCPos;
         vec2 = URCPos - LRCPos;
+        forward = transform.forward;
         keyLength = vec1.magnitude / 10; // key width
         print("LENGTH OF KEYBOARD: " + vec1.magnitude);
         keyboardNorm.x = -(vec1.y*vec2.z - vec1.z*vec2.y);
@@ -147,6 +149,7 @@ public class WGKTest : MonoBehaviour {
         LRCPos = LowerRightCorner.transform.position;
         vec1 = URCPos - ULCPos;
         vec2 = URCPos - LRCPos;
+        forward = transform.forward;
 
         if (isWriting) {
             //LR.SetPosition(pointCount, col.transform.position);
@@ -193,6 +196,9 @@ public class WGKTest : MonoBehaviour {
             float length = vec1.magnitude;
             float width = vec2.magnitude;
             //float s = 2 / vec1.magnitude;
+            Vector3 v1 = new Vector3(0,0,0);
+            Vector3 v2 = new Vector3(0,0,0);
+            Vector3 v3 = new Vector3(0,0,0);
             for (int i = 0; i < LR.positionCount; i++) {
                 point = LR.GetPosition(i);
                 //print("THIS IS A LINERENDERER POINT: " + point);
@@ -208,7 +214,81 @@ public class WGKTest : MonoBehaviour {
                 //point += 0.5f * vec1 + 0.5f * vec2;
                 Vector3 vec1Norm = vec1.normalized;
                 Vector3 vec2Norm = vec2.normalized;
+                int xPos = 0;   // needed to determine, whether to take u, v or w for x and y (because it's order can change)
+                int yPos = 0;
 
+                bool vec1Taken = false;
+                bool vec2Taken = false;
+                bool vec3Taken = false;
+
+                if (vec1Norm.x != 0) {
+                    v1 = vec1Norm;
+                    vec1Taken = true;
+                    xPos = 0;
+                } else if (vec2Norm.x != 0) {
+                    v1 = vec2Norm;
+                    vec2Taken = true;
+                    yPos = 0;
+                } else {
+                    v1 = forward;
+                    vec3Taken = true;
+                }
+
+                if (vec1Norm.y != 0 && !vec1Taken) {
+                    v2 = vec1Norm;
+                    vec1Taken = true;
+                    xPos = 1;
+                } else if (vec2Norm.y != 0 && !vec2Taken) {
+                    v2 = vec2Norm;
+                    vec2Taken = true;
+                    yPos = 1;
+                } else {
+                    v2 = forward;
+                    vec3Taken = true;
+                }
+
+                if (!vec1Taken) {
+                    v3 = vec1Norm;
+                    xPos = 2;
+                } else if (!vec2Taken) {
+                    v3 = vec2Norm;
+                    yPos = 2;
+                } else {
+                    v3 = forward;
+                }
+
+                
+                float m = v1.y / v1.x;
+                v1.y = 0;
+                v2.y = v2.y - v2.x * m;
+                v3.y = v3.y - v3.x * m;
+                point.y = point.y - point.x * m;
+
+                m = v1.z / v1.x;
+                v1.z = 0;
+                v2.z = v2.z - v2.x * m;
+                v3.z = v3.z - v3.x * m;
+                point.z = point.z - point.x * m;
+
+                m = v2.z / v2.y;
+                v2.z = 0;
+                v3.z = v3.z - v3.y * m;
+                point.z = point.z - point.y * m;
+
+                float w = point.z / v3.z;
+                float v = (point.y - v3.y * w) / v2.y;
+                float u = (point.x - v3.x * w - v2.x * v) / v1.x;
+
+                float[] res = new float[3];
+                res[0] = u;
+                res[1] = v;
+                res[2] = w;
+                for (int j = 0; j < 3; j++) {
+                    print("THIS IS UWV: " + res[j]);
+                }
+
+
+                /*
                 float z = vec1Norm.y / vec1Norm.x;
                 vec1Norm.y -= vec1Norm.x * z;
                 vec2Norm.y -= vec2Norm.x * z;
@@ -234,11 +314,14 @@ public class WGKTest : MonoBehaviour {
                 t2 = Mathf.Max(t2, t3);
 
                 float s = (point.x - vec2Norm.x * t2) / vec1Norm.x;
+                */
 
 
-                pointsList.Add(new Vector2((s + halfLength) / length, (t2 + halfWidth) / length)); // adding magnitudes, such that lower left corner of "coordinate system" is at (0/0) and not middle point at (0/0)
+                pointsList.Add(new Vector2((res[xPos] + halfLength) / length, (res[yPos] + halfWidth) / length)); // adding magnitudes, such that lower left corner of "coordinate system" is at (0/0) and not middle point at (0/0)
                 pointsListTest.Add(pointsList[i]);
-                //print("POINT: " + pointsList[i]);
+                print("CALCx: " + Mathf.Abs(res[xPos]) + "halflen" + halfLength + "len" + length);
+                print("CALCy: " + Mathf.Abs(res[yPos]) + "halflen" + halfLength + "len" + length);
+                print("POINT: " + pointsList[i]);
 
                 //print("POINT IS ON: " + s + " : " + t2);
                 //print("PPPPPPOINT= " + point.x + ", " + point.y + ", " + point.z);
@@ -483,6 +566,9 @@ public class WGKTest : MonoBehaviour {
                 int k = 0;
                 foreach (Vector2 p in word.Value) {
                     cost += (p - inputPoints[k]).magnitude;
+                    if (word.Key == "point") {
+                        print("locpointcost inside: " + cost + " iteration: " + k);
+                    } 
                     k += 1;
                 }
             }
