@@ -9868,13 +9868,4 @@ varieties
 arbor
 mediawiki
 configurations
-poisonphilipp
-pikachu
-plinfa
-porygon2
-pliplup
-ketchum
-patrickstinktnachfisch
-leagueoflegends
-drei
-New Text
+poison

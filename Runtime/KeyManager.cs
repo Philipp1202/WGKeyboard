@@ -4,7 +4,7 @@ using UnityEngine;
 using UnityEngine.UI;
 
 public class KeyManager : MonoBehaviour
-{
+{/*
     Transform parent;
     string letter;
     Text text;
@@ -36,5 +36,5 @@ public class KeyManager : MonoBehaviour
             }
             hoverEnter = !hoverEnter;
         }
-    }
+    }*/
 }

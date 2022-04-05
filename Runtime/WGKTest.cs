@@ -20,11 +20,14 @@ public class WGKTest : MonoBehaviour {
     public Material whiteMat;
     public Material grayMat;
     public TextInputEvent result;
+    public string layout;
+    public GameObject layoutKey;
+    GameObject optionObjects;
+    GameObject addNewWordKey;
 
     BoxCollider boxCollider;
     Text text;
     LineRenderer LR;
-    //LineRenderer LRDebug;
 
     int pointCount = 0;
     Dictionary<string, List<Vector2>> normalizedWordsPointsDict;
@@ -36,6 +39,7 @@ public class WGKTest : MonoBehaviour {
     bool isWriting;
     Transform col = null;
     Dictionary<string, Vector2> letterPos;
+    List<string> layouts;
 
     List<string> keyboardSet;
     int pointCalls = 0;
@@ -44,6 +48,8 @@ public class WGKTest : MonoBehaviour {
     float calcTime = 0;
     bool sampleCalcReady = true;
     bool notEnded = false;
+    bool isOptionsOpen = false;
+    bool isAddingNewWord = false;
 
     float startTime = 0;
     float keyRadius;
@@ -56,22 +62,15 @@ public class WGKTest : MonoBehaviour {
     float[] backSpaceHitbox = new float[4];
     float[] spaceHitbox = new float[4];
 
-    public bool[] modeArr = new bool[3];
+    //public bool[] modeArr = new bool[3];
     bool modeChangeOn = true;
     bool pressedEnter = true;
 
     // Start is called before the first frame update
     void Start()
-    {
+    {   
+
         startTime = Time.realtimeSinceStartup;
-        /*
-        var go = new GameObject("TestLine", typeof(LineRenderer));
-        LRDebug = go.GetComponent<LineRenderer>();
-        LRDebug.numCapVertices = 4;
-        LRDebug.numCornerVertices = 4;
-        LRDebug.widthMultiplier = 0.01f;
-        LRDebug.useWorldSpace = false;
-        */
 
         boxCollider = transform.parent.GetComponent<BoxCollider>();
         text = transform.parent.GetChild(1).GetChild(0).GetComponent<Text>();
@@ -82,67 +81,19 @@ public class WGKTest : MonoBehaviour {
 
         isWriting = false;
 
-        keyboardLength = transform.localScale.x;
-        keyboardWidth = transform.localScale.y;
-
-        normalizedWordsPointsDict = new Dictionary<string, List<Vector2>>();
-        locationWordsPointsDict = new Dictionary<string, List<Vector2>>();
-        letterPos = new Dictionary<string, Vector2>();
-
-        loadWordGraphs("qwertz");
-        string path = "Packages/com.unibas.wgkeyboard/Assets/sokgraph_qwertz.txt";
-
-        StreamReader sr = new StreamReader(path);
-        string line;
-        string[] splits = new string[3];
-        List<Vector2> normalizedPoints = new List<Vector2>();
-        List<Vector2> locationPoints = new List<Vector2>();
-        while (true) {
-            line = sr.ReadLine();
-            if (line == null) { // end of file reached
-                break;
-            }
-            splits = line.Split(":");
-            
-            string[] points = splits[1].Split(","); // not normalized points
-            int n = 0;
-            float v1 = 0;
-            float d;
-            foreach (string p in points) {
-                float.TryParse(p, out d);
-                if ((n % 2) == 0) {
-                    v1 = d;
-                } else {
-                    locationPoints.Add(new Vector2(v1, d));
-                }
-                n += 1;
-            } 
-
-            points = splits[2].Split(",");  // normalized points
-            n = 0;
-            v1 = 0;
-            foreach (string p in points) {
-                float.TryParse(p, out d);
-                if ((n % 2) == 0) {
-                    v1 = d;
-                } else {
-                    normalizedPoints.Add(new Vector2(v1, d));
-                }
-                n += 1;
-            }
-
-//            print("NPOINTSCOUNT: " + normalizedPoints.Count);
-
-            normalizedWordsPointsDict.Add(splits[0], normalizedPoints);
-            locationWordsPointsDict.Add(splits[0], locationPoints);
-//            print("COUTN: " + normalizedWordsPointsDict["a"].Count);
-            normalizedPoints = new List<Vector2>();
-            locationPoints = new List<Vector2>();
+        if (layout == "") { // if user didn't specify another layout, the standard qwertz layout will be used
+            layout = "qwertz";
         }
-
-        createKeyboardOverlay("qwertz");
-
+        layouts = new List<string>();
+        loadLayouts();
+        loadWordGraphs(layout);
+        createKeyboardOverlay(layout);
         print("Time needed for startup: " + (Time.realtimeSinceStartup - startTime));
+        optionObjects = transform.parent.Find("OptionObjects").gameObject;
+        optionObjects.SetActive(false);
+        addNewWordKey = transform.parent.Find("Add").gameObject;
+        addNewWordKey.SetActive(false);
+
     }
 
     // Update is called once per frame
@@ -154,141 +105,162 @@ public class WGKTest : MonoBehaviour {
                 RaycastHit hit;
                 Vector3 hitPoint = new Vector3(0, 0, 0);
                 if (Physics.Raycast(col.position, transform.forward, out hit, Mathf.Infinity, layerMask)) {
-                    /*if (pointCount >= LR.positionCount) {
-                        LR.positionCount++;
-                    }*/
                     hitPoint = hit.point;
-                    //LR.SetPosition(pointCount, hit.point);
-                    //pointCount+=1;
+                    samplePoints(hitPoint);
                 } else if (Physics.Raycast(col.position, -transform.forward, out hit, Mathf.Infinity, layerMask)) {
-                    /*if (pointCount >= LR.positionCount) {
-                        LR.positionCount++;
-                    }*/
                     hitPoint = hit.point;
-                    //LR.SetPosition(pointCount, hit.point);
-                    //pointCount+=1;
+                    samplePoints(hitPoint);
                 }
-                //print("HITPOINT" + hitPoint);
-
-                samplePoints(hitPoint);
             }
-        } else if (sampleCalcReady && notEnded) {   // these two bools tell us, wheter the calculation has ended and notEnded tells us, if the user input has been further prosessed
-            print("LR.POSITIONCOUNT: " + LR.positionCount);
+        } else if (sampleCalcReady && notEnded) {   // these two bools tell us, whether the calculation has ended and notEnded tells us, if the user input has been further processed
             startTime = Time.realtimeSinceStartup;
             List<Vector2> pointsList = new List<Vector2>();
-            //List<Vector3> pointsListTest = new List<Vector3>();
             Vector3 point;
 
             for (int i = 0; i < LR.positionCount; i++) {
                 point = LR.GetPosition(i);
                 Vector3 localTransformedPoint = transform.parent.InverseTransformPoint(point);
-
                 pointsList.Add(new Vector2((localTransformedPoint[0] + keyboardLength / 2) / keyboardLength, (localTransformedPoint[2] + keyboardWidth / 2) / keyboardLength)); // adding magnitudes, such that lower left corner of "coordinate system" is at (0/0) and not middle point at (0/0)
-                //pointsListTest.Add(pointsList[i]);
-                //print("PREPOINT: " + localTransformedPoint);
-                //print("POINT: " + pointsList[i]);
             }
             print("POINTCOUNT: " + pointCount + " VS  POINTCALLS: " + pointCalls);
             pointCount = 0;
             LR.positionCount = 0;
             lastDistShort = false;
 
-            /*
-            LRDebug.positionCount = pointsListTest.Count;
-            for (int i = 0; i < pointsListTest.Count; i++) {
-                LRDebug.SetPosition(i, pointsListTest[i]);
-            }
-            LRDebug.transform.Rotate(-transform.localRotation.eulerAngles.z, -transform.localRotation.eulerAngles.y, -transform.localRotation.eulerAngles.x + 90);
-            */
-
             boxCollider.center = new Vector3(boxCollider.center.x, 0.03f, boxCollider.center.z);
             boxCollider.size = new Vector3(boxCollider.size.x, 0.05f, boxCollider.size.z);
 
-
             if (isBackSpaceOrSpace(pointsList) == -1) {
-                text.text = text.text.Substring(0, text.text.Length - 1);   // maybe look here if a word or just a single letter was written before (to know wheter to delete one letter or a whole word)
+                text.text = text.text.Substring(0, text.text.Length - 1);   // maybe look here if a word or just a single letter was written before (to know whether to delete one letter or a whole word)
             } else if (isBackSpaceOrSpace(pointsList) == 1) {
                 text.text += " ";
             } else {
                 calcBestWords(pointsList, 20);
             }
-
-            //////            Task.Run(() => { calcBestWords(pointsList, 20);});
             print("TIME NEEDED: " + (Time.realtimeSinceStartup - startTime));
-            print("TIME FOR CALCS: " + calcTime / pointCalls);
             pointCalls = 0;
             notEnded = false;
         }
     }
 
+    void loadLayouts() {
+        string path = "Packages/com.unibas.wgkeyboard/Assets/layouts.txt";
+        StreamReader sr = new StreamReader(path);
+        string line;
+        while (true) {
+            line = sr.ReadLine();
+            if (line == null) { // end of file reached
+                break;
+            }
+            layouts.Add(line);
+        }
+    }
+
     // loads the sokgraphs that have been generated for a certain keyboard layout in a file called "sokgraph_'layout'.txt"
     void loadWordGraphs(string layout) {
+        locationWordsPointsDict = new Dictionary<string, List<Vector2>>();
+        normalizedWordsPointsDict = new Dictionary<string, List<Vector2>>();
 
-    }
+        string path = "Packages/com.unibas.wgkeyboard/Assets/sokgraph_" + layout + ".txt";
 
-    /*
-    public void hoverTest(bool b)
-    {
-        int layerMask = LayerMask.GetMask("WGKeyboard");
-        RaycastHit hit;
-        Vector3 point = new Vector3(0,0,0);
-        if (Physics.Raycast(col.position, transform.forward, out hit, Mathf.Infinity, layerMask)) {
-            point = hit.point;
-        } else if (Physics.Raycast(col.position, -transform.forward, out hit, Mathf.Infinity, layerMask)) {
-            point = hit.point;
-        }
-
-        if (point != new Vector3(0,0,0)) {
-            point = transform.parent.InverseTransformPoint(point);
-            Vector2 transformedPoint = new Vector2((point[0] + keyboardLength / 2) / keyboardLength, (point[2] + keyboardWidth / 2) / keyboardLength);
-            int xPos = (int) (transformedPoint.x / keyboardLength * numKeysOnLongestLine);
-            int yPos = (int) (transformedPoint.y / keyboardWidth * keyboardSet.Count);
-            if (xPos < numKeysOnLongestLine) {
-                text.text = keyboardSet[xPos][yPos].ToString();
-            } else {
-                text.text = "-";
+        StreamReader sr = new StreamReader(path);
+        string line;
+        string[] splits = new string[3];
+        string[] points;
+        List<Vector2> locationPoints = new List<Vector2>();
+        List<Vector2> normalizedPoints = new List<Vector2>();
+        while (true) {
+            line = sr.ReadLine();
+            if (line == null) { // end of file reached
+                break;
             }
-        }
-    }*/
-
-    public void enterWordGestureMode(bool b) {
-        changeMode(0);
-    }
-
-    public void enterSingleInputMode(bool b) {
-        changeMode(1);
-    }
-
-    public void enterAddNewWordMode(bool b) {
-        changeMode(2);
-    }
-
-    void changeMode(int mode) {
-        if (modeChangeOn) {
-            text.text = "";
-            print("MODE: " + mode);
-            Transform parent = transform.parent;
-            for (int i = 0; i < 3; i++) {
-                if (i != mode) {
-                    parent.GetChild(i + 2).GetComponent<MeshRenderer>().material = whiteMat;
-                    modeArr[i] = false;
+            splits = line.Split(":");
+            points = splits[1].Split(","); // not normalized points
+            int n = 0;
+            float v1 = 0;
+            float d;
+            foreach (string p in points) {
+                float.TryParse(p, out d);
+                if ((n % 2) == 0) {
+                    v1 = d;
                 } else {
-                    parent.GetChild(i + 2).GetComponent<MeshRenderer>().material = grayMat;
-                    modeArr[i] = true;
+                    locationPoints.Add(new Vector2(v1, d));
                 }
+                n += 1;
+            }
+
+            points = splits[2].Split(",");  // normalized points
+            n = 0;
+            foreach (string p in points) {
+                float.TryParse(p, out d);
+                if ((n % 2) == 0) {
+                    v1 = d;
+                } else {
+                    normalizedPoints.Add(new Vector2(v1, d));
+                }
+                n += 1;
+            }
+
+            locationWordsPointsDict.Add(splits[0], locationPoints);
+            normalizedWordsPointsDict.Add(splits[0], normalizedPoints);
+
+            normalizedPoints = new List<Vector2>();
+            locationPoints = new List<Vector2>();
+        }
+    }
+
+    public void enterOptions(Transform t, bool b) {
+        if (b) {
+            if (!isOptionsOpen) {
+                transform.parent.Find("Options").GetComponent<MeshRenderer>().material = grayMat;
+                optionObjects.SetActive(true);
+            } else {
+                transform.parent.Find("Options").GetComponent<MeshRenderer>().material = whiteMat;
+                optionObjects.SetActive(false);
+            }
+            isOptionsOpen = !isOptionsOpen;
+        } 
+    }
+
+    public void enterAddWordMode(Transform t, bool b) {
+        if (b) {
+            isAddingNewWord = !isAddingNewWord;
+            if (isAddingNewWord) {
+                transform.parent.Find("OptionObjects").GetChild(2).GetComponent<MeshRenderer>().material = grayMat;
+                addNewWordKey.SetActive(true);
+            } else {
+                transform.parent.Find("OptionObjects").GetChild(2).GetComponent<MeshRenderer>().material = whiteMat;
+                addNewWordKey.SetActive(false);
             }
         }
+    }
 
-        if (mode == 2) {
-            this.transform.parent.GetChild(5).gameObject.SetActive(true);
-        } else {
-            this.transform.parent.GetChild(5).gameObject.SetActive(false);
+    public void enterLayoutChoose(Transform t, bool b) {
+        for (int i = 0; i < layouts.Count; i++) {
+            GameObject Key = Instantiate(layoutKey) as GameObject;
+            Key.transform.GetChild(0).GetChild(0).GetComponent<Text>().text = layouts[i];
+            Key.transform.localPosition = new Vector3(Key.transform.localPosition.x, Key.transform.localPosition.y + Key.transform.localScale.y * i, Key.transform.localPosition.z);
+            Key.transform.SetParent(transform.parent.Find("Layouts"));
+            Key.SetActive(true);
         }
-        modeChangeOn = !modeChangeOn;   // needed because objects that call this method on hover do not have rigidbody, therefore bool b is always false
+    }
+
+    public void chooseLayout(Transform t, bool b) {
+        if (b) {
+            string layout = t.GetChild(0).GetChild(0).GetComponent<Text>().text;
+            foreach (Transform child in this.transform) {
+                GameObject.Destroy(child.gameObject);
+            }
+            changeLayout(layout);
+        }
+    }
+
+    void changeLayout(string layout) {
+        createKeyboardOverlay(layout);
     }
 
     public void drawWord(Transform t, bool b) {
-        if (b && modeArr[0]) {
+        if (b) {
             isWriting = true;
             col = t;
             boxCollider.center = new Vector3(boxCollider.center.x, 0.01f, boxCollider.center.z);
@@ -297,11 +269,9 @@ public class WGKTest : MonoBehaviour {
     }
 
     public void endWord(Transform t, bool b) {
-        //print("here1");
-        if (!b && modeArr[0]) {
+        if (!b) {
             notEnded = true;
             isWriting = false;
-            //print("here2");
         }
     }
 
@@ -313,6 +283,12 @@ public class WGKTest : MonoBehaviour {
             keyboardSet.Add("asdfghjklöä");
             keyboardSet.Add("yxcvbnm<");
             keyboardSet.Add(" ");
+        } else if (layout.Equals("qwerty")) {
+            keyboardSet.Add("1234567890_-");
+            keyboardSet.Add("qwertyuiop");
+            keyboardSet.Add("asdfghjkl");
+            keyboardSet.Add("zxcvbnm<");
+            keyboardSet.Add(" ");
         }
 
         for (int i = 0; i < keyboardSet.Count; i++) {
@@ -320,10 +296,10 @@ public class WGKTest : MonoBehaviour {
                 numKeysOnLongestLine = keyboardSet[i].Length;
             }
         }
-        delta = 1 / numKeysOnLongestLine;   // is also the width of a key
+        delta = 1 / numKeysOnLongestLine;
         keyRadius = 1 / numKeysOnLongestLine / 2;
 
-        this.transform.localScale = new Vector3(0.05f * numKeysOnLongestLine, 0.05f * keyboardSet.Count, transform.localScale.z);
+        transform.localScale = new Vector3(0.05f * numKeysOnLongestLine, 0.05f * keyboardSet.Count, transform.localScale.z); // keyboard gets bigger if more keys on one line, but keys always have the same size
         keyboardLength = transform.localScale.x;
         keyboardWidth = transform.localScale.y;
         boxCollider.size = new Vector3(keyboardLength, 0.05f, keyboardWidth);
@@ -348,7 +324,6 @@ public class WGKTest : MonoBehaviour {
            
 
             foreach (var letter in s) {
-                //print((numKeysOnLongestLine) / 2 - x);
                 GameObject specificKey = Instantiate(Key) as GameObject;
                 int scale = 1;
                 if (letter.ToString() == "<") {
@@ -362,7 +337,6 @@ public class WGKTest : MonoBehaviour {
                     backSpaceHitbox[3] = yPos + keyRadius;
                 } else if (letter.ToString() == " ") {
                     scale = 8;
-                    //o += keyRadius * keyboardLength;
                     float xPos = x / numKeysOnLongestLine + keyRadius;
                     float yPos = y / numKeysOnLongestLine + keyRadius;
                     spaceHitbox[0] = xPos - scale * keyRadius + o / keyboardLength;
@@ -372,7 +346,6 @@ public class WGKTest : MonoBehaviour {
                 }
                 specificKey.transform.position = new Vector3(transform.position.x + (-keyboardLength / numKeysOnLongestLine)*((numKeysOnLongestLine)/2-x) + o + keyRadius * keyboardLength, transform.position.y + 0.005f, transform.position.z - (-keyboardWidth/keyboardSet.Count)*(-keyboardSet.Count/2.0f + y + 1) - keyRadius * keyboardLength);
                 specificKey.transform.Find("Canvas").Find("Text").GetComponent<Text>().text = letter.ToString();
-                //specificKey.transform.localScale -= (new Vector3(specificKey.transform.localScale.x * scale, specificKey.transform.localScale.y, specificKey.transform.localScale.z)) * 0.5f;
                 specificKey.transform.localScale = new Vector3(keyboardLength / (numKeysOnLongestLine+1.5f) * scale, keyboardLength / (numKeysOnLongestLine + 1.5f), specificKey.transform.localScale.z);
                 specificKey.transform.SetParent(this.transform);
 
@@ -382,19 +355,17 @@ public class WGKTest : MonoBehaviour {
         }
     }
 
-    async void samplePoints(Vector3 hitPoint) { // worked with async, because FPS dropped from 90 to (worst case observed) around 40. Can't use Linerenderer functions in async Task.Run(), therefore worked with some "unnecessary" variables
+    async void samplePoints(Vector3 hitPoint) { // I worked with async, because FPS dropped from 90 to (worst case observed) around 40. Can't use Linerenderer functions in async Task.Run(), therefore worked with some "unnecessary" variables
         sampleCalcReady = false;
         int posCount = LR.positionCount;
         bool setPoint = false;
         Vector3 startPoint = new Vector3(0,0,0);
-        Vector3 middlePoint = new Vector3(0, 0, 0);
+        Vector3 middlePoint = new Vector3(0,0,0);
         if (posCount > 2) {
             startPoint = LR.GetPosition(pointCount - 2);
             middlePoint = LR.GetPosition(pointCount - 1);
         }
         await Task.Run(() => {
-            print("I'M IN ASYNC1");
-
             float minAngle = 10;
             float minSegmentDist = 0.015f;
             if (hitPoint != new Vector3(0, 0)) { // check if point needs to get set or if it can be ignored
@@ -402,53 +373,15 @@ public class WGKTest : MonoBehaviour {
                 if (pointCount < 3) {
                     pointCount++;
                     setPoint = true;
-                    //LR.SetPosition(pointCount - 1, hitPoint);
-                }
-
-                /*
-                else {
-                    print("DIST: " + (hitPoint - LR.GetPosition(pointCount - 1)).magnitude);
-                    if ((hitPoint - LR.GetPosition(pointCount - 1)).magnitude > minSegmentDist) {   // set point if dist too last point > minSegmentDist
-                        pointCount++;
-                        LR.positionCount++;
-                        LR.SetPosition(pointCount - 1, hitPoint);
-                    } else {
-                        Vector3 startPoint = LR.GetPosition(pointCount - 2);
-                        Vector3 middlePoint = LR.GetPosition(pointCount - 1);
-                        print("ANGLE: " + Vector3.Angle(middlePoint - startPoint, hitPoint - middlePoint));
-                        if (Vector3.Angle(middlePoint - startPoint, hitPoint - middlePoint) < 180 - minAngle) { // set Point if angle too big
-                            if ((hitPoint - LR.GetPosition(pointCount - 1)).magnitude > minSegmentDist / 2) {
-                                pointCount++;
-                                LR.positionCount++;
-                                LR.SetPosition(pointCount - 1, hitPoint);
-                            } else {
-                                LR.SetPosition(pointCount - 1, hitPoint);
-                            }
-                        } else {
-                            if ((hitPoint - LR.GetPosition(pointCount - 1)).magnitude > minSegmentDist) {
-                                pointCount++;
-                                LR.positionCount++;
-                                LR.SetPosition(pointCount - 1, hitPoint);   // delete last Point and set new Point
-                            } else {
-                                LR.SetPosition(pointCount - 1, hitPoint);
-                            } 
-                        }
-                    }
-                }*/
-
-                else {
-                    print("I'M IN ASYNC2");
+                } else {
                     Vector3 lastPoint;
                     if (Vector3.Angle(middlePoint - startPoint, hitPoint - middlePoint) < minAngle) { // set Point if almost a straight line
-                        //print("ANGLE: " + Vector3.Angle(middlePoint - startPoint, hitPoint - middlePoint));
                         if (lastDistShort) {
                             setPoint = true;
-                            //LR.SetPosition(pointCount - 1, hitPoint);   // delete last Point and set new Point
                             lastPoint = startPoint;
                         } else {
                             pointCount++;
                             setPoint = true;
-                            //LR.SetPosition(pointCount - 1, hitPoint);
                             lastPoint = middlePoint;
                         }
                         if ((hitPoint - lastPoint).magnitude < minSegmentDist) {
@@ -459,12 +392,10 @@ public class WGKTest : MonoBehaviour {
                     } else {
                         if (lastDistShort) {
                             setPoint = true;
-                            //LR.SetPosition(pointCount - 1, hitPoint);   // delete last Point and set new Point
                             lastPoint = startPoint;
                         } else {
                             pointCount++;
                             setPoint = true;
-                            //LR.SetPosition(pointCount - 1, hitPoint);
                             lastPoint = middlePoint;
                         }
                         if ((hitPoint - lastPoint).magnitude < minSegmentDist / 5) {
@@ -474,37 +405,11 @@ public class WGKTest : MonoBehaviour {
                         }
                     }
                 }
-
-                /*
-                else {
-                    Vector3 startPoint = LR.GetPosition(pointCount - 2);
-                    Vector3 middlePoint = LR.GetPosition(pointCount - 1);
-                    Vector3 lastPoint;
-                    int a = 1;
-                    if (!(Vector3.Angle(middlePoint - startPoint, hitPoint - middlePoint) < minAngle)) { // set Point if almost a straight line
-                        //print("ANGLE: " + Vector3.Angle(middlePoint - startPoint, hitPoint - middlePoint));
-                        a = 5;
-                    }
-
-                    if (!lastDistShort) {
-                        pointCount++;
-                        LR.positionCount++;
-                    }
-                    LR.SetPosition(pointCount - 1, hitPoint);
-                    lastPoint = LR.GetPosition(pointCount - 2);
-
-                    if ((hitPoint - lastPoint).magnitude < minSegmentDist / a) {
-                        lastDistShort = true;
-                    } else {
-                        lastDistShort = false;
-                    }
-                }*/
             }
-            print("I'M IN ASYNC3");
         });
         if (setPoint) {
             LR.positionCount = pointCount;
-            print("HERE MIGHT BE AN ERROR: " + LR.positionCount + " , " + pointCount);
+            //print("HERE MIGHT BE AN ERROR: " + LR.positionCount + " , " + pointCount);
             LR.SetPosition(pointCount - 1, hitPoint);
             
         }
@@ -599,26 +504,29 @@ public class WGKTest : MonoBehaviour {
             print(sortedDict.Last().Key);
         });
 
-        text.text += sortedDict.Last().Key;
         print(sortedDict.Last().Key);
-        print("AT START POINT");
-        result.Invoke(sortedDict.Last().Key);
-        print("AT END POINT");
+
+        if (isAddingNewWord) {  // putting text into textfield from keyboard
+            text.text += sortedDict.Last().Key;
+        } else {    // putting text into inputfield of query
+            result.Invoke(sortedDict.Last().Key);
+            text.text += sortedDict.Last().Key; // remove
+        }
     }
 
     public void writeWord(string word) {
-        if (modeArr[0]) {
+        /*if (modeArr[0]) {
             // word = whole word calculated from gesture
         } else {
             // single letter
             text.text += word;
             print("DO I GET HERE?");
             result.Invoke(word);
-        }
+        }*/
     }
 
-    public void addNewWordToDict() {
-        if (pressedEnter) {
+    public void addNewWordToDict(Transform t, bool b) {
+        if (b) {
             this.transform.parent.GetChild(5).GetComponent<MeshRenderer>().material = grayMat;
             string newWord = text.text; // maybe needs to be changed, but maybe let it be with Text Object for adding a word -> wouldn't interfere with input in query
             if (newWord.Length != 0) {
