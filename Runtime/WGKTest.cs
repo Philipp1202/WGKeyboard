@@ -40,8 +40,9 @@ public class WGKTest : MonoBehaviour {
     Transform col = null;
     Dictionary<string, Vector2> letterPos;
     List<string> layouts;
+    Dictionary<string, List<string>> layoutKeys;
 
-    List<string> keyboardSet;
+    //List<string> keyboardSet;
     int pointCalls = 0;
     bool lastDistShort = false;
     bool lastAngleDistShort = false;
@@ -50,6 +51,7 @@ public class WGKTest : MonoBehaviour {
     bool notEnded = false;
     bool isOptionsOpen = false;
     bool isAddingNewWord = false;
+    bool isChoosingLayout = false;
 
     float startTime = 0;
     float keyRadius;
@@ -74,6 +76,8 @@ public class WGKTest : MonoBehaviour {
 
         boxCollider = transform.parent.GetComponent<BoxCollider>();
         text = transform.parent.GetChild(1).GetChild(0).GetComponent<Text>();
+        //layoutKey = transform.parent.Find("Layouts").GetChild(0).gameObject;
+        //layoutKey.SetActive(false);
 
         LR = GetComponent<LineRenderer>();
         LR.numCapVertices = 5;
@@ -85,6 +89,7 @@ public class WGKTest : MonoBehaviour {
             layout = "qwertz";
         }
         layouts = new List<string>();
+        layoutKeys = new Dictionary<string, List<string>>();
         loadLayouts();
         loadWordGraphs(layout);
         createKeyboardOverlay(layout);
@@ -147,66 +152,83 @@ public class WGKTest : MonoBehaviour {
         string path = "Packages/com.unibas.wgkeyboard/Assets/layouts.txt";
         StreamReader sr = new StreamReader(path);
         string line;
+        string l = "";  // layoutname
+        List<string> keys = new List<string>();
         while (true) {
             line = sr.ReadLine();
+            print(line);
             if (line == null) { // end of file reached
                 break;
+            } else if (l == "") {
+                l = line;
+                layouts.Add(line);
+                continue;
+            } else if (line == "-----") {
+                print("ERROR HERE?: " + l);
+                List<string> k = keys;
+                layoutKeys.Add(l, k);
+                keys = new List<string>();
+                l = "";
+                continue;
             }
-            layouts.Add(line);
+
+            keys.Add(line);
         }
     }
 
     // loads the sokgraphs that have been generated for a certain keyboard layout in a file called "sokgraph_'layout'.txt"
-    void loadWordGraphs(string layout) {
-        locationWordsPointsDict = new Dictionary<string, List<Vector2>>();
-        normalizedWordsPointsDict = new Dictionary<string, List<Vector2>>();
+    async void loadWordGraphs(string layout) {
+        await Task.Run(() => {
+            locationWordsPointsDict = new Dictionary<string, List<Vector2>>();
+            normalizedWordsPointsDict = new Dictionary<string, List<Vector2>>();
 
-        string path = "Packages/com.unibas.wgkeyboard/Assets/sokgraph_" + layout + ".txt";
+            string path = "Packages/com.unibas.wgkeyboard/Assets/sokgraph_" + layout + ".txt";
 
-        StreamReader sr = new StreamReader(path);
-        string line;
-        string[] splits = new string[3];
-        string[] points;
-        List<Vector2> locationPoints = new List<Vector2>();
-        List<Vector2> normalizedPoints = new List<Vector2>();
-        while (true) {
-            line = sr.ReadLine();
-            if (line == null) { // end of file reached
-                break;
-            }
-            splits = line.Split(":");
-            points = splits[1].Split(","); // not normalized points
-            int n = 0;
-            float v1 = 0;
-            float d;
-            foreach (string p in points) {
-                float.TryParse(p, out d);
-                if ((n % 2) == 0) {
-                    v1 = d;
-                } else {
-                    locationPoints.Add(new Vector2(v1, d));
+            StreamReader sr = new StreamReader(path);
+            string line;
+            string[] splits = new string[3];
+            string[] points;
+            List<Vector2> locationPoints = new List<Vector2>();
+            List<Vector2> normalizedPoints = new List<Vector2>();
+            while (true) {
+                line = sr.ReadLine();
+                if (line == null) { // end of file reached
+                    break;
                 }
-                n += 1;
-            }
-
-            points = splits[2].Split(",");  // normalized points
-            n = 0;
-            foreach (string p in points) {
-                float.TryParse(p, out d);
-                if ((n % 2) == 0) {
-                    v1 = d;
-                } else {
-                    normalizedPoints.Add(new Vector2(v1, d));
+                splits = line.Split(":");
+                points = splits[1].Split(","); // not normalized points
+                int n = 0;
+                float v1 = 0;
+                float d;
+                foreach (string p in points) {
+                    float.TryParse(p, out d);
+                    if ((n % 2) == 0) {
+                        v1 = d;
+                    } else {
+                        locationPoints.Add(new Vector2(v1, d));
+                    }
+                    n += 1;
                 }
-                n += 1;
+
+                points = splits[2].Split(",");  // normalized points
+                n = 0;
+                foreach (string p in points) {
+                    float.TryParse(p, out d);
+                    if ((n % 2) == 0) {
+                        v1 = d;
+                    } else {
+                        normalizedPoints.Add(new Vector2(v1, d));
+                    }
+                    n += 1;
+                }
+
+                locationWordsPointsDict.Add(splits[0], locationPoints);
+                normalizedWordsPointsDict.Add(splits[0], normalizedPoints);
+
+                normalizedPoints = new List<Vector2>();
+                locationPoints = new List<Vector2>();
             }
-
-            locationWordsPointsDict.Add(splits[0], locationPoints);
-            normalizedWordsPointsDict.Add(splits[0], normalizedPoints);
-
-            normalizedPoints = new List<Vector2>();
-            locationPoints = new List<Vector2>();
-        }
+        });
     }
 
     public void enterOptions(Transform t, bool b) {
@@ -236,27 +258,36 @@ public class WGKTest : MonoBehaviour {
     }
 
     public void enterLayoutChoose(Transform t, bool b) {
-        for (int i = 0; i < layouts.Count; i++) {
-            GameObject Key = Instantiate(layoutKey) as GameObject;
-            Key.transform.GetChild(0).GetChild(0).GetComponent<Text>().text = layouts[i];
-            Key.transform.localPosition = new Vector3(Key.transform.localPosition.x, Key.transform.localPosition.y + Key.transform.localScale.y * i, Key.transform.localPosition.z);
-            Key.transform.SetParent(transform.parent.Find("Layouts"));
-            Key.SetActive(true);
-        }
-    }
-
-    public void chooseLayout(Transform t, bool b) {
         if (b) {
-            string layout = t.GetChild(0).GetChild(0).GetComponent<Text>().text;
-            foreach (Transform child in this.transform) {
-                GameObject.Destroy(child.gameObject);
+            isChoosingLayout = !isChoosingLayout;
+            if (isChoosingLayout) {
+                transform.parent.Find("OptionObjects").GetChild(1).GetComponent<MeshRenderer>().material = grayMat;
+                for (int i = 0; i < layouts.Count; i++) {
+                    GameObject Key = Instantiate(layoutKey, transform.parent.Find("Layouts"), false) as GameObject;
+                    Key.transform.GetChild(0).GetChild(0).GetComponent<Text>().text = layouts[i];
+                    Key.transform.localPosition = new Vector3(Key.transform.localPosition.x, Key.transform.localPosition.y + Key.transform.localScale.y * 1.1f * i, Key.transform.localPosition.z);
+                    //Key.transform.SetParent(transform.parent.Find("Layouts"));
+                    //Key.transform.localScale = new Vector3(1.4f, 0.7f, 0.05f);
+                    //Key.transform.localPosition = new Vector3(1.571f, 0.575f + i, 1.273f);
+                    //Key.transform.localRotation = new Quaternion(0, 0, 0, 0);
+                    Key.SetActive(true);
+                }
+            } else {
+                transform.parent.Find("OptionObjects").GetChild(1).GetComponent<MeshRenderer>().material = whiteMat;
+                foreach (Transform child in transform.parent.Find("Layouts")) {
+                    GameObject.Destroy(child.gameObject);
+                }
             }
-            changeLayout(layout);
         }
     }
 
-    void changeLayout(string layout) {
+    public void changeLayout(string layout) {
+        foreach (Transform child in this.transform) {
+            GameObject.Destroy(child.gameObject);
+        }
+        this.layout = layout;
         createKeyboardOverlay(layout);
+        loadWordGraphs(layout);
     }
 
     public void drawWord(Transform t, bool b) {
@@ -276,8 +307,9 @@ public class WGKTest : MonoBehaviour {
     }
 
     void createKeyboardOverlay(string layout) { // implementation does not work, if first row is not the longest (has most characters) (first.length > allOther.length)
-        keyboardSet = new List<String>();
-        if (layout.Equals("qwertz")) {
+        //keyboardSet = new List<String>();
+        print("LAYOUT: " + layout);
+        /*if (layout.Equals("qwertz")) {
             keyboardSet.Add("1234567890_-");
             keyboardSet.Add("qwertzuiopü");
             keyboardSet.Add("asdfghjklöä");
@@ -289,23 +321,27 @@ public class WGKTest : MonoBehaviour {
             keyboardSet.Add("asdfghjkl");
             keyboardSet.Add("zxcvbnm<");
             keyboardSet.Add(" ");
-        }
-
-        for (int i = 0; i < keyboardSet.Count; i++) {
-            if (keyboardSet[i].Length > numKeysOnLongestLine) {
-                numKeysOnLongestLine = keyboardSet[i].Length;
+        }*/
+        List<string> keyList = layoutKeys[layout];
+        int count = keyList.Count;
+        print(count);
+        for (int i = 0; i < count; i++) {
+            if (keyList[i].Length > numKeysOnLongestLine) {
+                numKeysOnLongestLine = keyList[i].Length;
             }
+            print(keyList[i]);
         }
         delta = 1 / numKeysOnLongestLine;
         keyRadius = 1 / numKeysOnLongestLine / 2;
 
-        transform.localScale = new Vector3(0.05f * numKeysOnLongestLine, 0.05f * keyboardSet.Count, transform.localScale.z); // keyboard gets bigger if more keys on one line, but keys always have the same size
+        transform.localScale = new Vector3(0.05f * numKeysOnLongestLine, 0.05f * count, transform.localScale.z); // keyboard gets bigger if more keys on one line, but keys always have the same size
         keyboardLength = transform.localScale.x;
         keyboardWidth = transform.localScale.y;
         boxCollider.size = new Vector3(keyboardLength, 0.05f, keyboardWidth);
+        //boxCollider.center = new Vector3(boxCollider.center.x, 0.03f, boxCollider.center.z);
 
-        int y = keyboardSet.Count - 1;
-        foreach (string s in keyboardSet) {
+        int y = count - 1;
+        foreach (string s in keyList) {
             float o = 0;
             int x = 0;
             if (y == 3) {   // change, is wrong
@@ -318,7 +354,7 @@ public class WGKTest : MonoBehaviour {
                 o = 11 * keyRadius * keyboardLength;
             }
 
-            if (keyboardSet.Count == 4) {   // keyboard without numbers in top row
+            if (count == 4) {   // keyboard without numbers in top row
                 o -= keyRadius * keyboardLength;
             }
            
@@ -344,10 +380,15 @@ public class WGKTest : MonoBehaviour {
                     spaceHitbox[2] = yPos - keyRadius;
                     spaceHitbox[3] = yPos + keyRadius;
                 }
-                specificKey.transform.position = new Vector3(transform.position.x + (-keyboardLength / numKeysOnLongestLine)*((numKeysOnLongestLine)/2-x) + o + keyRadius * keyboardLength, transform.position.y + 0.005f, transform.position.z - (-keyboardWidth/keyboardSet.Count)*(-keyboardSet.Count/2.0f + y + 1) - keyRadius * keyboardLength);
+                specificKey.transform.position = new Vector3(transform.position.x + (-keyboardLength / numKeysOnLongestLine)*((numKeysOnLongestLine)/2-x) + o + keyRadius * keyboardLength, transform.position.y + 0.005f, transform.position.z - (-keyboardWidth/count) *(-count/2.0f + y + 1) - keyRadius * keyboardLength);
                 specificKey.transform.Find("Canvas").Find("Text").GetComponent<Text>().text = letter.ToString();
                 specificKey.transform.localScale = new Vector3(keyboardLength / (numKeysOnLongestLine+1.5f) * scale, keyboardLength / (numKeysOnLongestLine + 1.5f), specificKey.transform.localScale.z);
+
+                // for next 4 lines: didn't have a better idea but to make roation of tansform.parent object to 0,0,0 (if it's not 0,0,0, then something strange happens, when setting this.transform as parent
+                Quaternion tempRot = transform.parent.localRotation;
+                transform.parent.localRotation = new Quaternion(0, 0, 0, 0);
                 specificKey.transform.SetParent(this.transform);
+                transform.parent.localRotation = tempRot;
 
                 x += 1;
             }
@@ -510,7 +551,7 @@ public class WGKTest : MonoBehaviour {
             text.text += sortedDict.Last().Key;
         } else {    // putting text into inputfield of query
             result.Invoke(sortedDict.Last().Key);
-            text.text += sortedDict.Last().Key; // remove
+            text.text = sortedDict.Last().Key; // remove
         }
     }
 
@@ -551,30 +592,34 @@ public class WGKTest : MonoBehaviour {
                     sw.WriteLine(newWord);
                     sw.Close();
 
-                    List<Vector2> wordLocationPoints = getWordPoints(newWord);
-                    List<Vector2> wordNormPoints = normalize(wordLocationPoints, 2);
+                    foreach (var l in layouts) {
+                        List<Vector2> wordLocationPoints = getWordPoints(newWord, l);
+                        List<Vector2> wordNormPoints = normalize(wordLocationPoints, 2);
 
-                    path = "Packages/com.unibas.wgkeyboard/Assets/sokgraph_qwertz.txt";
-                    sw = File.AppendText(path);
-                    string newLine = newWord + ":";
-                    for (int i = 0; i < wordLocationPoints.Count; i++) {
-                        newLine += wordLocationPoints[i].x.ToString() + "," + wordLocationPoints[i].y.ToString();
-                        if (i < wordLocationPoints.Count - 1) {
-                            newLine += ",";
+                        path = "Packages/com.unibas.wgkeyboard/Assets/sokgraph_" + l + ".txt";
+                        sw = File.AppendText(path);
+                        string newLine = newWord + ":";
+                        for (int i = 0; i < wordLocationPoints.Count; i++) {
+                            newLine += wordLocationPoints[i].x.ToString() + "," + wordLocationPoints[i].y.ToString();
+                            if (i < wordLocationPoints.Count - 1) {
+                                newLine += ",";
+                            }
+                        }
+                        newLine += ":";
+                        for (int i = 0; i < wordNormPoints.Count; i++) {
+                            newLine += wordNormPoints[i].x.ToString() + "," + wordNormPoints[i].y.ToString();
+                            if (i < wordLocationPoints.Count - 1) {
+                                newLine += ",";
+                            }
+                        }
+                        sw.WriteLine(newLine);
+                        sw.Close();
+
+                        if (l == this.layout) {
+                            normalizedWordsPointsDict.Add(newWord, wordNormPoints);
+                            locationWordsPointsDict.Add(newWord, wordLocationPoints);
                         }
                     }
-                    newLine += ":";
-                    for (int i = 0; i < wordNormPoints.Count; i++) {
-                        newLine += wordNormPoints[i].x.ToString() + "," + wordNormPoints[i].y.ToString();
-                        if (i < wordLocationPoints.Count - 1) {
-                            newLine += ",";
-                        }
-                    }
-                    sw.WriteLine(newLine);
-                    sw.Close();
-
-                    normalizedWordsPointsDict.Add(newWord, wordNormPoints);
-                    locationWordsPointsDict.Add(newWord, wordLocationPoints);
                 }
                 text.text = "";
             }
@@ -776,9 +821,11 @@ public class WGKTest : MonoBehaviour {
         return dist;
     }
     
-    List<Vector2> getWordPoints(string word) {
+    List<Vector2> getWordPoints(string word, string l) {
         Dictionary<string, Vector2> letterPos = new Dictionary<string, Vector2>();
-        for (int y = 0; y < keyboardSet.Count; y++) {
+        List<String> keyList = layoutKeys[l];
+        int count = keyList.Count;
+        for (int y = 0; y < count; y++) {
             float o = 0;
             if (y == 3) {   // change, is wrong
                 o = 0.5f;
@@ -790,13 +837,13 @@ public class WGKTest : MonoBehaviour {
                 o = 5.25f;
             }
 
-            if (keyboardSet.Count == 4) {   // keyboard without numbers in top row
+            if (count == 4) {   // keyboard without numbers in top row
                 o -= 0.5f;
             }
 
-            for (int x = 0; x < keyboardSet[keyboardSet.Count - y - 1].Count(); x++) {
-                letterPos.Add(keyboardSet[keyboardSet.Count - y - 1][x].ToString(), new Vector2((x + o + 0.5f) / numKeysOnLongestLine, (y + 0.5f) / numKeysOnLongestLine)); // position of all letters if one key had radius 1
-                print(keyboardSet[keyboardSet.Count - y - 1][x].ToString() + " : " + new Vector2((x + o + 0.5f) / numKeysOnLongestLine, (y + 0.5f) / numKeysOnLongestLine));
+            for (int x = 0; x < keyList[count - y - 1].Count(); x++) {
+                letterPos.Add(keyList[count - y - 1][x].ToString(), new Vector2((x + o + 0.5f) / numKeysOnLongestLine, (y + 0.5f) / numKeysOnLongestLine)); // position of all letters if one key had radius 1
+                print(keyList[count - y - 1][x].ToString() + " : " + new Vector2((x + o + 0.5f) / numKeysOnLongestLine, (y + 0.5f) / numKeysOnLongestLine));
             }
         }
 
@@ -894,5 +941,6 @@ public class WGKTest : MonoBehaviour {
         }
         return yPoints;
     }
+
 }
 //980

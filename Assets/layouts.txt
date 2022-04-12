@@ -1,2 +1,14 @@
 qwertz
+1234567890_-
+qwertzuiopü
+asdfghjklöä
+yxcvbnm<
+ 
+-----
 qwerty
+1234567890_-
+qwertyuiop
+asdfghjkl
+zxcvbnm<
+ 
+-----
