@@ -93,7 +93,6 @@ GameObject:
   - component: {fileID: 1157403622050763682}
   - component: {fileID: 1157403622050763683}
   - component: {fileID: 8088120275546456425}
-  - component: {fileID: 7425661898231064532}
   - component: {fileID: -7851705415446300637}
   m_Layer: 0
   m_Name: Key
@@ -177,10 +176,10 @@ BoxCollider:
   m_GameObject: {fileID: 1157403622050763692}
   m_Material: {fileID: 0}
   m_IsTrigger: 1
-  m_Enabled: 1
+  m_Enabled: 0
   serializedVersion: 2
   m_Size: {x: 1, y: 1, z: 80}
-  m_Center: {x: 0, y: 0, z: 39.29}
+  m_Center: {x: 0, y: 0, z: 0}
 --- !u!114 &8088120275546456425
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -193,45 +192,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: cdf21c715fe951c46bc6bce6a775eb8c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  whiteMat: {fileID: 2100000, guid: 201ca18badb4a7c45bf1d80f5e4e7c1a, type: 2}
-  grayMat: {fileID: 2100000, guid: 21bb89acc7e6fd64f9351ab370f889a2, type: 2}
---- !u!114 &7425661898231064532
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1157403622050763692}
-  m_Enabled: 0
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 11cac8de724f28d4ca9a7f4f946639ff, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  onInteraction:
-    m_PersistentCalls:
-      m_Calls: []
-  onGrab:
-    m_PersistentCalls:
-      m_Calls: []
-  onDrop:
-    m_PersistentCalls:
-      m_Calls: []
-  onHoverChange:
-    m_PersistentCalls:
-      m_Calls:
-      - m_Target: {fileID: 8088120275546456425}
-        m_TargetAssemblyTypeName: KeyManager, unibas.wgkeyboard
-        m_MethodName: writeLetter
-        m_Mode: 1
-        m_Arguments:
-          m_ObjectArgument: {fileID: 0}
-          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
-          m_IntArgument: 0
-          m_FloatArgument: 0
-          m_StringArgument: 
-          m_BoolArgument: 0
-        m_CallState: 2
-  grabTransform: {fileID: 0}
+  keyHoverMat: {fileID: 2100000, guid: 64444552736cbff4cbff0dfabdfd85a2, type: 2}
+  normalMat: {fileID: 2100000, guid: f5d18eb985f838141970e3a086c3c0ec, type: 2}
 --- !u!114 &-7851705415446300637
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -258,8 +220,8 @@ MonoBehaviour:
       m_Calls:
       - m_Target: {fileID: 8088120275546456425}
         m_TargetAssemblyTypeName: KeyManager, unibas.wgkeyboard
-        m_MethodName: writeLetter
-        m_Mode: 1
+        m_MethodName: IsHovered
+        m_Mode: 0
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
           m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
