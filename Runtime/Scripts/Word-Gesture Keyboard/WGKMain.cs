@@ -27,6 +27,7 @@ namespace WordGestureKeyboard {
 
         GameObject optionObjects;
         GameObject addNewWordKey;
+        GameObject chooseWord;
 
         BoxCollider boxCollider;
         Text text;
@@ -46,7 +47,8 @@ namespace WordGestureKeyboard {
         bool isChoosingLayout = false;
         bool isLastSingleLetter = false;
 
-        string queryInput;
+        string queryInput = "";
+        string lastInputWord = "";
 
         float startTime = 0;
 
@@ -80,11 +82,16 @@ namespace WordGestureKeyboard {
             addNewWordKey = transform.parent.Find("Add").gameObject;
             addNewWordKey.SetActive(false);
 
+            transform.parent.Find("Options").localPosition = new Vector3(-0.5f * KH.keyboardLength - transform.parent.Find("Options").localScale.x * 0.5f - 0.005f, transform.parent.Find("Options").localPosition.y, transform.parent.Find("Options").localPosition.z);
+            transform.parent.Find("OptionObjects").localPosition = new Vector3(-0.5f * KH.keyboardLength - transform.parent.Find("OptionObjects").localScale.x * 0.5f - 0.005f, transform.parent.Find("OptionObjects").localPosition.y, transform.parent.Find("OptionObjects").localPosition.z);
+            chooseWord = transform.parent.Find("ChooseWord").gameObject;
+
             print("Time needed for startup: " + (Time.realtimeSinceStartup - startTime));
 
         }
 
         // Update is called once per frame
+        /*
         void Update() {
             if (isWriting) {
                 if (!UIH.getIsSampling()) {
@@ -102,33 +109,158 @@ namespace WordGestureKeyboard {
                 boxCollider.size = new Vector3(boxCollider.size.x, 0.05f, boxCollider.size.z);
 
                 if (GPC.isBackSpaceOrSpace(pointsList, KH.backSpaceHitbox, KH.spaceHitbox) == -1) {
-                    text.text = text.text.Substring(0, text.text.Length - 1);   // maybe look here if a word or just a single letter was written before (to know whether to delete one letter or a whole word)
-                    // invoke backspace
+                    int count = lastInputWord.Length;
+                    if (count != 0) {
+                        for (int i = 0; i < count; i++) {
+                            
+                            text.text = text.text.Substring(0, text.text.Length - 1);
+                            queryInput = queryInput.Substring(0, queryInput.Length - 1);
+                            // TODO invoke backspace
+                            if (queryInput == "") {
+                                break;
+                            }
+                        }
+                        lastInputWord = "";
+                    } else {
+                        text.text = text.text.Substring(0, text.text.Length - 1);
+                        queryInput = queryInput.Substring(0, queryInput.Length - 1);
+                        // TODO invoke backspace
+                    }
+                    for (int i = 0; i < 4; i++) {
+                        chooseWord.transform.GetChild(i).gameObject.SetActive(false);
+                    }
+                    isLastSingleLetter = false;
                 } else if (GPC.isBackSpaceOrSpace(pointsList, KH.backSpaceHitbox, KH.spaceHitbox) == 1) {
                     text.text += " ";
-                    // invoke inputtext with " "
+                    queryInput += " ";
+                    // TODO: invoke inputtext with " "
                 } else {
                     GPC.calcBestWords(pointsList, 20, FH.getLocationWordsPointsDict(), FH.getNormalizedWordsPointsDict(), KH.delta, KH.keyRadius);
                 }
                 print("TIME NEEDED: " + (Time.realtimeSinceStartup - startTime));
                 notEnded = false;
             } else if (GPC.sortedDict != null) {
+                for (int i = 0; i < 4; i++) {
+                    chooseWord.transform.GetChild(i).gameObject.SetActive(false);
+                }
+                int bestWordsDictLength = GPC.sortedDict.Count;
                 if (isAddingNewWord) {  // putting text into textfield from keyboard
-                    text.text += GPC.sortedDict.Last().Key;
+                    text.text += GPC.sortedDict[bestWordsDictLength - 1];
                 } else {    // putting text into inputfield of query
-                    result.Invoke(GPC.sortedDict.Last().Key);
-                    if (GPC.sortedDict.Last().Key.Length == 1) { //single letter
+                    if (GPC.sortedDict[bestWordsDictLength - 1].Length == 1) { //single letter
                         if (isLastSingleLetter) {
-                            result.Invoke(GPC.sortedDict.Last().Key);
+                            result.Invoke(GPC.sortedDict[bestWordsDictLength - 1]);
+                            text.text += GPC.sortedDict[bestWordsDictLength - 1];
+                            queryInput += GPC.sortedDict[bestWordsDictLength - 1];
                         } else {
-                            result.Invoke(" " + GPC.sortedDict.Last().Key);
+                            result.Invoke(" " + GPC.sortedDict[bestWordsDictLength - 1]);
+                            text.text += " " + GPC.sortedDict[bestWordsDictLength - 1];
+                            queryInput += " " + GPC.sortedDict[bestWordsDictLength - 1];
                         }
                         isLastSingleLetter = true;
-                    } else {
+                        lastInputWord = GPC.sortedDict[bestWordsDictLength - 1];
+                    } else {    // not single letter but word
+                        for (int i = 0; i < bestWordsDictLength - 1; i++) {
+                            if (i > 3) {    // maximum of 4 best words apart from top word
+                                break;
+                            }
+                            chooseWord.transform.GetChild(i).GetChild(0).GetChild(0).GetComponent<Text>().text = GPC.sortedDict[bestWordsDictLength - 2 - i];
+                            chooseWord.transform.GetChild(i).gameObject.SetActive(true);
+                        }
+                        if (queryInput != "") { // not first word
+                            result.Invoke(" ");
+                            text.text += " ";
+                            queryInput += " ";
+                        }
+                        result.Invoke(GPC.sortedDict[bestWordsDictLength - 1]);
+                        text.text += GPC.sortedDict[bestWordsDictLength - 1];
+                        queryInput += GPC.sortedDict[bestWordsDictLength - 1];
+                        lastInputWord = GPC.sortedDict[bestWordsDictLength - 1];
                         isLastSingleLetter = false;
                     }
-                    
-                    text.text = GPC.sortedDict.Last().Key; // remove
+                }
+                GPC.sortedDict = null;
+            }
+        }*/
+
+        void Update() {
+            if (isWriting) {
+                if (!UIH.getIsSampling()) {
+                    Vector3 hitPoint = UIH.getHitPoint(col.position, transform.forward);
+                    print(hitPoint);
+                    if (hitPoint != new Vector3(1000, 1000, 1000)) {
+                        UIH.samplePoints(hitPoint);
+                    }
+                }
+            } else if (!UIH.getIsSampling() && notEnded) {   // these two bools tell us, whether the calculation has ended and notEnded tells us, if the user input has been further processed
+                startTime = Time.realtimeSinceStartup;
+                List<Vector2> pointsList = UIH.getTransformedPoints();
+
+                boxCollider.center = new Vector3(boxCollider.center.x, 0.03f, boxCollider.center.z);
+                boxCollider.size = new Vector3(boxCollider.size.x, 0.05f, boxCollider.size.z);
+
+                if (GPC.isBackSpaceOrSpace(pointsList, KH.backSpaceHitbox, KH.spaceHitbox) == -1) {
+                    int count = lastInputWord.Length;
+                    if (count > 1) {
+                        for (int i = 0; i <= count; i++) {
+                            text.text = text.text.Substring(0, text.text.Length - 1);
+                            queryInput = queryInput.Substring(0, queryInput.Length - 1);
+                            // TODO invoke backspace
+                            if (queryInput == "") {
+                                break;
+                            }
+                        }
+                        lastInputWord = "";
+                    } else {
+                        text.text = text.text.Substring(0, text.text.Length - 1);
+                        queryInput = queryInput.Substring(0, queryInput.Length - 1);
+                        // TODO invoke backspace
+                    }
+                    for (int i = 0; i < 4; i++) {
+                        chooseWord.transform.GetChild(i).gameObject.SetActive(false);
+                    }
+                    isLastSingleLetter = false;
+                } else if (GPC.isBackSpaceOrSpace(pointsList, KH.backSpaceHitbox, KH.spaceHitbox) == 1) {
+                    text.text += " ";
+                    queryInput += " ";
+                    // TODO: invoke inputtext with " "
+                } else {
+                    GPC.calcBestWords(pointsList, 20, FH.getLocationWordsPointsDict(), FH.getNormalizedWordsPointsDict(), KH.delta, KH.keyRadius);
+                }
+                print("TIME NEEDED: " + (Time.realtimeSinceStartup - startTime));
+                notEnded = false;
+            } else if (GPC.sortedDict != null) {
+                for (int i = 0; i < 4; i++) {
+                    chooseWord.transform.GetChild(i).gameObject.SetActive(false);
+                }
+                int bestWordsDictLength = GPC.sortedDict.Count;
+                if (isAddingNewWord) {  // putting text into textfield from keyboard
+                    text.text += GPC.sortedDict[bestWordsDictLength - 1];
+                    queryInput += GPC.sortedDict[bestWordsDictLength - 1];
+                } else {    // putting text into inputfield of query
+                    if (GPC.sortedDict[bestWordsDictLength - 1].Length == 1) { //single letter
+
+                        result.Invoke(GPC.sortedDict[bestWordsDictLength - 1]);
+                        text.text += GPC.sortedDict[bestWordsDictLength - 1];
+                        queryInput += GPC.sortedDict[bestWordsDictLength - 1];
+
+                        isLastSingleLetter = true;
+                        lastInputWord = GPC.sortedDict[bestWordsDictLength - 1];
+                    } else {    // not single letter but word
+                        for (int i = 0; i < bestWordsDictLength - 1; i++) {
+                            if (i > 3) {    // maximum of 4 best words apart from top word
+                                break;
+                            }
+                            chooseWord.transform.GetChild(i).GetChild(0).GetChild(0).GetComponent<Text>().text = GPC.sortedDict[bestWordsDictLength - 2 - i];
+                            chooseWord.transform.GetChild(i).gameObject.SetActive(true);
+                        }
+
+                        result.Invoke(GPC.sortedDict[bestWordsDictLength - 1] + " ");
+                        text.text += GPC.sortedDict[bestWordsDictLength - 1] + " ";
+                        queryInput += GPC.sortedDict[bestWordsDictLength - 1] + " ";
+                        lastInputWord = GPC.sortedDict[bestWordsDictLength - 1];
+                        isLastSingleLetter = false;
+                    }
                 }
                 GPC.sortedDict = null;
             }
@@ -206,6 +338,7 @@ namespace WordGestureKeyboard {
                 boxCollider.center = new Vector3(boxCollider.center.x, 0.01f, boxCollider.center.z);
                 boxCollider.size = new Vector3(boxCollider.size.x, 0.001f, boxCollider.size.z);
                 foreach (Transform child in this.transform) {
+                    child.GetComponent<BoxCollider>().isTrigger = true;
                     child.GetComponent<BoxCollider>().enabled = true;
                 }
                 transform.GetComponent<MeshRenderer>().material = keyboardHoverMat;
@@ -217,8 +350,9 @@ namespace WordGestureKeyboard {
                 notEnded = true;
                 isWriting = false;
                 foreach (Transform child in this.transform) {
-                    child.GetComponent<BoxCollider>().enabled = false;
-                    child.GetComponent<KeyManager>().setColorDefault();
+                    child.GetComponent<BoxCollider>().isTrigger = false;
+                    //child.GetComponent<BoxCollider>().enabled = false;
+                    //child.GetComponent<KeyManager>().setColorDefault();
                 }
             }
         }
@@ -240,6 +374,22 @@ namespace WordGestureKeyboard {
             } else if (!b && !isWriting) {  // don't want to make keyboard write when interacting with in in sense of writing on it
                 transform.GetComponent<MeshRenderer>().material = whiteMat;
             }
+        }
+
+        public void changeWord(Text t, string word) {
+            int count = lastInputWord.Length;
+            for (int i = 0; i <= count; i++) {
+                text.text = text.text.Substring(0, text.text.Length - 1);
+                if (text.text == "") {
+                    break;
+                }
+            }
+            t.text = lastInputWord;
+
+            result.Invoke(word + " ");
+            text.text += word + " ";
+            queryInput += word + " ";
+            lastInputWord = word;
         }
     }
 }

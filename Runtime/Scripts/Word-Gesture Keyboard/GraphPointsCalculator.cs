@@ -10,7 +10,8 @@ namespace WordGestureKeyboard {
         //public float keyRadius;
         public float deltaNormal;
         public bool isSampling = false;
-        public IOrderedEnumerable<KeyValuePair<string, float>> sortedDict = null;
+        //public IOrderedEnumerable<KeyValuePair<string, float>> sortedDict = null;
+        public List<string> sortedDict = null;
         public float numKeysOnLongestLine;
 
         public GraphPointsCalculator(float n) {
@@ -254,7 +255,9 @@ namespace WordGestureKeyboard {
                     q += 1;
                 }
 
-                sortedDict = from entry in finalCosts orderby entry.Value ascending select entry;
+                IOrderedEnumerable<KeyValuePair<string, float>> sorted = null;
+                sorted = from entry in finalCosts orderby entry.Value ascending select entry;
+                sortedDict = sorted.Select(pair => pair.Key).ToList();  // only take words into a list, not their probabilities
             });
         }
 
@@ -464,7 +467,11 @@ namespace WordGestureKeyboard {
             return new Dictionary<string, List<Vector2>>[] { newLocWordsPoints, newNormWordsPoints };
         }
 
-        public IOrderedEnumerable<KeyValuePair<string, float>> getSortedDisc() {
+        //public IOrderedEnumerable<KeyValuePair<string, float>> getSortedDisc() {
+        //    return sortedDict;
+        //}
+
+        public List<string> getSortedDisc() {
             return sortedDict;
         }
     }
