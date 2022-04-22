@@ -82,8 +82,10 @@ namespace WordGestureKeyboard {
             addNewWordKey = transform.parent.Find("Add").gameObject;
             addNewWordKey.SetActive(false);
 
-            transform.parent.Find("Options").localPosition = new Vector3(-0.5f * KH.keyboardLength - transform.parent.Find("Options").localScale.x * 0.5f - 0.005f, transform.parent.Find("Options").localPosition.y, transform.parent.Find("Options").localPosition.z);
-            transform.parent.Find("OptionObjects").localPosition = new Vector3(-0.5f * KH.keyboardLength - transform.parent.Find("OptionObjects").localScale.x * 0.5f - 0.005f, transform.parent.Find("OptionObjects").localPosition.y, transform.parent.Find("OptionObjects").localPosition.z);
+            transform.parent.Find("Options").localPosition = new Vector3(0.5f * KH.keyboardLength + transform.parent.Find("Options").localScale.x * 0.5f + 0.005f, 0, transform.localScale.y * 0.5f - transform.parent.Find("Options").localScale.z * 0.5f);
+            transform.parent.Find("OptionObjects").localPosition = new Vector3(0.5f * KH.keyboardLength + transform.parent.Find("OptionObjects").localScale.x * 0.5f + 0.005f, transform.parent.Find("OptionObjects").localPosition.y, transform.parent.Find("OptionObjects").localPosition.z + transform.localScale.y * 0.5f - transform.parent.Find("Options").localScale.z * 0.5f);
+            transform.parent.Find("Add").localPosition = new Vector3(0.5f * KH.keyboardLength + transform.parent.Find("Add").localScale.x * 0.5f + 0.005f, 0, -transform.localScale.y * 0.5f + transform.parent.Find("Add").localScale.z);
+            transform.parent.Find("Layouts").localPosition = new Vector3(0.5f * KH.keyboardLength + transform.parent.Find("Layouts").localScale.x * 0.5f + 0.0075f + transform.parent.Find("OptionObjects").localScale.x, transform.parent.Find("OptionObjects").localPosition.z + transform.localScale.y * 0.5f - transform.parent.Find("Options").localScale.z * 0.5f);
             chooseWord = transform.parent.Find("ChooseWord").gameObject;
 
             print("Time needed for startup: " + (Time.realtimeSinceStartup - startTime));
@@ -306,7 +308,8 @@ namespace WordGestureKeyboard {
                     for (int i = 0; i < FH.layouts.Count; i++) {
                         GameObject Key = Instantiate(layoutKey, transform.parent.Find("Layouts"), false) as GameObject;
                         Key.transform.GetChild(0).GetChild(0).GetComponent<Text>().text = FH.layouts[i];
-                        Key.transform.localPosition = new Vector3(Key.transform.localPosition.x, Key.transform.localPosition.y + Key.transform.localScale.y * 1.1f * i, Key.transform.localPosition.z);
+                        //Key.transform.localPosition = new Vector3(Key.transform.localPosition.x, Key.transform.localPosition.y + Key.transform.localScale.y * 1.1f * i, Key.transform.localPosition.z);
+                        Key.transform.localPosition = new Vector3(0, Key.transform.localScale.y * 1.1f * i, 0);
                         //Key.transform.SetParent(transform.parent.Find("Layouts"));
                         //Key.transform.localScale = new Vector3(1.4f, 0.7f, 0.05f);
                         //Key.transform.localPosition = new Vector3(1.571f, 0.575f + i, 1.273f);
