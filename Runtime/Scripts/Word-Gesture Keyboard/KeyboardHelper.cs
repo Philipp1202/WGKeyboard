@@ -18,6 +18,7 @@ namespace WordGestureKeyboard {
         public float[] backSpaceHitbox = new float[4];
         public float[] spaceHitbox = new float[4];
         public float delta;
+        public float keyboardScale = 1;
 
         public KeyboardHelper(Transform t, GameObject K, BoxCollider b, FileHandler f) {
             transform = t;
@@ -33,6 +34,7 @@ namespace WordGestureKeyboard {
         public void createKeyboardOverlay(string layout) { // implementation does not work, if first row is not the longest (has most characters) (first.length > allOther.length)
             List<string> keyList = FH.layoutKeys[layout];
             int count = keyList.Count;
+            numKeysOnLongestLine = 0;
             for (int i = 0; i < count; i++) {
                 if (keyList[i].Length > numKeysOnLongestLine) {
                     numKeysOnLongestLine = keyList[i].Length;
@@ -40,7 +42,7 @@ namespace WordGestureKeyboard {
             }
             delta = 1 / numKeysOnLongestLine;
             keyRadius = 1 / numKeysOnLongestLine / 2;   // keyradius after transformation of x to length 1
-            transform.localScale = new Vector3(0.05f * numKeysOnLongestLine, 0.05f * count, transform.localScale.z); // keyboard gets bigger if more keys on one line, but keys always have the same size
+            transform.localScale = new Vector3(0.05f * numKeysOnLongestLine * keyboardScale, 0.05f * count * keyboardScale, transform.localScale.z); // keyboard gets bigger if more keys on one line, but keys always have the same size
             keyboardLength = transform.localScale.x;
             keyboardWidth = transform.localScale.y;
             boxCollider.size = new Vector3(keyboardLength, 0.05f, keyboardWidth);

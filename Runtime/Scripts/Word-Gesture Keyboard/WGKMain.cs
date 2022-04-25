@@ -24,10 +24,14 @@ namespace WordGestureKeyboard {
         public GameObject layoutKey;
         public string layout;
         public TextInputEvent result;
+        public GameObject optionObjects;
+        public GameObject chooseObjects;
+        public GameObject optionsKey;
+        public GameObject addKey;
+        public GameObject layoutsObjects;
+        public GameObject scaleObjects;
 
-        GameObject optionObjects;
-        GameObject addNewWordKey;
-        GameObject chooseWord;
+        List<GameObject> subOptionButtons = new List<GameObject>();
 
         BoxCollider boxCollider;
         Text text;
@@ -46,6 +50,7 @@ namespace WordGestureKeyboard {
         bool isAddingNewWord = false;
         bool isChoosingLayout = false;
         bool isLastSingleLetter = false;
+        bool isChangeSizeOpen = false;
 
         string queryInput = "";
         string lastInputWord = "";
@@ -56,6 +61,11 @@ namespace WordGestureKeyboard {
         void Start() {
 
             startTime = Time.realtimeSinceStartup;
+
+            subOptionButtons.Add(optionObjects);
+            subOptionButtons.Add(addKey);
+            subOptionButtons.Add(layoutsObjects);
+            subOptionButtons.Add(scaleObjects);
 
             boxCollider = transform.parent.GetComponent<BoxCollider>();
             text = transform.parent.GetChild(1).GetChild(0).GetComponent<Text>();
@@ -77,16 +87,17 @@ namespace WordGestureKeyboard {
             GPC = new GraphPointsCalculator(KH.numKeysOnLongestLine);
 
             // maybe change next 4 lines
-            optionObjects = transform.parent.Find("OptionObjects").gameObject;
-            optionObjects.SetActive(false);
-            addNewWordKey = transform.parent.Find("Add").gameObject;
-            addNewWordKey.SetActive(false);
+            //optionObjects = transform.parent.Find("OptionObjects").gameObject;
+            //optionObjects.SetActive(false);
+            //addNewWordKey = transform.parent.Find("Add").gameObject;
+            //addNewWordKey.SetActive(false);
 
-            transform.parent.Find("Options").localPosition = new Vector3(0.5f * KH.keyboardLength + transform.parent.Find("Options").localScale.x * 0.5f + 0.005f, 0, transform.localScale.y * 0.5f - transform.parent.Find("Options").localScale.z * 0.5f);
-            transform.parent.Find("OptionObjects").localPosition = new Vector3(0.5f * KH.keyboardLength + transform.parent.Find("OptionObjects").localScale.x * 0.5f + 0.005f, transform.parent.Find("OptionObjects").localPosition.y, transform.parent.Find("OptionObjects").localPosition.z + transform.localScale.y * 0.5f - transform.parent.Find("Options").localScale.z * 0.5f);
-            transform.parent.Find("Add").localPosition = new Vector3(0.5f * KH.keyboardLength + transform.parent.Find("Add").localScale.x * 0.5f + 0.005f, 0, -transform.localScale.y * 0.5f + transform.parent.Find("Add").localScale.z);
-            transform.parent.Find("Layouts").localPosition = new Vector3(0.5f * KH.keyboardLength + transform.parent.Find("Layouts").localScale.x * 0.5f + 0.0075f + transform.parent.Find("OptionObjects").localScale.x, transform.parent.Find("OptionObjects").localPosition.z + transform.localScale.y * 0.5f - transform.parent.Find("Options").localScale.z * 0.5f);
-            chooseWord = transform.parent.Find("ChooseWord").gameObject;
+            //optionsKey = transform.parent.Find("Options");
+            //optionObjects = transform.parent.Find("OptionObjects");
+            //addKey = transform.parent.Find("Add");
+            //layoutsObjects = transform.parent.Find("Layouts");
+
+            updateOptionPositions();
 
             print("Time needed for startup: " + (Time.realtimeSinceStartup - startTime));
 
@@ -219,7 +230,7 @@ namespace WordGestureKeyboard {
                         // TODO invoke backspace
                     }
                     for (int i = 0; i < 4; i++) {
-                        chooseWord.transform.GetChild(i).gameObject.SetActive(false);
+                        chooseObjects.transform.GetChild(i).gameObject.SetActive(false);
                     }
                     isLastSingleLetter = false;
                 } else if (GPC.isBackSpaceOrSpace(pointsList, KH.backSpaceHitbox, KH.spaceHitbox) == 1) {
@@ -233,7 +244,7 @@ namespace WordGestureKeyboard {
                 notEnded = false;
             } else if (GPC.sortedDict != null) {
                 for (int i = 0; i < 4; i++) {
-                    chooseWord.transform.GetChild(i).gameObject.SetActive(false);
+                    chooseObjects.transform.GetChild(i).gameObject.SetActive(false);
                 }
                 int bestWordsDictLength = GPC.sortedDict.Count;
                 if (isAddingNewWord) {  // putting text into textfield from keyboard
@@ -253,8 +264,8 @@ namespace WordGestureKeyboard {
                             if (i > 3) {    // maximum of 4 best words apart from top word
                                 break;
                             }
-                            chooseWord.transform.GetChild(i).GetChild(0).GetChild(0).GetComponent<Text>().text = GPC.sortedDict[bestWordsDictLength - 2 - i];
-                            chooseWord.transform.GetChild(i).gameObject.SetActive(true);
+                            chooseObjects.transform.GetChild(i).GetChild(0).GetChild(0).GetComponent<Text>().text = GPC.sortedDict[bestWordsDictLength - 2 - i];
+                            chooseObjects.transform.GetChild(i).gameObject.SetActive(true);
                         }
 
                         result.Invoke(GPC.sortedDict[bestWordsDictLength - 1] + " ");
@@ -267,15 +278,67 @@ namespace WordGestureKeyboard {
                 GPC.sortedDict = null;
             }
         }
+        
+        void updateOptionPositions() {
+            optionsKey.transform.localPosition = new Vector3(0.5f * KH.keyboardLength + optionsKey.transform.localScale.x * 0.5f + 0.005f, 0, transform.localScale.y * 0.5f - optionsKey.transform.localScale.z * 0.5f);
+            optionObjects.transform.localPosition = new Vector3(0.5f * KH.keyboardLength + optionObjects.transform.localScale.x * 0.5f + 0.005f, optionObjects.transform.localPosition.y, optionsKey.transform.localPosition.z + (MathF.Sin((90 - 360 + optionObjects.transform.localEulerAngles.x) * Mathf.PI / 180)) * (optionObjects.transform.localScale.z * 3));//optionObjects.transform.localPosition.z + transform.localScale.y * 0.5f - optionsKey.transform.localScale.z * 0.5f);
+            print("beta: " + (MathF.Sin((90 - 360 + optionObjects.transform.localEulerAngles.x) * Mathf.PI / 180)) + " term " + (optionObjects.transform.localScale.z * 3));
+            addKey.transform.localPosition = new Vector3(0.5f * KH.keyboardLength + addKey.transform.localScale.x * 0.5f + 0.005f, 0, -transform.localScale.y * 0.5f + addKey.transform.localScale.z);
+            //layoutsObjects.transform.localPosition = new Vector3(0.5f * KH.keyboardLength + layoutsObjects.transform.localScale.x * 0.5f + 0.0075f + optionObjects.transform.localScale.x, optionObjects.transform.localPosition.y, optionObjects.transform.localPosition.z);
+            chooseObjects.transform.localPosition = new Vector3(0, chooseObjects.transform.localPosition.y, transform.localScale.y * 0.5f + 0.035f);
+            //scaleObjects.transform.localPosition = new Vector3(0.5f * KH.keyboardLength + layoutsObjects.transform.localScale.x * 0.5f + 0.0075f + optionObjects.transform.localScale.x, scaleObjects.transform.localPosition.y, scaleObjects.transform.localPosition.z);
+        }
+
+        public void scalePlus(Transform t, bool b) {
+            if (b && transform.parent.localScale.x < 2) {
+                scaleObjects.transform.GetChild(0).GetComponent<MeshRenderer>().material = grayMat;
+                transform.parent.localScale += new Vector3(0.05f, 0.05f, 0.05f);
+                KH.keyboardScale += 0.05f;
+            } else {
+                scaleObjects.transform.GetChild(0).GetComponent<MeshRenderer>().material = whiteMat;
+            }
+        }
+
+        public void scaleMinus(Transform t, bool b) {
+            if (b && transform.parent.localScale.x > 0.5) {
+                scaleObjects.transform.GetChild(1).GetComponent<MeshRenderer>().material = grayMat;
+                transform.parent.localScale -= new Vector3(0.05f, 0.05f, 0.05f);
+                KH.keyboardScale -= 0.05f;
+            } else {
+                scaleObjects.transform.GetChild(1).GetComponent<MeshRenderer>().material = whiteMat;
+            }
+        }
+
+        public void changeSize(Transform t, bool b) {
+            if (b) {
+                if (!isChangeSizeOpen) {
+                    optionObjects.transform.GetChild(0).GetComponent<MeshRenderer>().material = grayMat;
+                    scaleObjects.SetActive(true);
+                } else {
+                    scaleObjects.transform.GetChild(0).GetComponent<MeshRenderer>().material = whiteMat;
+                    scaleObjects.SetActive(false);
+                }
+                isChangeSizeOpen = !isChangeSizeOpen;
+            }
+        }
 
         public void enterOptions(Transform t, bool b) {
             if (b) {
                 if (!isOptionsOpen) {
-                    transform.parent.Find("Options").GetComponent<MeshRenderer>().material = grayMat;
+                    optionsKey.GetComponent<MeshRenderer>().material = grayMat;
                     optionObjects.SetActive(true);
                 } else {
-                    transform.parent.Find("Options").GetComponent<MeshRenderer>().material = whiteMat;
+                    optionsKey.GetComponent<MeshRenderer>().material = whiteMat;
                     optionObjects.SetActive(false);
+                    foreach (GameObject g in subOptionButtons) {
+                        g.SetActive(false);
+                    }
+                    for (int i = 0; i < 3; i++) { 
+                        optionObjects.transform.GetChild(i).GetComponent<MeshRenderer>().material = whiteMat;
+                    }
+                    isAddingNewWord = false;
+                    isChoosingLayout = false;
+                    isChangeSizeOpen = false;
                 }
                 isOptionsOpen = !isOptionsOpen;
             }
@@ -285,14 +348,14 @@ namespace WordGestureKeyboard {
             if (b) {
                 isAddingNewWord = !isAddingNewWord;
                 if (isAddingNewWord) {
-                    transform.parent.Find("OptionObjects").GetChild(2).GetComponent<MeshRenderer>().material = grayMat;
-                    addNewWordKey.SetActive(true);
+                    optionObjects.transform.GetChild(2).GetComponent<MeshRenderer>().material = grayMat;
+                    addKey.SetActive(true);
                     foreach (Transform child in this.transform) {
                         child.GetComponent<BoxCollider>().enabled = true;
                     }
                 } else {
-                    transform.parent.Find("OptionObjects").GetChild(2).GetComponent<MeshRenderer>().material = whiteMat;
-                    addNewWordKey.SetActive(false);
+                    optionObjects.transform.GetChild(2).GetComponent<MeshRenderer>().material = whiteMat;
+                    addKey.SetActive(false);
                     foreach (Transform child in this.transform) {
                         child.GetComponent<BoxCollider>().enabled = false;
                     }
@@ -304,23 +367,25 @@ namespace WordGestureKeyboard {
             if (b) {
                 isChoosingLayout = !isChoosingLayout;
                 if (isChoosingLayout) {
-                    transform.parent.Find("OptionObjects").GetChild(1).GetComponent<MeshRenderer>().material = grayMat;
+                    optionObjects.transform.GetChild(1).GetComponent<MeshRenderer>().material = grayMat;
                     for (int i = 0; i < FH.layouts.Count; i++) {
-                        GameObject Key = Instantiate(layoutKey, transform.parent.Find("Layouts"), false) as GameObject;
+                        GameObject Key = Instantiate(layoutKey, layoutsObjects.transform, false) as GameObject;
                         Key.transform.GetChild(0).GetChild(0).GetComponent<Text>().text = FH.layouts[i];
                         //Key.transform.localPosition = new Vector3(Key.transform.localPosition.x, Key.transform.localPosition.y + Key.transform.localScale.y * 1.1f * i, Key.transform.localPosition.z);
-                        Key.transform.localPosition = new Vector3(0, Key.transform.localScale.y * 1.1f * i, 0);
+                        Key.transform.localPosition = new Vector3(0, 0, Key.transform.localScale.y * 1.1f * i);
                         //Key.transform.SetParent(transform.parent.Find("Layouts"));
                         //Key.transform.localScale = new Vector3(1.4f, 0.7f, 0.05f);
                         //Key.transform.localPosition = new Vector3(1.571f, 0.575f + i, 1.273f);
                         //Key.transform.localRotation = new Quaternion(0, 0, 0, 0);
                         Key.SetActive(true);
                     }
+                    layoutsObjects.SetActive(true);
                 } else {
-                    transform.parent.Find("OptionObjects").GetChild(1).GetComponent<MeshRenderer>().material = whiteMat;
-                    foreach (Transform child in transform.parent.Find("Layouts")) {
+                    optionObjects.transform.GetChild(1).GetComponent<MeshRenderer>().material = whiteMat;
+                    foreach (Transform child in layoutsObjects.transform) {
                         GameObject.Destroy(child.gameObject);
                     }
+                    layoutsObjects.SetActive(false);
                 }
             }
         }
@@ -332,6 +397,7 @@ namespace WordGestureKeyboard {
             this.layout = layout;
             KH.createKeyboardOverlay(layout);
             FH.loadWordGraphs(layout);
+            updateOptionPositions();
         }
 
         public void drawWord(Transform t, bool b) {

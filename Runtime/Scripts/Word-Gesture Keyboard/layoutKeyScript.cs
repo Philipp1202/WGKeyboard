@@ -22,7 +22,7 @@ namespace WordGestureKeyboard {
             if (b) {
                 transform.GetComponent<MeshRenderer>().material = grayMat;
                 string layout = transform.GetChild(0).GetChild(0).GetComponent<Text>().text;
-                transform.parent.parent.Find("WGKeyboard").GetComponent<WGKMain>().changeLayout(layout);
+                transform.parent.parent.parent.Find("WGKeyboard").GetComponent<WGKMain>().changeLayout(layout);
             } else {
                 transform.GetComponent<MeshRenderer>().material = whiteMat;
             }

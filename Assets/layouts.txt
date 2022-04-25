@@ -12,3 +12,10 @@ asdfghjkl
 zxcvbnm<
  
 -----
+alphabet
+abcdefg
+hijklmn
+opqrst
+uvwxyz
+
+-----
