@@ -82,7 +82,7 @@ namespace WordGestureKeyboard {
         /// adds the sokgraph points to the corresponding files and also adds these to the normalizedWordsPointsDict and locationWordsPointsDict.
         /// </summary>
         /// <param name="newWord">New word that should be added to the dicitonary.</param>
-        public void addNewWordToDict(string newWord, GraphPointsCalculator GPC, float numKeysOnLongestLine) {
+        public void addNewWordToDict(string newWord, GraphPointsCalculator GPC) {
             if (newWord.Length != 0) {
                 string path = "Packages/com.unibas.wgkeyboard/Assets/10000_english_words.txt";
                 StreamReader sr = new StreamReader(path);
@@ -105,7 +105,7 @@ namespace WordGestureKeyboard {
                     sw.Close();
 
                     foreach (var l in layouts) {
-                        List<Vector2> wordLocationPoints = GPC.getWordPoints(newWord, l, layoutKeys, numKeysOnLongestLine);
+                        List<Vector2> wordLocationPoints = GPC.getWordPoints(newWord, layoutKeys[l]);
                         List<Vector2> wordNormPoints = GPC.normalize(wordLocationPoints, 2);
 
                         path = "Packages/com.unibas.wgkeyboard/Assets/sokgraph_" + l + ".txt";

@@ -12,11 +12,11 @@ namespace WordGestureKeyboard {
         public bool isSampling = false;
         //public IOrderedEnumerable<KeyValuePair<string, float>> sortedDict = null;
         public List<string> sortedDict = null;
-        public float numKeysOnLongestLine;
-
+        //public float numKeysOnLongestLine;
+        /*
         public GraphPointsCalculator(float n) {
             numKeysOnLongestLine = n;
-        }
+        }*/
 
         /// <summary>
         /// Calculates the costs for every word given in "locationWordsPointDict" with respect to the "inputpoints". This is the cost of the not normalized points more or less according to SHARK2.
@@ -330,10 +330,15 @@ namespace WordGestureKeyboard {
         /// <param name="l">Layout to be considered.</param>
         /// <param name="layoutKeys">Dict with all layouts and its related order of keys.</param>
         /// <param name="numKeyOnLongestLine">Highest number of keys in one line (on the keyboard).</param>
-        public List<Vector2> getWordPoints(string word, string l, Dictionary<string, List<string>> layoutKeys, float numKeyOnLongestLine) {
+        public List<Vector2> getWordPoints(string word, List<string> layoutKeys) {
             Dictionary<string, Vector2> letterPos = new Dictionary<string, Vector2>();
-            List<string> keyList = layoutKeys[l];
-            int count = keyList.Count;
+            int count = layoutKeys.Count;
+            int numKeysOnLongestLine = 0;
+            for (int i = 0; i < count; i++) {
+                if (layoutKeys[i].Length > numKeysOnLongestLine) {
+                    numKeysOnLongestLine = layoutKeys[i].Length;
+                }
+            }
             for (int y = 0; y < count; y++) {
                 float o = 0;
                 if (y == 3) {   // change, is wrong
@@ -350,8 +355,8 @@ namespace WordGestureKeyboard {
                     o -= 0.5f;
                 }
 
-                for (int x = 0; x < keyList[count - y - 1].Count(); x++) {
-                    letterPos.Add(keyList[count - y - 1][x].ToString(), new Vector2((x + o + 0.5f) / numKeysOnLongestLine, (y + 0.5f) / numKeysOnLongestLine)); // position of all letters if one key had radius 1
+                for (int x = 0; x < layoutKeys[count - y - 1].Count(); x++) {
+                    letterPos.Add(layoutKeys[count - y - 1][x].ToString(), new Vector2((x + o + 0.5f) / numKeysOnLongestLine, (y + 0.5f) / numKeysOnLongestLine)); // position of all letters if one key had radius 1
                 }
             }
 

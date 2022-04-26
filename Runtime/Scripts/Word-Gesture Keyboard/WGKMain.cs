@@ -49,7 +49,6 @@ namespace WordGestureKeyboard {
         bool isOptionsOpen = false;
         bool isAddingNewWord = false;
         bool isChoosingLayout = false;
-        bool isLastSingleLetter = false;
         bool isChangeSizeOpen = false;
 
         string queryInput = "";
@@ -84,7 +83,7 @@ namespace WordGestureKeyboard {
             KH = new KeyboardHelper(this.transform, Key, boxCollider, FH);
             KH.createKeyboardOverlay(layout);
             UIH = new UserInputHandler(LR, this.transform);
-            GPC = new GraphPointsCalculator(KH.numKeysOnLongestLine);
+            GPC = new GraphPointsCalculator();
 
             // maybe change next 4 lines
             //optionObjects = transform.parent.Find("OptionObjects").gameObject;
@@ -232,7 +231,6 @@ namespace WordGestureKeyboard {
                     for (int i = 0; i < 4; i++) {
                         chooseObjects.transform.GetChild(i).gameObject.SetActive(false);
                     }
-                    isLastSingleLetter = false;
                 } else if (GPC.isBackSpaceOrSpace(pointsList, KH.backSpaceHitbox, KH.spaceHitbox) == 1) {
                     text.text += " ";
                     queryInput += " ";
@@ -247,33 +245,34 @@ namespace WordGestureKeyboard {
                     chooseObjects.transform.GetChild(i).gameObject.SetActive(false);
                 }
                 int bestWordsDictLength = GPC.sortedDict.Count;
-                if (isAddingNewWord) {  // putting text into textfield from keyboard
-                    text.text += GPC.sortedDict[bestWordsDictLength - 1];
-                    queryInput += GPC.sortedDict[bestWordsDictLength - 1];
-                } else {    // putting text into inputfield of query
-                    if (GPC.sortedDict[bestWordsDictLength - 1].Length == 1) { //single letter
-
-                        result.Invoke(GPC.sortedDict[bestWordsDictLength - 1]);
+                if (bestWordsDictLength != 0) {
+                    if (isAddingNewWord) {  // putting text into textfield from keyboard
                         text.text += GPC.sortedDict[bestWordsDictLength - 1];
                         queryInput += GPC.sortedDict[bestWordsDictLength - 1];
+                    } else {    // putting text into inputfield of query
+                        if (GPC.sortedDict[bestWordsDictLength - 1].Length == 1) { //single letter
 
-                        isLastSingleLetter = true;
-                        lastInputWord = GPC.sortedDict[bestWordsDictLength - 1];
-                    } else {    // not single letter but word
-                        for (int i = 0; i < bestWordsDictLength - 1; i++) {
-                            if (i > 3) {    // maximum of 4 best words apart from top word
-                                break;
+                            result.Invoke(GPC.sortedDict[bestWordsDictLength - 1]);
+                            text.text += GPC.sortedDict[bestWordsDictLength - 1];
+                            queryInput += GPC.sortedDict[bestWordsDictLength - 1];
+                            lastInputWord = GPC.sortedDict[bestWordsDictLength - 1];
+                        } else {    // not single letter but word
+                            for (int i = 0; i < bestWordsDictLength - 1; i++) {
+                                if (i > 3) {    // maximum of 4 best words apart from top word
+                                    break;
+                                }
+                                chooseObjects.transform.GetChild(i).GetChild(0).GetChild(0).GetComponent<Text>().text = GPC.sortedDict[bestWordsDictLength - 2 - i];
+                                chooseObjects.transform.GetChild(i).gameObject.SetActive(true);
                             }
-                            chooseObjects.transform.GetChild(i).GetChild(0).GetChild(0).GetComponent<Text>().text = GPC.sortedDict[bestWordsDictLength - 2 - i];
-                            chooseObjects.transform.GetChild(i).gameObject.SetActive(true);
-                        }
 
-                        result.Invoke(GPC.sortedDict[bestWordsDictLength - 1] + " ");
-                        text.text += GPC.sortedDict[bestWordsDictLength - 1] + " ";
-                        queryInput += GPC.sortedDict[bestWordsDictLength - 1] + " ";
-                        lastInputWord = GPC.sortedDict[bestWordsDictLength - 1];
-                        isLastSingleLetter = false;
+                            result.Invoke(GPC.sortedDict[bestWordsDictLength - 1] + " ");
+                            text.text += GPC.sortedDict[bestWordsDictLength - 1] + " ";
+                            queryInput += GPC.sortedDict[bestWordsDictLength - 1] + " ";
+                            lastInputWord = GPC.sortedDict[bestWordsDictLength - 1];
+                        }
                     }
+                } else {
+                    UnityEngine.Debug.Log("no word found");
                 }
                 GPC.sortedDict = null;
             }
@@ -315,7 +314,7 @@ namespace WordGestureKeyboard {
                     optionObjects.transform.GetChild(0).GetComponent<MeshRenderer>().material = grayMat;
                     scaleObjects.SetActive(true);
                 } else {
-                    scaleObjects.transform.GetChild(0).GetComponent<MeshRenderer>().material = whiteMat;
+                    optionObjects.transform.GetChild(0).GetComponent<MeshRenderer>().material = whiteMat;
                     scaleObjects.SetActive(false);
                 }
                 isChangeSizeOpen = !isChangeSizeOpen;
@@ -430,7 +429,7 @@ namespace WordGestureKeyboard {
             if (b) {
                 this.transform.parent.GetChild(5).GetComponent<MeshRenderer>().material = grayMat;
                 string newWord = text.text; // maybe needs to be changed, but maybe let it be with Text Object for adding a word -> wouldn't interfere with input in query
-                FH.addNewWordToDict(newWord, GPC, KH.numKeysOnLongestLine);
+                FH.addNewWordToDict(newWord, GPC);
                 text.text = "";
             } else {
                 this.transform.parent.GetChild(5).GetComponent<MeshRenderer>().material = whiteMat;
