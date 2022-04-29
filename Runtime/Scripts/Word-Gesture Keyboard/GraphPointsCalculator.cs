@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using System.Linq;  // for Max(), Min(), ...
 using System.Threading.Tasks;
+using System;
 
 namespace WordGestureKeyboard {
     public class GraphPointsCalculator {
@@ -70,7 +71,7 @@ namespace WordGestureKeyboard {
                     }
                 }
 
-                if (word.Key == "point") {
+                if (word.Key == "pololoop") {
                     Debug.Log("locpointcost: " + cost);
                 }
                 //print("COOOOOOOOOST: " + word.Key + " : " + cost);
@@ -93,6 +94,7 @@ namespace WordGestureKeyboard {
             Dictionary<string, float> normalizedCostList = new Dictionary<string, float>();
             int n;
             float cost;
+            Debug.Log("ATLEAST I AM HERE YOU DUMMY " + normalizedWordsPointDict.Count);
             foreach (var word in normalizedWordsPointDict) {
                 n = 0;
                 cost = 0;
@@ -102,7 +104,7 @@ namespace WordGestureKeyboard {
                     n += 1;
                 }
                 cost /= steps;
-
+                Debug.Log("normpointcost: " + cost + " : " + (deltaNormal));
                 //print("COSTS: " + word.Key + " : " + cost);
                 if (word.Key == "point") {
                     Debug.Log("normpointcost: " + cost + " : " + (deltaNormal));
@@ -330,38 +332,60 @@ namespace WordGestureKeyboard {
         /// <param name="l">Layout to be considered.</param>
         /// <param name="layoutKeys">Dict with all layouts and its related order of keys.</param>
         /// <param name="numKeyOnLongestLine">Highest number of keys in one line (on the keyboard).</param>
-        public List<Vector2> getWordPoints(string word, List<string> layoutKeys) {
+        public List<Vector2> getWordPoints(string word, Tuple<List<float>, List<string>> layoutInfo) {
             Dictionary<string, Vector2> letterPos = new Dictionary<string, Vector2>();
-            int count = layoutKeys.Count;
-            int numKeysOnLongestLine = 0;
-            for (int i = 0; i < count; i++) {
-                if (layoutKeys[i].Length > numKeysOnLongestLine) {
-                    numKeysOnLongestLine = layoutKeys[i].Length;
+            List<float> paddingList = layoutInfo.Item1;
+            List<string> charList = layoutInfo.Item2;
+            int count = charList.Count;
+
+            HashSet<char> allCharacters = new HashSet<char>();
+            foreach (string line in charList) {
+                foreach (char character in line) {
+                    if (character.ToString() == " " || character.ToString() == "<") {
+                        continue;
+                    }
+                    if (!allCharacters.Contains(character)) {
+                        allCharacters.Add(character);
+                    }
                 }
             }
+            foreach (char c in word) {
+                if (!allCharacters.Contains(c)) {
+                    return null;    // word cannot be written with current layout
+                }
+            }
+
+            float numKeysOnLongestLine = 0;
+            for (int i = 0; i < count; i++) {
+                float lineLength = charList[i].Length + Mathf.Abs(paddingList[i]);
+                if (charList[i].Contains(" ")) {
+                    lineLength += 7;    // because length of spacebar is 8 * normal keysize, that means 7 * keysize extra
+                }
+                if (charList[i].Contains("<")) {
+                    lineLength += 1;    // because length of backspace is 2 * normal keysize, that means 1 * keysize extra
+                }
+                if (lineLength > numKeysOnLongestLine) {
+                    numKeysOnLongestLine = lineLength;
+                }
+            }
+
             for (int y = 0; y < count; y++) {
-                float o = 0;
-                if (y == 3) {   // change, is wrong
-                    o = 0.5f;
-                } else if (y == 2) {
-                    o = 0.75f;
-                } else if (y == 1) {
-                    o = 1.25f;
-                } else if (y == 0) {
-                    o = 5.25f;
-                }
-
-                if (count == 4) {   // keyboard without numbers in top row
-                    o -= 0.5f;
-                }
-
-                for (int x = 0; x < layoutKeys[count - y - 1].Count(); x++) {
-                    letterPos.Add(layoutKeys[count - y - 1][x].ToString(), new Vector2((x + o + 0.5f) / numKeysOnLongestLine, (y + 0.5f) / numKeysOnLongestLine)); // position of all letters if one key had radius 1
+                float offset = paddingList[count - 1 - y];
+                for (int x = 0; x < charList[count - y - 1].Count(); x++) {
+                    if (charList[count - y - 1][x].ToString() == " ") {
+                        offset += 7;
+                        continue;
+                    }
+                    if (charList[count - y - 1][x].ToString() == "<") {
+                        offset += 1;
+                        continue;
+                    }
+                    letterPos.Add(charList[count - y - 1][x].ToString(), new Vector2((x + offset + 0.5f) / numKeysOnLongestLine, (y + 0.5f) / numKeysOnLongestLine)); // position of all letters if one key had radius 1
                 }
             }
 
             List<Vector2> points = new List<Vector2>();
-            foreach (var letter in word) {
+            foreach (char letter in word) {
                 points.Add(letterPos[letter.ToString()]);
             }
 
@@ -463,6 +487,9 @@ namespace WordGestureKeyboard {
             Dictionary<string, List<Vector2>> newNormWordsPoints = new Dictionary<string, List<Vector2>>();
 
             foreach (var word in locWordsPoints) {
+                if (word.Key == "pololoop") {
+                    Debug.Log("TEST FOR SEPOSITION: " + input[0] + " : " + word.Value[0] + input[steps - 1] + " : " + word.Value[steps - 1]);
+                }
                 if ((input[0] - word.Value[0]).magnitude < keyRadius * 1.5f && (input[steps - 1] - word.Value[steps - 1]).magnitude < keyRadius * 1.5f) {
                     newLocWordsPoints.Add(word.Key, word.Value);
                     newNormWordsPoints.Add(word.Key, normWordsPoints[word.Key]);

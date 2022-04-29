@@ -80,10 +80,14 @@ namespace WordGestureKeyboard {
             //loadLayouts();
             //loadWordGraphs(layout);
             FH = new FileHandler(layout);
+            FH.loadLayouts();
             KH = new KeyboardHelper(this.transform, Key, boxCollider, FH);
             KH.createKeyboardOverlay(layout);
             UIH = new UserInputHandler(LR, this.transform);
             GPC = new GraphPointsCalculator();
+            
+            //FH.addKeyboardLettersToLexicon(GPC);
+            FH.loadWordGraphs(layout);
 
             // maybe change next 4 lines
             //optionObjects = transform.parent.Find("OptionObjects").gameObject;
@@ -394,6 +398,7 @@ namespace WordGestureKeyboard {
                 GameObject.Destroy(child.gameObject);
             }
             this.layout = layout;
+            FH.layout = layout;
             KH.createKeyboardOverlay(layout);
             FH.loadWordGraphs(layout);
             updateOptionPositions();
@@ -427,12 +432,12 @@ namespace WordGestureKeyboard {
 
         public void addNewWordToDict(Transform t, bool b) {
             if (b) {
-                this.transform.parent.GetChild(5).GetComponent<MeshRenderer>().material = grayMat;
+                addKey.GetComponent<MeshRenderer>().material = grayMat;
                 string newWord = text.text; // maybe needs to be changed, but maybe let it be with Text Object for adding a word -> wouldn't interfere with input in query
                 FH.addNewWordToDict(newWord, GPC);
                 text.text = "";
             } else {
-                this.transform.parent.GetChild(5).GetComponent<MeshRenderer>().material = whiteMat;
+                addKey.GetComponent<MeshRenderer>().material = whiteMat;
             }
         }
 

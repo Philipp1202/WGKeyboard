@@ -3,19 +3,20 @@ using System.Collections.Generic;
 using UnityEngine;
 using System.Threading.Tasks;
 using System.IO;
+using System;
 
 namespace WordGestureKeyboard {
     public class FileHandler {
         Dictionary<string, List<Vector2>> locationWordsPointsDict = null;
         Dictionary<string, List<Vector2>> normalizedWordsPointsDict = null;
-        string layout;
+        public string layout;
         public List<string> layouts;
-        public Dictionary<string, List<string>> layoutKeys;
+        HashSet<string> wordsInLexicon = new HashSet<string>();
+        public Dictionary<string, Tuple<List<float>, List<string>>> layoutKeys;
 
         public FileHandler(string layout) {
             this.layout = layout;
-            loadLayouts();
-            loadWordGraphs(layout);
+            wordsInLexicon = getAllWordsInLexicon(layout);
         }
 
         /// <summary>
@@ -31,6 +32,7 @@ namespace WordGestureKeyboard {
                 string path = "Packages/com.unibas.wgkeyboard/Assets/sokgraph_" + layout + ".txt";
 
                 StreamReader sr = new StreamReader(path);
+                Debug.Log("HERE IS BEGINNING OF LOADGRAPHS");
                 string line;
                 string[] splits = new string[3];
                 string[] points;
@@ -68,6 +70,7 @@ namespace WordGestureKeyboard {
                         n += 1;
                     }
 
+                    //Debug.Log("SOMETHING TO TEST: " + splits[0]);
                     locationWordsPointsDict.Add(splits[0], locationPoints);
                     normalizedWordsPointsDict.Add(splits[0], normalizedPoints);
 
@@ -88,6 +91,8 @@ namespace WordGestureKeyboard {
                 StreamReader sr = new StreamReader(path);
                 bool isIn = false;
                 string line;
+
+                float starttime = Time.realtimeSinceStartup;
                 while (true) {
                     line = sr.ReadLine();
                     if (line == newWord) {  //word already in lexicon
@@ -98,14 +103,28 @@ namespace WordGestureKeyboard {
                         break;
                     }
                 }
+                Debug.Log("FIRST TIME: " + (Time.realtimeSinceStartup - starttime));
+                starttime = Time.realtimeSinceStartup;
+                
+                if (wordsInLexicon.Contains(newWord)) {
+                    isIn = true;
+                }
+
+                Debug.Log("SECOND TIME: " + (Time.realtimeSinceStartup - starttime));
+
                 sr.Close();
-                if (!isIn) {
+                if (!isIn) {    // word to be added to the lexicon is new and not already in it
                     StreamWriter sw = File.AppendText(path);
                     sw.WriteLine(newWord);
                     sw.Close();
 
                     foreach (var l in layouts) {
+                        Debug.Log(l);
                         List<Vector2> wordLocationPoints = GPC.getWordPoints(newWord, layoutKeys[l]);
+                        if (wordLocationPoints == null) {
+                            Debug.Log("CANT BE WRITTEN IN: " + l);
+                            continue;
+                        }
                         List<Vector2> wordNormPoints = GPC.normalize(wordLocationPoints, 2);
 
                         path = "Packages/com.unibas.wgkeyboard/Assets/sokgraph_" + l + ".txt";
@@ -138,13 +157,76 @@ namespace WordGestureKeyboard {
             // Calculate graph of new word and add it to the dict/list
         }
 
+        public void addKeyboardLettersToLexicon(GraphPointsCalculator GPC) {
+            HashSet<string> allCharacters = new HashSet<string>();
+            foreach (string layout in layouts) {
+                foreach (string l in layoutKeys[layout].Item2) {
+                    foreach (char character in l) {
+                        if (!allCharacters.Contains(character.ToString())) {
+                            allCharacters.Add(character.ToString());
+                        }
+                    }
+                }
+            }
+            HashSet<string> allCharactersCopy = new HashSet<string>();
+            foreach (string s in allCharacters) {
+                allCharactersCopy.Add(s);
+            }
+            string path = "Packages/com.unibas.wgkeyboard/Assets/10000_english_words.txt";
+            StreamReader sr = new StreamReader(path);
+            string line;
+            while (true) {
+                line = sr.ReadLine();
+                foreach (string s in allCharactersCopy) {
+                    if (line == s) {
+                        allCharacters.Remove(s);
+                    }
+                }
+                if (line == null) {
+                    break;
+                }
+            }
+            sr.Close();
+            StreamWriter sw = File.AppendText(path);
+            foreach (string s in allCharacters) {
+                sw.WriteLine(s);
+            }
+            sw.Close();
+
+            foreach (var l in layouts) {
+                path = "Packages/com.unibas.wgkeyboard/Assets/sokgraph_" + l + ".txt";
+                sw = File.AppendText(path);
+                foreach (string s in allCharacters) {
+                    List<Vector2> wordLocationPoints = GPC.getWordPoints(s, layoutKeys[l]);
+                    List<Vector2> wordNormPoints = GPC.normalize(wordLocationPoints, 2);
+
+                    string newLine = s + ":";
+                    for (int i = 0; i < wordLocationPoints.Count; i++) {
+                        newLine += wordLocationPoints[i].x.ToString() + "," + wordLocationPoints[i].y.ToString();
+                        if (i < wordLocationPoints.Count - 1) {
+                            newLine += ",";
+                        }
+                    }
+                    newLine += ":";
+                    for (int i = 0; i < wordNormPoints.Count; i++) {
+                        newLine += wordNormPoints[i].x.ToString() + "," + wordNormPoints[i].y.ToString();
+                        if (i < wordLocationPoints.Count - 1) {
+                            newLine += ",";
+                        }
+                    }
+                    sw.WriteLine(newLine);
+                }
+                sw.Close();
+            }
+        }
+
         /// <summary>
         /// Loads the layouts from the file in Assets/layouts.txt.
         /// It stores the layout names in "layouts" and the order of the keys with the layout name in the dict "layoutKeys".
         /// </summary>
-        void loadLayouts() {
+        void loadLayoutsOld() {
             layouts = new List<string>();
-            layoutKeys = new Dictionary<string, List<string>>();
+            //layoutKeys = new Dictionary<string, List<string>>();
             string path = "Packages/com.unibas.wgkeyboard/Assets/layouts.txt";
             StreamReader sr = new StreamReader(path);
             string line;
@@ -160,7 +242,7 @@ namespace WordGestureKeyboard {
                     continue;
                 } else if (line == "-----") {
                     List<string> k = keys;
-                    layoutKeys.Add(l, k);
+                    //layoutKeys.Add(l, k);
                     keys = new List<string>();
                     l = "";
                     continue;
@@ -170,11 +252,89 @@ namespace WordGestureKeyboard {
             }
         }
 
+        /// <summary>
+        /// Loads the layouts from the file in Assets/layouts.txt.
+        /// It stores the layout names in "layouts" and the order of the keys with the layout name in the dict "layoutKeys".
+        /// </summary>
+        public void loadLayouts() {
+            layouts = new List<string>();
+            layoutKeys = new Dictionary<string, Tuple<List<float>, List<string>>>();
+            string path = "Packages/com.unibas.wgkeyboard/Assets/layouts.txt";
+            StreamReader sr = new StreamReader(path);
+            string line;
+            string l = "";  // layoutname
+            Tuple<List<float>, List<string>> keys;
+            keys = new Tuple<List<float>, List<string>>(new List<float>(), new List<string>());
+            int i = 0;
+            while (true) {
+                line = sr.ReadLine();
+                if (i < 5) {    // skip first 5 lines, because they just explain the format to be used
+                    i++;
+                    continue;
+                }
+                if (line == null) { // end of file reached
+                    break;
+                } else if (l == "") {
+                    l = line;
+                    layouts.Add(line);
+                    continue;
+                } else if (line == "-----") {
+                    HashSet<char> allCharacters = new HashSet<char>();
+                    bool isIllegalLayout = false;
+                    foreach (string s in keys.Item2) {
+                        foreach (char character in s) {
+                            if (character.ToString() == " " || character.ToString() == "<") {
+                                continue;
+                            }
+                            if (allCharacters.Contains(character)) {
+                                isIllegalLayout = true;
+                                Debug.Log("THIS ISSSSSSSSSSSSSSS THE IMPOSTER CHARACTER!!!!!!!!: " + character);
+                            }
+                            allCharacters.Add(character);
+                        }
+                    }
+                    if (!isIllegalLayout) { // two or more times same character in layout
+                        layoutKeys.Add(l, keys);
+                        Debug.Log("JUST ADDED: " + l);
+                    } else {
+                        layouts.Remove(l);
+                    }
+                    keys = new Tuple<List<float>, List<string>>(new List<float>(), new List<string>());
+                    l = "";
+                    continue;
+                }
+                string[] splits = line.Split("$$");
+                float f = 0;
+                if (float.TryParse(splits[1], out f)) { // true, if a float, false if not
+                    keys.Item1.Add(f);
+                } else {
+                    keys.Item1.Add(0);
+                }
+                keys.Item2.Add(splits[0]);
+                Debug.Log("line: " + splits[0] + " : padding: " + f);
+            }
+        }
+
+        HashSet<string> getAllWordsInLexicon(string layout) {
+            HashSet<string> words = new HashSet<string>();
+            string line;
+            string path = "Packages/com.unibas.wgkeyboard/Assets/sokgraph_" + layout + ".txt";
+            StreamReader sr = new StreamReader(path);
+            while (true) {
+                line = sr.ReadLine();
+                words.Add(line);
+                if (line == null) {
+                    break;
+                }
+            }
+            return words;
+        }
+
         public List<string> getLayouts() {
             return layouts;
         }
 
-        public Dictionary<string, List<string>> getLayoutKeys() {
+        public Dictionary<string, Tuple<List<float>, List<string>>> getLayoutKeys() {
             return layoutKeys;
         }
 
