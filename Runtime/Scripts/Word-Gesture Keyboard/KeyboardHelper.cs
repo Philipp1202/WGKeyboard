@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
+using System;
 
 namespace WordGestureKeyboard {
     public class KeyboardHelper {
@@ -157,23 +158,17 @@ namespace WordGestureKeyboard {
                     if (letter.ToString() == "<") {
                         scale = 2;
                         offsetSpecial = keyRadius * keyboardLength;
-                        float xPos = x / numKeysOnLongestLine + (offset + offsetSpecial) / keyboardLength;
-                        float yPos = y / numKeysOnLongestLine + keyRadius;
-                        backSpaceHitbox[0] = xPos - scale * 1 / (numKeysOnLongestLine + 1.5f) / 2 + keyRadius;
-                        backSpaceHitbox[1] = xPos + scale * 1 / (numKeysOnLongestLine + 1.5f) / 2 + keyRadius;
-                        backSpaceHitbox[2] = yPos - keyRadius;
-                        backSpaceHitbox[3] = yPos + keyRadius;
+                        Transform borderLeft = specificKey.transform.GetChild(2);
+                        Transform borderRight = specificKey.transform.GetChild(3);
+                        borderLeft.localScale = new Vector3(borderLeft.localScale.x / scale, borderLeft.localScale.y, borderLeft.localScale.z);
+                        borderRight.localScale = new Vector3(borderRight.localScale.x / scale, borderRight.localScale.y, borderRight.localScale.z);
                     } else if (letter.ToString() == " ") {
                         scale = 8;
                         offsetSpecial = keyRadius * keyboardLength * 8 - keyRadius * keyboardLength;
-                        float xPos = x / numKeysOnLongestLine + (offset + offsetSpecial) / keyboardLength;
-                        float yPos = y / numKeysOnLongestLine + keyRadius;
-                        spaceHitbox[0] = xPos - scale / 2 * l / keyboardLength + keyRadius;
-                        spaceHitbox[1] = xPos + scale / 2 * l / keyboardLength + keyRadius;
-                        spaceHitbox[2] = yPos - keyRadius;
-                        spaceHitbox[3] = yPos + keyRadius;
-                        Debug.Log("XPOS: " + xPos + ":" + offset / keyboardLength + " : YPOS: " + yPos);
-                        Debug.Log(spaceHitbox[0] + " " + spaceHitbox[1] + " " + spaceHitbox[2] + " " + spaceHitbox[3]);
+                        Transform borderLeft = specificKey.transform.GetChild(2);
+                        Transform borderRight = specificKey.transform.GetChild(3);
+                        borderLeft.localScale = new Vector3(borderLeft.localScale.x / scale, borderLeft.localScale.y, borderLeft.localScale.z);
+                        borderRight.localScale = new Vector3(borderRight.localScale.x / scale, borderRight.localScale.y, borderRight.localScale.z);
                     }
                     specificKey.transform.position = new Vector3(transform.position.x + (-keyboardLength / numKeysOnLongestLine) * ((numKeysOnLongestLine) / 2 - x) + offset + offsetSpecial + keyRadius * keyboardLength, transform.position.y + 0.005f, transform.position.z - (-keyboardWidth / count) * (-count / 2.0f + y + 1) - keyRadius * keyboardLength);
                     specificKey.transform.Find("Canvas").Find("Text").GetComponent<Text>().text = letter.ToString();
@@ -192,6 +187,59 @@ namespace WordGestureKeyboard {
             Debug.Log("KEYBOARD CREATION TIME: " + (Time.realtimeSinceStartup - startTime));
         }
 
+        public void checkForSpaceAndBackspace(Dictionary<string, Tuple<List<float>, List<string>>> layoutKeys, string layout) {
+            bool charFound = false;
+            int count = layoutKeys[layout].Item2.Count;
+            for (int y = 0; y < layoutKeys[layout].Item2.Count; y++) {
+                for (int x = 0; x < layoutKeys[layout].Item2[count - y - 1].Length; x++) {
+                    if (layoutKeys[layout].Item2[count - y - 1][x].ToString() == "<") {
+                        charFound = true;
+                        int scale = 2;
+                        float offset = layoutKeys[layout].Item1[count - y - 1];
+                        float offsetSpecial = scale / 2;
+                        float xPos = x + offset + offsetSpecial;
+                        float yPos = y + 0.5f;
+                        backSpaceHitbox[0] = (xPos - offsetSpecial + 1) / numKeysOnLongestLine - 1 / (numKeysOnLongestLine * 1.1f);
+                        backSpaceHitbox[1] = (xPos + offsetSpecial - 1) / numKeysOnLongestLine + 1 / (numKeysOnLongestLine * 1.1f);
+                        backSpaceHitbox[2] = (yPos - 0.5f) / numKeysOnLongestLine;
+                        backSpaceHitbox[3] = (yPos + 0.5f) / numKeysOnLongestLine;
+                    }
+                }
+            }
+
+            if (!charFound) {
+                backSpaceHitbox[0] = 0;
+                backSpaceHitbox[1] = 0;
+                backSpaceHitbox[2] = 0;
+                backSpaceHitbox[3] = 0;
+            }
+
+            charFound = false;
+            for (int y = 0; y < layoutKeys[layout].Item2.Count; y++) {
+                for (int x = 0; x < layoutKeys[layout].Item2[count - y - 1].Length; x++) {
+                    if (layoutKeys[layout].Item2[count - y - 1][x].ToString() == " ") {
+                        charFound = true;
+                        int scale = 8;
+                        float offset = layoutKeys[layout].Item1[count - y - 1];
+                        float offsetSpecial = scale / 2;
+                        float xPos = x + offset + offsetSpecial;
+                        float yPos = y + 0.5f;
+                        spaceHitbox[0] = (xPos - offsetSpecial + 1) / numKeysOnLongestLine - 1 / (numKeysOnLongestLine * 1.1f);
+                        spaceHitbox[1] = (xPos + offsetSpecial - 1) / numKeysOnLongestLine + 1 / (numKeysOnLongestLine * 1.1f);
+                        spaceHitbox[2] = (yPos - 0.5f) / numKeysOnLongestLine;
+                        spaceHitbox[3] = (yPos + 0.5f) / numKeysOnLongestLine;
+                        Debug.Log("XPOS: " + xPos + ":" + offset / keyboardLength + " : YPOS: " + yPos);
+                        Debug.Log(spaceHitbox[0] + " " + spaceHitbox[1] + " " + spaceHitbox[2] + " " + spaceHitbox[3]);
+                    }
+                }
+            }
+            if (!charFound) {
+                spaceHitbox[0] = 0;
+                spaceHitbox[1] = 0;
+                spaceHitbox[2] = 0;
+                spaceHitbox[3] = 0;
+            }
+        }
         /// <summary>
         /// Changes the color of the keyboard.
         /// </summary>

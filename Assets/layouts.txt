@@ -1,13 +1,21 @@
-
-
-
-
-
+Rules for creating a layout (first six lines get ignored by the program):
+1. Name of the layout
+2. The lines of characters. Type in some characters and at the end of the line "$$" and a number for the padding (how much this line should be indented (from the left side))
+2.1 Note, that you cannot use any character twice and right now, you cannot use "<", because it is reserved for the backspace.
+3. Use "<" and " " for the backspace and the space key (backspace key is twice as big as a normal key, the space key is 8 times as big as a normal key)
+4. At the end write "-----", so the program knows, that this is the end of this layout.
 qwertz
 1234567890_-$$0
 qwertzuiopü$$0.5
 asdfghjklöä$$0.75
 yxcvbnm<$$1.25
+ $$1.75
+-----
+qwertz_big
+1234567890_-$$0
+QWERTZUIOPÜ$$0.5
+ASDFGHJKLÖÄ$$0.75
+YXCVBNM<$$1.25
  $$1.75
 -----
 qwerty
@@ -41,4 +49,23 @@ utf-8
 éèà?=)$$0
 +"*ç%&$$0
 <abc$$0
+-----
+qwertz2
+1234567890_-$$0
+qwertzuiopü$$0.5
+ $$1.75
+asdfghjklöä$$0.75
+yxcvbnm<$$1.25
+-----
+Philipp
+1234567890_-$$0
+phil$$3
+ $$1.75
+webrr$$3
+-----
+Philipp2
+1234567890_-$$0
+phil$$3
+ $$1.75
+webrR$$3
 -----

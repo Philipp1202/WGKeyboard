@@ -33,6 +33,18 @@ namespace WordGestureKeyboard {
             float d2;
 
             float[] arrD = new float[steps];
+            float[] alpha = new float[steps];
+            for (int i = 0; i < steps; i++) {
+                alpha[i] = Mathf.Abs((1f / steps) * (steps / 2f) - (1f / steps) * i);
+                alpha[i] += 10;
+                Debug.Log("PREALHA: " + alpha[i]);
+            }
+            float sum = alpha.Sum();
+            Debug.Log(sum);
+            for (int i = 0; i < steps; i++) {
+                alpha[i] = alpha[i] / sum;
+                Debug.Log("ALPHA: " + alpha[i]);
+            }
 
             foreach (var word in locationWordsPointDict) {
                 cost = 0;
@@ -63,21 +75,21 @@ namespace WordGestureKeyboard {
                 } else {
                     int k = 0;
                     foreach (Vector2 p in word.Value) {
-                        cost += (p - inputPoints[k]).magnitude;
+                        cost += (p - inputPoints[k]).magnitude * alpha[k];
                         if (word.Key == "point") {
                             //print("locpointcost inside: " + cost + " iteration: " + k);
                         }
                         k += 1;
                     }
                 }
-
-                if (word.Key == "pololoop") {
-                    Debug.Log("locpointcost: " + cost);
+                if (word.Key == "pink" || word.Key == "pork") {
+                    Debug.Log("LAST LOCATIONTEST WITH ALPHA: " + word.Key + ", " + cost);
                 }
+
+                Debug.Log("locpointcost: " + cost);
                 //print("COOOOOOOOOST: " + word.Key + " : " + cost);
-                if (cost < 2) {
+                if (cost < keyRadius * 2) {
                     costList.Add(word.Key, cost);
-                    //                print("COOOOOOOOOST: " + word.Key + " : " + cost);
                 }
             }
             return costList;
@@ -104,7 +116,7 @@ namespace WordGestureKeyboard {
                     n += 1;
                 }
                 cost /= steps;
-                Debug.Log("normpointcost: " + cost + " : " + (deltaNormal));
+                //Debug.Log("normpointcost: " + cost + " : " + (deltaNormal));
                 //print("COSTS: " + word.Key + " : " + cost);
                 if (word.Key == "point") {
                     Debug.Log("normpointcost: " + cost + " : " + (deltaNormal));
@@ -189,7 +201,9 @@ namespace WordGestureKeyboard {
         /// <param name="keyRadius">Radius of a key of the keyboard.</param>
         async public void calcBestWords(List<Vector2> userInputPoints, int steps, Dictionary<string, List<Vector2>> locationWordsPointsDict, Dictionary<string, List<Vector2>> normalizedWordsPointsDict, float delta, float keyRadius) {
             sortedDict = null;
+            Debug.Log("IIIIII AMMMMMMM HEREEREREREEEE 1");
             await Task.Run(() => {    // need await, because I couln't access the text of Text in task.run(() => {});
+                Debug.Log("IIIIII AMMMMMMM HEREEREREREEEE 2");
                 List<Vector2> inputPoints = getWordGraphStepPoint(userInputPoints, steps);
                 for (int i = 0; i < inputPoints.Count; i++) {
                     //               print(inputPoints[i]);
@@ -294,6 +308,9 @@ namespace WordGestureKeyboard {
         /// <param name="backSpaceHitbox">Hitbox of the backspace key.</param>
         /// <param name="spaceHitbox">Hitbox of the space key.</param>
         public int isBackSpaceOrSpace(List<Vector2> letterPoints, float[] backSpaceHitbox, float[] spaceHitbox) {
+            if (letterPoints.Count == 0) {  // user wanted to write a word, but no point has been set
+                return 0;
+            }
             List<float> x = getX(letterPoints);
             List<float> y = getY(letterPoints);
 
@@ -485,14 +502,15 @@ namespace WordGestureKeyboard {
         Dictionary<string, List<Vector2>>[] seKeyPosition(List<Vector2> input, Dictionary<string, List<Vector2>> locWordsPoints, Dictionary<string, List<Vector2>> normWordsPoints, int steps, float keyRadius) {
             Dictionary<string, List<Vector2>> newLocWordsPoints = new Dictionary<string, List<Vector2>>();
             Dictionary<string, List<Vector2>> newNormWordsPoints = new Dictionary<string, List<Vector2>>();
-
+            Debug.Log("HOW MANY WORDS I CAN CHOOSE FROM?: " + locWordsPoints.Count);
             foreach (var word in locWordsPoints) {
                 if (word.Key == "pololoop") {
                     Debug.Log("TEST FOR SEPOSITION: " + input[0] + " : " + word.Value[0] + input[steps - 1] + " : " + word.Value[steps - 1]);
                 }
-                if ((input[0] - word.Value[0]).magnitude < keyRadius * 1.5f && (input[steps - 1] - word.Value[steps - 1]).magnitude < keyRadius * 1.5f) {
+                if ((input[0] - word.Value[0]).magnitude < keyRadius * 2 && (input[steps - 1] - word.Value[steps - 1]).magnitude < keyRadius * 2) {
                     newLocWordsPoints.Add(word.Key, word.Value);
                     newNormWordsPoints.Add(word.Key, normWordsPoints[word.Key]);
+                    Debug.Log("POSSIBLE WORDS: " + word.Key);
                 }
             }
             //print("LENGTH: " + newLocWordsPoints.Count);

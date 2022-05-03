@@ -21,6 +21,7 @@ namespace WordGestureKeyboard {
         public Material whiteMat;
         public Material grayMat;
         public Material keyboardHoverMat;
+        public Material keyboardMat;
         public GameObject layoutKey;
         public string layout;
         public TextInputEvent result;
@@ -88,6 +89,7 @@ namespace WordGestureKeyboard {
             
             //FH.addKeyboardLettersToLexicon(GPC);
             FH.loadWordGraphs(layout);
+            KH.checkForSpaceAndBackspace(FH.getLayoutKeys(), layout);
 
             // maybe change next 4 lines
             //optionObjects = transform.parent.Find("OptionObjects").gameObject;
@@ -212,44 +214,48 @@ namespace WordGestureKeyboard {
                 startTime = Time.realtimeSinceStartup;
                 List<Vector2> pointsList = UIH.getTransformedPoints();
 
-                boxCollider.center = new Vector3(boxCollider.center.x, 0.03f, boxCollider.center.z);
-                boxCollider.size = new Vector3(boxCollider.size.x, 0.05f, boxCollider.size.z);
+                if (pointsList.Count != 0) {    // user pressed trigger button, but somehow it didn^t register any points
+                    boxCollider.center = new Vector3(boxCollider.center.x, 0.03f, boxCollider.center.z);
+                    boxCollider.size = new Vector3(boxCollider.size.x, 0.05f, boxCollider.size.z);
 
-                if (GPC.isBackSpaceOrSpace(pointsList, KH.backSpaceHitbox, KH.spaceHitbox) == -1) {
-                    int count = lastInputWord.Length;
-                    if (count > 1) {
-                        for (int i = 0; i <= count; i++) {
+                    if (GPC.isBackSpaceOrSpace(pointsList, KH.backSpaceHitbox, KH.spaceHitbox) == -1) {
+                        int count = lastInputWord.Length;
+                        if (count > 1) {
+                            for (int i = 0; i <= count; i++) {
+                                text.text = text.text.Substring(0, text.text.Length - 1);
+                                queryInput = queryInput.Substring(0, queryInput.Length - 1);
+                                // TODO invoke backspace
+                                if (queryInput == "") {
+                                    break;
+                                }
+                            }
+                            lastInputWord = "";
+                        } else {
                             text.text = text.text.Substring(0, text.text.Length - 1);
                             queryInput = queryInput.Substring(0, queryInput.Length - 1);
                             // TODO invoke backspace
-                            if (queryInput == "") {
-                                break;
-                            }
                         }
-                        lastInputWord = "";
+                        for (int i = 0; i < 4; i++) {
+                            chooseObjects.transform.GetChild(i).gameObject.SetActive(false);
+                        }
+                    } else if (GPC.isBackSpaceOrSpace(pointsList, KH.backSpaceHitbox, KH.spaceHitbox) == 1) {
+                        text.text += " ";
+                        queryInput += " ";
+                        print("WHY TF AM I HERE?????????");
+                        // TODO: invoke inputtext with " "
                     } else {
-                        text.text = text.text.Substring(0, text.text.Length - 1);
-                        queryInput = queryInput.Substring(0, queryInput.Length - 1);
-                        // TODO invoke backspace
+                        GPC.calcBestWords(pointsList, 20, FH.getLocationWordsPointsDict(), FH.getNormalizedWordsPointsDict(), KH.delta, KH.keyRadius);
                     }
-                    for (int i = 0; i < 4; i++) {
-                        chooseObjects.transform.GetChild(i).gameObject.SetActive(false);
-                    }
-                } else if (GPC.isBackSpaceOrSpace(pointsList, KH.backSpaceHitbox, KH.spaceHitbox) == 1) {
-                    text.text += " ";
-                    queryInput += " ";
-                    // TODO: invoke inputtext with " "
-                } else {
-                    GPC.calcBestWords(pointsList, 20, FH.getLocationWordsPointsDict(), FH.getNormalizedWordsPointsDict(), KH.delta, KH.keyRadius);
+                    print("TIME NEEDED: " + (Time.realtimeSinceStartup - startTime));
+                    notEnded = false;
                 }
-                print("TIME NEEDED: " + (Time.realtimeSinceStartup - startTime));
-                notEnded = false;
             } else if (GPC.sortedDict != null) {
                 for (int i = 0; i < 4; i++) {
                     chooseObjects.transform.GetChild(i).gameObject.SetActive(false);
                 }
                 int bestWordsDictLength = GPC.sortedDict.Count;
                 if (bestWordsDictLength != 0) {
+                    print("THIS WAS THE MOST PROBABLE WORD: " + GPC.sortedDict[bestWordsDictLength - 1] +" YES IT IS INDEED");
                     if (isAddingNewWord) {  // putting text into textfield from keyboard
                         text.text += GPC.sortedDict[bestWordsDictLength - 1];
                         queryInput += GPC.sortedDict[bestWordsDictLength - 1];
@@ -356,6 +362,8 @@ namespace WordGestureKeyboard {
                     foreach (Transform child in this.transform) {
                         child.GetComponent<BoxCollider>().enabled = true;
                     }
+                    lastInputWord = ""; // for now, maybe changes, if everything with the query inputfield works, and text field is for addWordMode only
+                    text.text = "";
                 } else {
                     optionObjects.transform.GetChild(2).GetComponent<MeshRenderer>().material = whiteMat;
                     addKey.SetActive(false);
@@ -401,6 +409,7 @@ namespace WordGestureKeyboard {
             FH.layout = layout;
             KH.createKeyboardOverlay(layout);
             FH.loadWordGraphs(layout);
+            KH.checkForSpaceAndBackspace(FH.getLayoutKeys(), layout);
             updateOptionPositions();
         }
 
@@ -445,7 +454,7 @@ namespace WordGestureKeyboard {
             if (b) {
                 transform.GetComponent<MeshRenderer>().material = keyboardHoverMat;
             } else if (!b && !isWriting) {  // don't want to make keyboard write when interacting with in in sense of writing on it
-                transform.GetComponent<MeshRenderer>().material = whiteMat;
+                transform.GetComponent<MeshRenderer>().material = keyboardMat;
             }
         }
 

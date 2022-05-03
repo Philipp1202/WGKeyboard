@@ -86,7 +86,7 @@ namespace WordGestureKeyboard {
         /// </summary>
         /// <param name="newWord">New word that should be added to the dicitonary.</param>
         public void addNewWordToDict(string newWord, GraphPointsCalculator GPC) {
-            if (newWord.Length != 0) {
+            if (newWord.Length != 0 && !newWord.Contains(" ")) {
                 string path = "Packages/com.unibas.wgkeyboard/Assets/10000_english_words.txt";
                 StreamReader sr = new StreamReader(path);
                 bool isIn = false;
@@ -103,14 +103,10 @@ namespace WordGestureKeyboard {
                         break;
                     }
                 }
-                Debug.Log("FIRST TIME: " + (Time.realtimeSinceStartup - starttime));
-                starttime = Time.realtimeSinceStartup;
                 
                 if (wordsInLexicon.Contains(newWord)) {
                     isIn = true;
                 }
-
-                Debug.Log("SECOND TIME: " + (Time.realtimeSinceStartup - starttime));
 
                 sr.Close();
                 if (!isIn) {    // word to be added to the lexicon is new and not already in it
@@ -268,7 +264,7 @@ namespace WordGestureKeyboard {
             int i = 0;
             while (true) {
                 line = sr.ReadLine();
-                if (i < 5) {    // skip first 5 lines, because they just explain the format to be used
+                if (i < 6) {    // skip first 6 lines, because they just explain the format to be used
                     i++;
                     continue;
                 }
