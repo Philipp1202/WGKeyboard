@@ -37,13 +37,13 @@ namespace WordGestureKeyboard {
             for (int i = 0; i < steps; i++) {
                 alpha[i] = Mathf.Abs((1f / steps) * (steps / 2f) - (1f / steps) * i);
                 alpha[i] += 10;
-                Debug.Log("PREALHA: " + alpha[i]);
+                //Debug.Log("PREALHA: " + alpha[i]);
             }
             float sum = alpha.Sum();
-            Debug.Log(sum);
+            //Debug.Log(sum);
             for (int i = 0; i < steps; i++) {
                 alpha[i] = alpha[i] / sum;
-                Debug.Log("ALPHA: " + alpha[i]);
+                //Debug.Log("ALPHA: " + alpha[i]);
             }
 
             foreach (var word in locationWordsPointDict) {
@@ -83,10 +83,10 @@ namespace WordGestureKeyboard {
                     }
                 }
                 if (word.Key == "pink" || word.Key == "pork") {
-                    Debug.Log("LAST LOCATIONTEST WITH ALPHA: " + word.Key + ", " + cost);
+                   //Debug.Log("LAST LOCATIONTEST WITH ALPHA: " + word.Key + ", " + cost);
                 }
 
-                Debug.Log("locpointcost: " + cost);
+                //Debug.Log("locpointcost: " + cost);
                 //print("COOOOOOOOOST: " + word.Key + " : " + cost);
                 if (cost < keyRadius * 2) {
                     costList.Add(word.Key, cost);
@@ -106,7 +106,7 @@ namespace WordGestureKeyboard {
             Dictionary<string, float> normalizedCostList = new Dictionary<string, float>();
             int n;
             float cost;
-            Debug.Log("ATLEAST I AM HERE YOU DUMMY " + normalizedWordsPointDict.Count);
+            //Debug.Log("ATLEAST I AM HERE " + normalizedWordsPointDict.Count);
             foreach (var word in normalizedWordsPointDict) {
                 n = 0;
                 cost = 0;
@@ -201,9 +201,9 @@ namespace WordGestureKeyboard {
         /// <param name="keyRadius">Radius of a key of the keyboard.</param>
         async public void calcBestWords(List<Vector2> userInputPoints, int steps, Dictionary<string, List<Vector2>> locationWordsPointsDict, Dictionary<string, List<Vector2>> normalizedWordsPointsDict, float delta, float keyRadius) {
             sortedDict = null;
-            Debug.Log("IIIIII AMMMMMMM HEREEREREREEEE 1");
+            //Debug.Log("IIIIII AMMMMMMM HEREEREREREEEE 1");
             await Task.Run(() => {    // need await, because I couln't access the text of Text in task.run(() => {});
-                Debug.Log("IIIIII AMMMMMMM HEREEREREREEEE 2");
+                //Debug.Log("IIIIII AMMMMMMM HEREEREREREEEE 2");
                 List<Vector2> inputPoints = getWordGraphStepPoint(userInputPoints, steps);
                 for (int i = 0; i < inputPoints.Count; i++) {
                     //               print(inputPoints[i]);
@@ -502,15 +502,15 @@ namespace WordGestureKeyboard {
         Dictionary<string, List<Vector2>>[] seKeyPosition(List<Vector2> input, Dictionary<string, List<Vector2>> locWordsPoints, Dictionary<string, List<Vector2>> normWordsPoints, int steps, float keyRadius) {
             Dictionary<string, List<Vector2>> newLocWordsPoints = new Dictionary<string, List<Vector2>>();
             Dictionary<string, List<Vector2>> newNormWordsPoints = new Dictionary<string, List<Vector2>>();
-            Debug.Log("HOW MANY WORDS I CAN CHOOSE FROM?: " + locWordsPoints.Count);
+            //Debug.Log("HOW MANY WORDS I CAN CHOOSE FROM?: " + locWordsPoints.Count);
             foreach (var word in locWordsPoints) {
                 if (word.Key == "pololoop") {
-                    Debug.Log("TEST FOR SEPOSITION: " + input[0] + " : " + word.Value[0] + input[steps - 1] + " : " + word.Value[steps - 1]);
+                    //Debug.Log("TEST FOR SEPOSITION: " + input[0] + " : " + word.Value[0] + input[steps - 1] + " : " + word.Value[steps - 1]);
                 }
                 if ((input[0] - word.Value[0]).magnitude < keyRadius * 2 && (input[steps - 1] - word.Value[steps - 1]).magnitude < keyRadius * 2) {
                     newLocWordsPoints.Add(word.Key, word.Value);
                     newNormWordsPoints.Add(word.Key, normWordsPoints[word.Key]);
-                    Debug.Log("POSSIBLE WORDS: " + word.Key);
+                    //Debug.Log("POSSIBLE WORDS: " + word.Key);
                 }
             }
             //print("LENGTH: " + newLocWordsPoints.Count);

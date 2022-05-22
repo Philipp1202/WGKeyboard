@@ -1,0 +1,20 @@
+36: the force is with you: nr of Backspaces: 4
+37: you are not a jedi yet: nr of Backspaces: 4
+38: an offer you cannot refuse: nr of Backspaces: 4
+39: are you talking to me: nr of Backspaces: 10
+36: the force is with you: nr of Backspaces: 1
+37: you are not a jedi yet: nr of Backspaces: 0
+38: an offer you cannot refuse: nr of Backspaces: 0
+39: are you talking to me: nr of Backspaces: 3
+40: yes you are very smart: nr of Backspaces: 0
+41: all work and no play: nr of Backspaces: 4
+42: hair gel is very greasy: nr of Backspaces: 0
+43: valium in the economy size: nr of Backspaces: 0
+44: the facts get in the way: nr of Backspaces: 7
+45: the dreamers of dreams: nr of Backspaces: 1
+46: did you have a good time: nr of Backspaces: 0
+47: space is a high priority: nr of Backspaces: 0
+48: you are a wonderful example: nr of Backspaces: 0
+49: do not squander your time: nr of Backspaces: 1
+50: do not drink too much: nr of Backspaces: 1
+36: the force is with you: nr of Backspaces: 4

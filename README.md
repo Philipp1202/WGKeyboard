@@ -23,7 +23,6 @@ The paper can be found [here](https://www.researchgate.net/publication/228875756
 
 
 ## classes
-TODO: LIST ALL CLASSES + SHORT TEXT ABOUT WHAT THEY DO
 WGKMain.cs is the main file. It has instances of the other important classes and looks for the userinput.
 FileHanlder.cs is for the handling of files, e.g. reading the layouts file, but also writing new words/ graphpoints into the wordlist/graphfiles, when a new word is being added.
 GraphPointsCalculator.cs is for the calculations considering the graphs needed for SHARK2.

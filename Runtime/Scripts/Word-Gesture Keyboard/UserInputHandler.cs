@@ -49,7 +49,7 @@ namespace WordGestureKeyboard {
                 float keyboardLength = transform.localScale.x;
                 float keyboardWidth = transform.localScale.y;
                 pointsList.Add(new Vector2((localTransformedPoint[0] + keyboardLength / 2) / keyboardLength, (localTransformedPoint[2] + keyboardWidth / 2) / keyboardLength)); // adding magnitudes, such that lower left corner of "coordinate system" is at (0/0) and not middle point at (0/0)
-                Debug.Log("PONT: " + pointsList[i]);
+                //Debug.Log("PONT: " + pointsList[i]);
             }
             pointCount = 0;
             LR.positionCount = 0;
@@ -72,9 +72,9 @@ namespace WordGestureKeyboard {
                 startPoint = LR.GetPosition(pointCount - 2);
                 middlePoint = LR.GetPosition(pointCount - 1);
             }
-            Debug.Log("BEFORE ASYNC");
+            //Debug.Log("BEFORE ASYNC");
             await Task.Run(() => {
-                Debug.Log("IN ASYNC");
+                //Debug.Log("IN ASYNC");
                 float minAngle = 10;
                 float minSegmentDist = 0.015f;
                 if (hitPoint != new Vector3(1000, 1000, 1000)) { // check if point needs to get set or if it can be ignored

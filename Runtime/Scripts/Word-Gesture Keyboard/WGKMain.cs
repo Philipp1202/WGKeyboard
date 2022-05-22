@@ -13,10 +13,14 @@ using System.Threading.Tasks;
 namespace WordGestureKeyboard {
     public class WGKMain : MonoBehaviour {
 
+        public Text userInputText;  // remove, only for evaluation
+        EvaluationManager evaluationManager; // remove, only for evaluation
+
         [Serializable]
         public class TextInputEvent : UnityEvent<string> {
         }
 
+        public AudioSource wordInputSound;
         public GameObject Key;
         public Material whiteMat;
         public Material grayMat;
@@ -59,6 +63,7 @@ namespace WordGestureKeyboard {
 
         // Start is called before the first frame update
         void Start() {
+            evaluationManager = GameObject.Find("EvaluationPhraseHolder").GetComponent<EvaluationManager>();
 
             startTime = Time.realtimeSinceStartup;
 
@@ -205,7 +210,7 @@ namespace WordGestureKeyboard {
             if (isWriting) {
                 if (!UIH.getIsSampling()) {
                     Vector3 hitPoint = UIH.getHitPoint(col.position, transform.forward);
-                    print(hitPoint);
+                    //print(hitPoint);
                     if (hitPoint != new Vector3(1000, 1000, 1000)) {
                         UIH.samplePoints(hitPoint);
                     }
@@ -219,11 +224,14 @@ namespace WordGestureKeyboard {
                     boxCollider.size = new Vector3(boxCollider.size.x, 0.05f, boxCollider.size.z);
 
                     if (GPC.isBackSpaceOrSpace(pointsList, KH.backSpaceHitbox, KH.spaceHitbox) == -1) {
+                        wordInputSound.Play();
                         int count = lastInputWord.Length;
                         if (count > 1) {
                             for (int i = 0; i <= count; i++) {
                                 text.text = text.text.Substring(0, text.text.Length - 1);
                                 queryInput = queryInput.Substring(0, queryInput.Length - 1);
+
+                                userInputText.text = userInputText.text.Substring(0, userInputText.text.Length - 1);
                                 // TODO invoke backspace
                                 if (queryInput == "") {
                                     break;
@@ -233,20 +241,25 @@ namespace WordGestureKeyboard {
                         } else {
                             text.text = text.text.Substring(0, text.text.Length - 1);
                             queryInput = queryInput.Substring(0, queryInput.Length - 1);
+
+                            userInputText.text = userInputText.text.Substring(0, userInputText.text.Length - 1);
                             // TODO invoke backspace
                         }
+                        evaluationManager.nrBackspaces += 1;
                         for (int i = 0; i < 4; i++) {
                             chooseObjects.transform.GetChild(i).gameObject.SetActive(false);
                         }
                     } else if (GPC.isBackSpaceOrSpace(pointsList, KH.backSpaceHitbox, KH.spaceHitbox) == 1) {
+                        wordInputSound.Play();
                         text.text += " ";
                         queryInput += " ";
-                        print("WHY TF AM I HERE?????????");
+
+                        userInputText.text += " ";
                         // TODO: invoke inputtext with " "
                     } else {
                         GPC.calcBestWords(pointsList, 20, FH.getLocationWordsPointsDict(), FH.getNormalizedWordsPointsDict(), KH.delta, KH.keyRadius);
                     }
-                    print("TIME NEEDED: " + (Time.realtimeSinceStartup - startTime));
+                    //print("TIME NEEDED: " + (Time.realtimeSinceStartup - startTime));
                     notEnded = false;
                 }
             } else if (GPC.sortedDict != null) {
@@ -255,10 +268,13 @@ namespace WordGestureKeyboard {
                 }
                 int bestWordsDictLength = GPC.sortedDict.Count;
                 if (bestWordsDictLength != 0) {
-                    print("THIS WAS THE MOST PROBABLE WORD: " + GPC.sortedDict[bestWordsDictLength - 1] +" YES IT IS INDEED");
+                    wordInputSound.Play();
+                    //print("THIS WAS THE MOST PROBABLE WORD: " + GPC.sortedDict[bestWordsDictLength - 1] +" YES IT IS INDEED");
                     if (isAddingNewWord) {  // putting text into textfield from keyboard
                         text.text += GPC.sortedDict[bestWordsDictLength - 1];
                         queryInput += GPC.sortedDict[bestWordsDictLength - 1];
+
+                        userInputText.text += GPC.sortedDict[bestWordsDictLength - 1];
                     } else {    // putting text into inputfield of query
                         if (GPC.sortedDict[bestWordsDictLength - 1].Length == 1) { //single letter
 
@@ -266,6 +282,8 @@ namespace WordGestureKeyboard {
                             text.text += GPC.sortedDict[bestWordsDictLength - 1];
                             queryInput += GPC.sortedDict[bestWordsDictLength - 1];
                             lastInputWord = GPC.sortedDict[bestWordsDictLength - 1];
+
+                            userInputText.text += GPC.sortedDict[bestWordsDictLength - 1];
                         } else {    // not single letter but word
                             for (int i = 0; i < bestWordsDictLength - 1; i++) {
                                 if (i > 3) {    // maximum of 4 best words apart from top word
@@ -279,6 +297,8 @@ namespace WordGestureKeyboard {
                             text.text += GPC.sortedDict[bestWordsDictLength - 1] + " ";
                             queryInput += GPC.sortedDict[bestWordsDictLength - 1] + " ";
                             lastInputWord = GPC.sortedDict[bestWordsDictLength - 1];
+
+                            userInputText.text += GPC.sortedDict[bestWordsDictLength - 1] + " ";
                         }
                     }
                 } else {
@@ -291,7 +311,7 @@ namespace WordGestureKeyboard {
         void updateOptionPositions() {
             optionsKey.transform.localPosition = new Vector3(0.5f * KH.keyboardLength + optionsKey.transform.localScale.x * 0.5f + 0.005f, 0, transform.localScale.y * 0.5f - optionsKey.transform.localScale.z * 0.5f);
             optionObjects.transform.localPosition = new Vector3(0.5f * KH.keyboardLength + optionObjects.transform.localScale.x * 0.5f + 0.005f, optionObjects.transform.localPosition.y, optionsKey.transform.localPosition.z + (MathF.Sin((90 - 360 + optionObjects.transform.localEulerAngles.x) * Mathf.PI / 180)) * (optionObjects.transform.localScale.z * 3));//optionObjects.transform.localPosition.z + transform.localScale.y * 0.5f - optionsKey.transform.localScale.z * 0.5f);
-            print("beta: " + (MathF.Sin((90 - 360 + optionObjects.transform.localEulerAngles.x) * Mathf.PI / 180)) + " term " + (optionObjects.transform.localScale.z * 3));
+            //print("beta: " + (MathF.Sin((90 - 360 + optionObjects.transform.localEulerAngles.x) * Mathf.PI / 180)) + " term " + (optionObjects.transform.localScale.z * 3));
             addKey.transform.localPosition = new Vector3(0.5f * KH.keyboardLength + addKey.transform.localScale.x * 0.5f + 0.005f, 0, -transform.localScale.y * 0.5f + addKey.transform.localScale.z);
             //layoutsObjects.transform.localPosition = new Vector3(0.5f * KH.keyboardLength + layoutsObjects.transform.localScale.x * 0.5f + 0.0075f + optionObjects.transform.localScale.x, optionObjects.transform.localPosition.y, optionObjects.transform.localPosition.z);
             chooseObjects.transform.localPosition = new Vector3(0, chooseObjects.transform.localPosition.y, transform.localScale.y * 0.5f + 0.035f);
@@ -364,6 +384,8 @@ namespace WordGestureKeyboard {
                     }
                     lastInputWord = ""; // for now, maybe changes, if everything with the query inputfield works, and text field is for addWordMode only
                     text.text = "";
+
+                    userInputText.text = "";
                 } else {
                     optionObjects.transform.GetChild(2).GetComponent<MeshRenderer>().material = whiteMat;
                     addKey.SetActive(false);
@@ -445,6 +467,8 @@ namespace WordGestureKeyboard {
                 string newWord = text.text; // maybe needs to be changed, but maybe let it be with Text Object for adding a word -> wouldn't interfere with input in query
                 FH.addNewWordToDict(newWord, GPC);
                 text.text = "";
+
+                userInputText.text = "";
             } else {
                 addKey.GetComponent<MeshRenderer>().material = whiteMat;
             }
@@ -459,9 +483,11 @@ namespace WordGestureKeyboard {
         }
 
         public void changeWord(Text t, string word) {
+            wordInputSound.Play();
             int count = lastInputWord.Length;
             for (int i = 0; i <= count; i++) {
                 text.text = text.text.Substring(0, text.text.Length - 1);
+                userInputText.text = userInputText.text.Substring(0, userInputText.text.Length - 1);
                 if (text.text == "") {
                     break;
                 }
@@ -472,6 +498,8 @@ namespace WordGestureKeyboard {
             text.text += word + " ";
             queryInput += word + " ";
             lastInputWord = word;
+
+            userInputText.text += word + " ";
         }
     }
 }
