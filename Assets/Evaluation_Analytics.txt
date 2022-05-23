@@ -18,3 +18,18 @@
 49: do not squander your time: nr of Backspaces: 1
 50: do not drink too much: nr of Backspaces: 1
 36: the force is with you: nr of Backspaces: 4
+51: take a coffee break: nr of Backspaces: 20
+55: the living is easy: nr of Backspaces: 23
+59: but the levee was dry: nr of Backspaces: 9
+60: i took the rover from the shop: nr of Backspaces: 24
+61: movie about a nutty professor: nr of Backspaces: 1
+64: i am going to a music lesson: nr of Backspaces: 2
+66: soon we will return from the city: nr of Backspaces: 34
+67: i am wearing a tie and a jacket: nr of Backspaces: 9
+68: the quick brown fox jumped: nr of Backspaces: 20
+69: all together in one big pile: nr of Backspaces: 3
+72: i am allergic to bees and peanuts: nr of Backspaces: 14
+73: he is still on our team: nr of Backspaces: 1
+75: my preferred treat is chocolate: nr of Backspaces: 4
+76: the king sends you to the tower: nr of Backspaces: 7
+79: goldilocks and the three bears: nr of Backspaces: 9
