@@ -150,6 +150,7 @@ namespace WordGestureKeyboard {
                 nrWords += temp.Length;
                 nrWordsPhrase = temp.Length;
                 print(nrWords);
+                nrBackspaces = 0;
             } else {
                 startButton.GetComponent<MeshRenderer>().material = grayMat;
             }
