@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="ChangeListManager">
+    <list default="true" id="c932b7f4-7c96-4e9e-b2e5-9d9f7bd56ea2" name="Changes" comment="">
+      <change beforePath="$PROJECT_DIR$/10000_english_words.txt" beforeDir="false" afterPath="$PROJECT_DIR$/10000_english_words.txt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/sokgraph_alphabet.txt" beforeDir="false" afterPath="$PROJECT_DIR$/sokgraph_alphabet.txt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/sokgraph_qwerty.txt" beforeDir="false" afterPath="$PROJECT_DIR$/sokgraph_qwerty.txt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/sokgraph_qwertz.txt" beforeDir="false" afterPath="$PROJECT_DIR$/sokgraph_qwertz.txt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/sokgraph_qwertz2.txt" beforeDir="false" afterPath="$PROJECT_DIR$/sokgraph_qwertz2.txt" afterDir="false" />
+    </list>
+    <option name="SHOW_DIALOG" value="false" />
+    <option name="HIGHLIGHT_CONFLICTS" value="true" />
+    <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
+    <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="Git.Settings">
+    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$/.." />
+  </component>
+  <component name="ProjectId" id="29EqnUAkxMzaFgF5S5brE99cxqo" />
+  <component name="ProjectLevelVcsManager" settingsEditedManually="true" />
+  <component name="ProjectViewState">
+    <option name="hideEmptyMiddlePackages" value="true" />
+    <option name="showLibraryContents" value="true" />
+  </component>
+  <component name="PropertiesComponent">
+    <property name="RunOnceActivity.OpenProjectViewOnStart" value="true" />
+    <property name="RunOnceActivity.ShowReadmeOnStart" value="true" />
+    <property name="WebServerToolWindowFactoryState" value="false" />
+    <property name="settings.editor.selected.configurable" value="configurable.group.appearance" />
+  </component>
+  <component name="SpellCheckerSettings" RuntimeDictionaries="0" Folders="0" CustomDictionaries="0" DefaultDictionary="application-level" UseSingleDictionary="true" transferred="true" />
+  <component name="TaskManager">
+    <task active="true" id="Default" summary="Default task">
+      <created>1652688761519</created>
+      <option name="number" value="Default" />
+      <option name="presentableId" value="Default" />
+      <updated>1652688761519</updated>
+      <workItem from="1652688761762" duration="3000" />
+    </task>
+    <servers />
+  </component>
+  <component name="UnityCheckinConfiguration" checkUnsavedScenes="true" />
+  <component name="UnityUnitTestConfiguration" currentTestLauncher="NUnit" />
+  <component name="VcsManagerConfiguration">
+    <option name="CLEAR_INITIAL_COMMIT_MESSAGE" value="true" />
+  </component>
+</project>

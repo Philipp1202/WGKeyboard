@@ -90,6 +90,7 @@ namespace WordGestureKeyboard {
                         print("NUMBER OF CHARACTERS: " + nrCharacters);
                         print("NUMBER OF GESTURES: " + nrWords);
                         hasStarted = false;
+			writeStatistics("Nr of characters: " + nrCharacters + " : Nr of words: " + nrWords + " : Time: " + (Time.realtimeSinceStartup - startTime).ToString());
                     } else {
                         nrPhrase += 1;
                         position += 1;
