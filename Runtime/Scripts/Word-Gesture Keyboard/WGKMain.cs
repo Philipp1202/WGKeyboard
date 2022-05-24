@@ -239,11 +239,14 @@ namespace WordGestureKeyboard {
                             }
                             lastInputWord = "";
                         } else {
-                            text.text = text.text.Substring(0, text.text.Length - 1);
-                            queryInput = queryInput.Substring(0, queryInput.Length - 1);
+                            if (queryInput != "") {
+                                text.text = text.text.Substring(0, text.text.Length - 1);
+                                queryInput = queryInput.Substring(0, queryInput.Length - 1);
 
-                            userInputText.text = userInputText.text.Substring(0, userInputText.text.Length - 1);
-                            // TODO invoke backspace
+                                userInputText.text = userInputText.text.Substring(0, userInputText.text.Length - 1);
+                                // TODO invoke backspace
+                            }
+                            lastInputWord = "";
                         }
                         evaluationManager.nrBackspaces += 1;
                         for (int i = 0; i < 4; i++) {

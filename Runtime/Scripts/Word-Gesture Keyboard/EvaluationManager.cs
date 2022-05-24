@@ -23,9 +23,11 @@ namespace WordGestureKeyboard {
         float wordsPerMinute;
         float gesturesPerMinute;
         float startTime;
-        float endTime;
-        int nrWords = 0;
-        int nrCharacters = 0;
+        float phraseStartTime;
+        float nrWords = 0;
+        float nrWordsPhrase = 0;
+        float nrCharacters = 0;
+        float nrCharactersPhrase = 0;
         public int nrBackspaces = 0;
         // Start is called before the first frame update
         void Start() {
@@ -78,7 +80,11 @@ namespace WordGestureKeyboard {
                         print(position.ToString() + ": " + testPhrase.text + ": nr of Backspaces: " + nrBackspaces);
                         nrBackspaces = 0;
                     }
-                    if (nrPhrase >= 14) {
+                    wordsPerMinute = (nrCharactersPhrase / 5) / ((Time.realtimeSinceStartup - phraseStartTime) / 60);
+                    gesturesPerMinute = nrWordsPhrase / ((Time.realtimeSinceStartup - phraseStartTime) / 60);
+                    writeStatistics("PHRASENR: " + position + ", WPM: " + wordsPerMinute.ToString() + ", GMP " + gesturesPerMinute.ToString() + ", TIME: " + (Time.realtimeSinceStartup - phraseStartTime) + ", Nr of characters: " + nrCharactersPhrase + ", Nr of words: " + nrWordsPhrase);
+                    phraseStartTime = Time.realtimeSinceStartup;
+                    if (nrPhrase >= 4) {
                         testPhrase.text = "Thank you for participating!";
                         wordsPerMinute = (nrCharacters / 5) / ((Time.realtimeSinceStartup - startTime) / 60);
                         gesturesPerMinute = nrWords / ((Time.realtimeSinceStartup - startTime) / 60);
@@ -89,8 +95,8 @@ namespace WordGestureKeyboard {
                         print("TIME NEEDED: " + (Time.realtimeSinceStartup - startTime).ToString());
                         print("NUMBER OF CHARACTERS: " + nrCharacters);
                         print("NUMBER OF GESTURES: " + nrWords);
+                        writeStatistics("Nr of characters: " + nrCharacters + " : Nr of words: " + nrWords + " : Time: " + (Time.realtimeSinceStartup - startTime).ToString());
                         hasStarted = false;
-			writeStatistics("Nr of characters: " + nrCharacters + " : Nr of words: " + nrWords + " : Time: " + (Time.realtimeSinceStartup - startTime).ToString());
                     } else {
                         nrPhrase += 1;
                         position += 1;
@@ -101,8 +107,10 @@ namespace WordGestureKeyboard {
                         phraseNumber.text = (nrPhrase + 1).ToString() + " / 15";
                         userPhrase.text = "";
                         nrCharacters += phrases[position].Length;
+                        nrCharactersPhrase = phrases[position].Length;
                         string[] temp = phrases[position].Split(' ');
                         nrWords += temp.Length;
+                        nrWordsPhrase = temp.Length;
                     }
                 }
             }
@@ -131,13 +139,16 @@ namespace WordGestureKeyboard {
                 testPhrase.text = phrases[position];
                 userPhrase.text = "";
                 startTime = Time.realtimeSinceStartup;
+                phraseStartTime = Time.realtimeSinceStartup;
                 startButton.SetActive(false);
 
                 phraseNumber.text = "1 / 15";
                 nrCharacters += phrases[position].Length;
+                nrCharactersPhrase = phrases[position].Length;
                 print(nrCharacters);
                 string[] temp = phrases[position].Split(' ');
                 nrWords += temp.Length;
+                nrWordsPhrase = temp.Length;
                 print(nrWords);
             } else {
                 startButton.GetComponent<MeshRenderer>().material = grayMat;

@@ -136,7 +136,7 @@ namespace WordGestureKeyboard {
             Debug.Log("numkeysonlongestline: " + numKeysOnLongestLine);
             delta = 1 / numKeysOnLongestLine;
             keyRadius = 1 / numKeysOnLongestLine / 2;   // keyradius after transformation of x to length 1
-            transform.localScale = new Vector3(0.05f * numKeysOnLongestLine * keyboardScale, 0.05f * count * keyboardScale, transform.localScale.z); // keyboard gets bigger if more keys on one line, but keys always have the same size
+            transform.localScale = new Vector3(0.05f * numKeysOnLongestLine, 0.05f * count, transform.localScale.z); // keyboard gets bigger if more keys on one line, but keys always have the same size
             keyboardLength = transform.localScale.x;
             keyboardWidth = transform.localScale.y;
             boxCollider.size = new Vector3(keyboardLength, 0.05f, keyboardWidth);
@@ -145,6 +145,7 @@ namespace WordGestureKeyboard {
             float startTime = Time.realtimeSinceStartup;
             Quaternion tempRot = transform.parent.localRotation;
             transform.parent.localRotation = new Quaternion(0, 0, 0, 0);    // set to 0,0,0,0, because otherwise could lead to wrong positions and rotations for keys, when attached to keyboard
+            transform.parent.localScale = new Vector3(1, 1, 1);
             float l = keyboardLength / (numKeysOnLongestLine * 1.1f);
             int y = count - 1;
             foreach (string s in keyList) {
@@ -175,15 +176,16 @@ namespace WordGestureKeyboard {
                     specificKey.transform.localScale = new Vector3(l + (keyRadius * keyboardLength) * (scale - 1) * 2, l, specificKey.transform.localScale.z);
                     offset += offsetSpecial * 2;    // to get all the keys in right position that are behind the special-sized keys
 
-                    // for next 4 lines: didn't have a better idea but to make roation of transform.parent object to 0,0,0 (if it's not 0,0,0, then something strange happens, when setting this.transform as parent
+                    
                     specificKey.transform.SetParent(this.transform);
-
 
                     x += 1;
                 }
                 y -= 1;
             }
+            transform.parent.localScale = new Vector3(keyboardScale, keyboardScale, keyboardScale);
             transform.parent.localRotation = tempRot;
+            
             Debug.Log("KEYBOARD CREATION TIME: " + (Time.realtimeSinceStartup - startTime));
         }
 
