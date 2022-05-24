@@ -84,7 +84,7 @@ namespace WordGestureKeyboard {
                     gesturesPerMinute = nrWordsPhrase / ((Time.realtimeSinceStartup - phraseStartTime) / 60);
                     writeStatistics("PHRASENR: " + position + ", WPM: " + wordsPerMinute.ToString() + ", GMP " + gesturesPerMinute.ToString() + ", TIME: " + (Time.realtimeSinceStartup - phraseStartTime) + ", Nr of characters: " + nrCharactersPhrase + ", Nr of words: " + nrWordsPhrase);
                     phraseStartTime = Time.realtimeSinceStartup;
-                    if (nrPhrase >= 4) {
+                    if (nrPhrase >= 14) {
                         testPhrase.text = "Thank you for participating!";
                         wordsPerMinute = (nrCharacters / 5) / ((Time.realtimeSinceStartup - startTime) / 60);
                         gesturesPerMinute = nrWords / ((Time.realtimeSinceStartup - startTime) / 60);
