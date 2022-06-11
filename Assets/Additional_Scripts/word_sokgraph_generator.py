@@ -57,14 +57,15 @@ class wordSokgraphGenerator:
                     x += 2
                     continue
                 #print(letter, " : ", y)
-                letterPos[letter] = np.array([x, y])
+                letterPos[letter.lower()] = np.array([x, y])
                 x += 1
+        print("LETTERPOS: ", letterPos)
         return letterPos
         
     # returns a list of points for the given word (points where the "pressed" letters lie)
     def getPointsForWord(self, word, letterPos):
         points = []
-        for letter in word:
+        for letter in word.lower():
             points.append(letterPos.get(letter))    
         return points
         #letterPos = {}
@@ -261,7 +262,7 @@ class wordSokgraphGenerator:
         for i in range(0, len(self.layoutKeys[self.layout][1])):
             for character in self.layoutKeys[self.layout][1][i]:
                 if character != " " and character != "<":
-                    availableChars += character
+                    availableChars += character.lower()
         self.availableChars = availableChars
         print(self.availableChars)
 

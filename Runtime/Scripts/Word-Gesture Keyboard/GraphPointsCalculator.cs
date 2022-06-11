@@ -199,7 +199,7 @@ namespace WordGestureKeyboard {
         /// <param name="normalizedWordsPointsDict">Dict of words and their corresponding normalized sokgraph points.</param>
         /// <param name="delta">Parameter for algorithm, to determine if words should be discarded early or not. If smaller, more words get dicarded early on.</param>
         /// <param name="keyRadius">Radius of a key of the keyboard.</param>
-        async public void calcBestWords(List<Vector2> userInputPoints, int steps, Dictionary<string, List<Vector2>> locationWordsPointsDict, Dictionary<string, List<Vector2>> normalizedWordsPointsDict, float delta, float keyRadius) {
+        async public void calcBestWords(List<Vector2> userInputPoints, int steps, Dictionary<string, List<Vector2>> locationWordsPointsDict, Dictionary<string, List<Vector2>> normalizedWordsPointsDict, float delta, float keyRadius, Dictionary<string, int> wordRanking) {
             sortedDict = null;
             //Debug.Log("IIIIII AMMMMMMM HEREEREREREEEE 1");
             await Task.Run(() => {    // need await, because I couln't access the text of Text in task.run(() => {});
@@ -270,10 +270,38 @@ namespace WordGestureKeyboard {
                     finalCosts.Add(word, tempCosts2[q]);
                     q += 1;
                 }
+                foreach (var k in finalCosts.Keys) {
+                    Debug.Log(k + ": " + finalCosts[k]);
+                }
 
                 IOrderedEnumerable<KeyValuePair<string, float>> sorted = null;
-                sorted = from entry in finalCosts orderby entry.Value ascending select entry;
-                sortedDict = sorted.Select(pair => pair.Key).ToList();  // only take words into a list, not their probabilities
+                sorted = from entry in finalCosts orderby entry.Value descending select entry;
+
+                List<KeyValuePair<string, float>> betterSortedDict;
+                List<string> sortedList;
+
+                betterSortedDict = sorted.ToList();
+                sortedList = sorted.Select(pair => pair.Key).ToList();  // only take words into a list, not their probabilities
+                float highestValue = betterSortedDict[0].Value;
+                Dictionary<string, int> bestMatches = new Dictionary<string, int>();
+                foreach (var pair in betterSortedDict) {
+                    if (pair.Value == highestValue) {
+                        bestMatches[pair.Key] = wordRanking[pair.Key];
+                    }
+                }
+                IOrderedEnumerable<KeyValuePair<string, int>> sortedBestMatches = null;
+                sortedBestMatches = from entry in bestMatches orderby entry.Value ascending select entry;
+
+                int p = 0;
+                foreach (var pair in sortedBestMatches) {
+                    sortedList[p] = pair.Key;
+                    p++;
+                }
+                sortedDict = sortedList;
+
+                foreach (var k in sortedDict) {
+                    Debug.Log(k);
+                }
             });
         }
 

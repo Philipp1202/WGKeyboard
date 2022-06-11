@@ -12,11 +12,13 @@ namespace WordGestureKeyboard {
         public string layout;
         public List<string> layouts;
         HashSet<string> wordsInLexicon = new HashSet<string>();
+        public Dictionary<string, int> wordRanking = new Dictionary<string, int>();
         public Dictionary<string, Tuple<List<float>, List<string>>> layoutKeys;
 
         public FileHandler(string layout) {
             this.layout = layout;
-            wordsInLexicon = getAllWordsInLexicon(layout);
+            wordsInLexicon = getAllWordsInLexicon().Item1;
+            wordRanking = getAllWordsInLexicon().Item2;
         }
 
         /// <summary>
@@ -103,7 +105,6 @@ namespace WordGestureKeyboard {
                         break;
                     }
                 }
-                
                 if (wordsInLexicon.Contains(newWord)) {
                     isIn = true;
                 }
@@ -147,6 +148,8 @@ namespace WordGestureKeyboard {
                             locationWordsPointsDict.Add(newWord, wordLocationPoints);
                         }
                     }
+                    wordsInLexicon.Add(newWord);
+                    wordRanking[newWord] = 20000;
                 }
             }
 
@@ -157,7 +160,7 @@ namespace WordGestureKeyboard {
             HashSet<string> allCharacters = new HashSet<string>();
             foreach (string layout in layouts) {
                 foreach (string l in layoutKeys[layout].Item2) {
-                    foreach (char character in l) {
+                    foreach (char character in l.ToLower()) {
                         if (!allCharacters.Contains(character.ToString())) {
                             allCharacters.Add(character.ToString());
                         }
@@ -311,19 +314,24 @@ namespace WordGestureKeyboard {
             }
         }
 
-        HashSet<string> getAllWordsInLexicon(string layout) {
+        Tuple<HashSet<string>, Dictionary<string, int>> getAllWordsInLexicon() {
             HashSet<string> words = new HashSet<string>();
+            Dictionary<string, int> wordsWithRank = new Dictionary<string, int>();
             string line;
-            string path = "Packages/com.unibas.wgkeyboard/Assets/sokgraph_" + layout + ".txt";
+            string path = "Packages/com.unibas.wgkeyboard/Assets/10000_english_words.txt";
             StreamReader sr = new StreamReader(path);
+            int rank = 0;
             while (true) {
                 line = sr.ReadLine();
-                words.Add(line);
                 if (line == null) {
                     break;
                 }
+                words.Add(line);
+                wordsWithRank[line] = rank;
+                rank++;
             }
-            return words;
+            Tuple<HashSet<string>, Dictionary<string, int>> wordReturn = new Tuple<HashSet<string>, Dictionary<string, int>>(words, wordsWithRank);
+            return wordReturn;
         }
 
         public List<string> getLayouts() {

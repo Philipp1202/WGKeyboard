@@ -239,7 +239,7 @@ namespace WordGestureKeyboard {
                             }
                             lastInputWord = "";
                         } else {
-                            if (queryInput != "") {
+                            if (queryInput != "" && text.text != "") {
                                 text.text = text.text.Substring(0, text.text.Length - 1);
                                 queryInput = queryInput.Substring(0, queryInput.Length - 1);
 
@@ -259,8 +259,12 @@ namespace WordGestureKeyboard {
 
                         userInputText.text += " ";
                         // TODO: invoke inputtext with " "
+                        lastInputWord = "";
+                        for (int i = 0; i < 4; i++) {
+                            chooseObjects.transform.GetChild(i).gameObject.SetActive(false);
+                        }
                     } else {
-                        GPC.calcBestWords(pointsList, 20, FH.getLocationWordsPointsDict(), FH.getNormalizedWordsPointsDict(), KH.delta, KH.keyRadius);
+                        GPC.calcBestWords(pointsList, 20, FH.getLocationWordsPointsDict(), FH.getNormalizedWordsPointsDict(), KH.delta, KH.keyRadius, FH.wordRanking);
                     }
                     //print("TIME NEEDED: " + (Time.realtimeSinceStartup - startTime));
                     notEnded = false;
@@ -274,34 +278,34 @@ namespace WordGestureKeyboard {
                     wordInputSound.Play();
                     //print("THIS WAS THE MOST PROBABLE WORD: " + GPC.sortedDict[bestWordsDictLength - 1] +" YES IT IS INDEED");
                     if (isAddingNewWord) {  // putting text into textfield from keyboard
-                        text.text += GPC.sortedDict[bestWordsDictLength - 1];
-                        queryInput += GPC.sortedDict[bestWordsDictLength - 1];
+                        text.text += GPC.sortedDict[0];
+                        queryInput += GPC.sortedDict[0];
 
-                        userInputText.text += GPC.sortedDict[bestWordsDictLength - 1];
+                        userInputText.text += GPC.sortedDict[0];
                     } else {    // putting text into inputfield of query
-                        if (GPC.sortedDict[bestWordsDictLength - 1].Length == 1) { //single letter
+                        if (GPC.sortedDict[0].Length == 1) { //single letter
 
-                            result.Invoke(GPC.sortedDict[bestWordsDictLength - 1]);
-                            text.text += GPC.sortedDict[bestWordsDictLength - 1];
-                            queryInput += GPC.sortedDict[bestWordsDictLength - 1];
-                            lastInputWord = GPC.sortedDict[bestWordsDictLength - 1];
+                            result.Invoke(GPC.sortedDict[0]);
+                            text.text += GPC.sortedDict[0];
+                            queryInput += GPC.sortedDict[0];
+                            lastInputWord = GPC.sortedDict[0];
 
-                            userInputText.text += GPC.sortedDict[bestWordsDictLength - 1];
+                            userInputText.text += GPC.sortedDict[0];
                         } else {    // not single letter but word
                             for (int i = 0; i < bestWordsDictLength - 1; i++) {
                                 if (i > 3) {    // maximum of 4 best words apart from top word
                                     break;
                                 }
-                                chooseObjects.transform.GetChild(i).GetChild(0).GetChild(0).GetComponent<Text>().text = GPC.sortedDict[bestWordsDictLength - 2 - i];
+                                chooseObjects.transform.GetChild(i).GetChild(0).GetChild(0).GetComponent<Text>().text = GPC.sortedDict[i + 1];
                                 chooseObjects.transform.GetChild(i).gameObject.SetActive(true);
                             }
 
-                            result.Invoke(GPC.sortedDict[bestWordsDictLength - 1] + " ");
-                            text.text += GPC.sortedDict[bestWordsDictLength - 1] + " ";
-                            queryInput += GPC.sortedDict[bestWordsDictLength - 1] + " ";
-                            lastInputWord = GPC.sortedDict[bestWordsDictLength - 1];
+                            result.Invoke(GPC.sortedDict[0] + " ");
+                            text.text += GPC.sortedDict[0] + " ";
+                            queryInput += GPC.sortedDict[0] + " ";
+                            lastInputWord = GPC.sortedDict[0];
 
-                            userInputText.text += GPC.sortedDict[bestWordsDictLength - 1] + " ";
+                            userInputText.text += GPC.sortedDict[0] + " ";
                         }
                     }
                 } else {
@@ -319,6 +323,10 @@ namespace WordGestureKeyboard {
             //layoutsObjects.transform.localPosition = new Vector3(0.5f * KH.keyboardLength + layoutsObjects.transform.localScale.x * 0.5f + 0.0075f + optionObjects.transform.localScale.x, optionObjects.transform.localPosition.y, optionObjects.transform.localPosition.z);
             chooseObjects.transform.localPosition = new Vector3(0, chooseObjects.transform.localPosition.y, transform.localScale.y * 0.5f + 0.035f);
             //scaleObjects.transform.localPosition = new Vector3(0.5f * KH.keyboardLength + layoutsObjects.transform.localScale.x * 0.5f + 0.0075f + optionObjects.transform.localScale.x, scaleObjects.transform.localPosition.y, scaleObjects.transform.localPosition.z);
+            UnityEngine.Debug.Log("addPos: " + addKey.transform.localPosition + ", scalePos: " + addKey.transform.localScale + ", optsPos: " + optionsKey.transform.localPosition + ", optsScale" + optionsKey.transform.localScale);
+            if (((addKey.transform.localPosition + (addKey.transform.localScale * 0.5f)) - (optionsKey.transform.localPosition - (optionsKey.transform.localScale * 0.5f))).z >= 0) {
+                addKey.transform.localPosition = new Vector3(addKey.transform.localPosition.x, addKey.transform.localPosition.y, optionsKey.transform.localPosition.z - (optionsKey.transform.localScale.z * 0.5f) - (addKey.transform.localScale.z * 0.5f) - 0.02f);
+            }
         }
 
         public void scalePlus(Transform t, bool b) {
@@ -359,6 +367,9 @@ namespace WordGestureKeyboard {
                 if (!isOptionsOpen) {
                     optionsKey.GetComponent<MeshRenderer>().material = grayMat;
                     optionObjects.SetActive(true);
+                    for (int i = 0; i < 4; i++) {
+                        chooseObjects.transform.GetChild(i).gameObject.SetActive(false);
+                    }
                 } else {
                     optionsKey.GetComponent<MeshRenderer>().material = whiteMat;
                     optionObjects.SetActive(false);
@@ -389,6 +400,10 @@ namespace WordGestureKeyboard {
                     text.text = "";
 
                     userInputText.text = "";
+
+                    for (int i = 0; i < 4; i++) {
+                        chooseObjects.transform.GetChild(i).gameObject.SetActive(false);
+                    }
                 } else {
                     optionObjects.transform.GetChild(2).GetComponent<MeshRenderer>().material = whiteMat;
                     addKey.SetActive(false);
