@@ -36,6 +36,8 @@ namespace WordGestureKeyboard {
         public GameObject layoutsObjects;
         public GameObject scaleObjects;
 
+        public GameObject previewWord;
+
         List<GameObject> subOptionButtons = new List<GameObject>();
 
         BoxCollider boxCollider;
@@ -208,12 +210,23 @@ namespace WordGestureKeyboard {
 
         void Update() {
             if (isWriting) {
+                for (int i = 0; i < 4; i++) {
+                    chooseObjects.transform.GetChild(i).gameObject.SetActive(false);
+                }
                 if (!UIH.getIsSampling()) {
                     Vector3 hitPoint = UIH.getHitPoint(col.position, transform.forward);
                     //print(hitPoint);
-                    if (hitPoint != new Vector3(1000, 1000, 1000)) {
+                    if (UIH.checkPoint(hitPoint)) {
                         UIH.samplePoints(hitPoint);
                     }
+                    if(!GPC.isCalculatingPreview) {
+                        List<Vector2> pointsList = UIH.getTransformedPoints2();
+                        UnityEngine.Debug.Log("pointslist: " + pointsList.Count);
+                        if (pointsList.Count != 0) {
+                            GPC.calcBestWords(pointsList, 20, FH.getLocationWordsPointsDict(), FH.getNormalizedWordsPointsDict(), KH.delta, KH.keyRadius, FH.wordRanking, true);
+                        }
+                    }
+                    previewWord.transform.GetChild(0).GetChild(0).GetChild(0).GetComponent<Text>().text = GPC.bestWord;
                 }
             } else if (!UIH.getIsSampling() && notEnded) {   // these two bools tell us, whether the calculation has ended and notEnded tells us, if the user input has been further processed
                 startTime = Time.realtimeSinceStartup;
@@ -264,7 +277,7 @@ namespace WordGestureKeyboard {
                             chooseObjects.transform.GetChild(i).gameObject.SetActive(false);
                         }
                     } else {
-                        GPC.calcBestWords(pointsList, 20, FH.getLocationWordsPointsDict(), FH.getNormalizedWordsPointsDict(), KH.delta, KH.keyRadius, FH.wordRanking);
+                        GPC.calcBestWords(pointsList, 20, FH.getLocationWordsPointsDict(), FH.getNormalizedWordsPointsDict(), KH.delta, KH.keyRadius, FH.wordRanking, false);
                     }
                     //print("TIME NEEDED: " + (Time.realtimeSinceStartup - startTime));
                     notEnded = false;
@@ -322,6 +335,8 @@ namespace WordGestureKeyboard {
             addKey.transform.localPosition = new Vector3(0.5f * KH.keyboardLength + addKey.transform.localScale.x * 0.5f + 0.005f, 0, -transform.localScale.y * 0.5f + addKey.transform.localScale.z);
             //layoutsObjects.transform.localPosition = new Vector3(0.5f * KH.keyboardLength + layoutsObjects.transform.localScale.x * 0.5f + 0.0075f + optionObjects.transform.localScale.x, optionObjects.transform.localPosition.y, optionObjects.transform.localPosition.z);
             chooseObjects.transform.localPosition = new Vector3(0, chooseObjects.transform.localPosition.y, transform.localScale.y * 0.5f + 0.035f);
+            //previewWord.transform.localPosition = new Vector3(0, previewWord.transform.localPosition.y + 0.1f, transform.localScale.y * 0.5f + 0.135f);
+            previewWord.transform.localPosition = new Vector3(0, previewWord.transform.localPosition.y, transform.localScale.y * 0.5f + previewWord.transform.localScale.z * 0.5f * 1.1f + 0.001f);
             //scaleObjects.transform.localPosition = new Vector3(0.5f * KH.keyboardLength + layoutsObjects.transform.localScale.x * 0.5f + 0.0075f + optionObjects.transform.localScale.x, scaleObjects.transform.localPosition.y, scaleObjects.transform.localPosition.z);
             UnityEngine.Debug.Log("addPos: " + addKey.transform.localPosition + ", scalePos: " + addKey.transform.localScale + ", optsPos: " + optionsKey.transform.localPosition + ", optsScale" + optionsKey.transform.localScale);
             if (((addKey.transform.localPosition + (addKey.transform.localScale * 0.5f)) - (optionsKey.transform.localPosition - (optionsKey.transform.localScale * 0.5f))).z >= 0) {
@@ -449,6 +464,7 @@ namespace WordGestureKeyboard {
             FH.layout = layout;
             KH.createKeyboardOverlay(layout);
             FH.loadWordGraphs(layout);
+            //delayActivateLayoutButtons();
             KH.checkForSpaceAndBackspace(FH.getLayoutKeys(), layout);
             updateOptionPositions();
         }
@@ -518,6 +534,14 @@ namespace WordGestureKeyboard {
             lastInputWord = word;
 
             userInputText.text += word + " ";
+        }
+
+        async public void delayActivateLayoutButtons() {
+            layoutsObjects.SetActive(false);
+            while (FH.isLoading) {
+                await Task.Delay(1);
+            }
+            layoutsObjects.SetActive(true);
         }
     }
 }

@@ -271,6 +271,8 @@ PHRASENR: 497, WPM: 27.57038, GMP 31.01668, TIME: 17.41, Nr of characters: 40, N
 PHRASENR: 498, WPM: 30.40072, GMP 28.95307, TIME: 8.289291, Nr of characters: 21, Nr of words: 4
 PHRASENR: 499, WPM: 30.23214, GMP 33.59127, TIME: 7.144714, Nr of characters: 18, Nr of words: 4
 Nr of characters: 122 : Nr of words: 26 : Time: 53.37108
+
+THE QUICK BROWN FOX---------------------------------------47.78
 496: the quick brown fox jumps over the lazy dog: nr of Backspaces: 1
 PHRASENR: 496, WPM: 28.12447, GMP 29.43259, TIME: 18.34703, Nr of characters: 43, Nr of words: 9
 PHRASENR: 496, WPM: 23.80142, GMP 24.90846, TIME: 21.67939, Nr of characters: 43, Nr of words: 9
@@ -286,3 +288,82 @@ PHRASENR: 497, WPM: 38.16175, GMP 39.93672, TIME: 13.52139, Nr of characters: 43
 PHRASENR: 498, WPM: 27.62565, GMP 28.91057, TIME: 18.6783, Nr of characters: 43, Nr of words: 9
 PHRASENR: 499, WPM: 34.17385, GMP 35.76334, TIME: 15.09927, Nr of characters: 43, Nr of words: 9
 Nr of characters: 172 : Nr of words: 36 : Time: 60.5702
+PHRASENR: 496, WPM: 30.93555, GMP 32.37441, TIME: 16.67987, Nr of characters: 43, Nr of words: 9
+PHRASENR: 497, WPM: 30.12038, GMP 31.52133, TIME: 17.13126, Nr of characters: 43, Nr of words: 9
+PHRASENR: 498, WPM: 40.3833, GMP 42.2616, TIME: 12.77759, Nr of characters: 43, Nr of words: 9
+499: the quick brown fox jumps over the lazy dog: nr of Backspaces: 42
+PHRASENR: 499, WPM: 11.96266, GMP 12.51906, TIME: 43.13422, Nr of characters: 43, Nr of words: 9
+Nr of characters: 172 : Nr of words: 36 : Time: 89.88284
+PHRASENR: 496, WPM: 26.70344, GMP 27.94546, TIME: 19.32337, Nr of characters: 43, Nr of words: 9
+497: the quick brown fox jumps over the lazy dog: nr of Backspaces: 17
+PHRASENR: 497, WPM: 16.26572, GMP 17.02226, TIME: 31.72317, Nr of characters: 43, Nr of words: 9
+PHRASENR: 498, WPM: 45.66028, GMP 47.78402, TIME: 11.30086, Nr of characters: 43, Nr of words: 9
+496: the quick brown fox jumps over the lazy dog: nr of Backspaces: 47
+PHRASENR: 496, WPM: 11.46601, GMP 11.99931, TIME: 45.00262, Nr of characters: 43, Nr of words: 9
+497: the quick brown fox jumps over the lazy dog: nr of Backspaces: 29
+PHRASENR: 497, WPM: 13.73182, GMP 14.37051, TIME: 37.57695, Nr of characters: 43, Nr of words: 9
+PHRASENR: 498, WPM: 47.78165, GMP 50.00405, TIME: 10.79913, Nr of characters: 43, Nr of words: 9
+PHRASENR: 499, WPM: 41.53358, GMP 43.46537, TIME: 12.42369, Nr of characters: 43, Nr of words: 9
+Nr of characters: 172 : Nr of words: 36 : Time: 105.8055
+----------------------------------------
+ASK NOT WHAT---------------------------------48.48
+PHRASENR: 496, WPM: 28.89477, GMP 32.50662, TIME: 16.61202, Nr of characters: 40, Nr of words: 9
+497: ask not what your country can do for you: nr of Backspaces: 9
+PHRASENR: 497, WPM: 21.95114, GMP 24.69503, TIME: 21.86675, Nr of characters: 40, Nr of words: 9
+PHRASENR: 496, WPM: 43.24202, GMP 48.64727, TIME: 11.10033, Nr of characters: 40, Nr of words: 9
+PHRASENR: 497, WPM: 40.26131, GMP 45.29397, TIME: 11.92212, Nr of characters: 40, Nr of words: 9
+
+PHRASENR: 496, WPM: 38.64, GMP 43.47, TIME: 12.42238, Nr of characters: 40, Nr of words: 9
+PHRASENR: 496, WPM: 48.4838, GMP 54.54428, TIME: 9.90023, Nr of characters: 40, Nr of words: 9
+PHRASENR: 496, WPM: 43.45892, GMP 48.89129, TIME: 11.04493, Nr of characters: 40, Nr of words: 9
+PHRASENR: 497, WPM: 45.28512, GMP 50.94576, TIME: 10.59952, Nr of characters: 40, Nr of words: 9
+-------------------------------------------------------
+EAST WEST NORTH------------------------------------------70.22
+
+496: east west north south: nr of Backspaces: 6
+PHRASENR: 496, WPM: 17.6486, GMP 16.80819, TIME: 14.27877, Nr of characters: 21, Nr of words: 4
+PHRASENR: 497, WPM: 39.58746, GMP 37.70234, TIME: 6.36566, Nr of characters: 21, Nr of words: 4
+PHRASENR: 498, WPM: 57.86058, GMP 55.10531, TIME: 4.355305, Nr of characters: 21, Nr of words: 4
+PHRASENR: 499, WPM: 53.2484, GMP 50.71276, TIME: 4.732544, Nr of characters: 21, Nr of words: 4
+Nr of characters: 84 : Nr of words: 16 : Time: 29.7351
+PHRASENR: 496, WPM: 67.31195, GMP 64.10662, TIME: 3.74378, Nr of characters: 21, Nr of words: 4
+PHRASENR: 497, WPM: 34.41467, GMP 32.77588, TIME: 7.322462, Nr of characters: 21, Nr of words: 4
+PHRASENR: 498, WPM: 69.33717, GMP 66.03539, TIME: 3.634426, Nr of characters: 21, Nr of words: 4
+499: east west north south: nr of Backspaces: 8
+PHRASENR: 499, WPM: 17.50255, GMP 16.66909, TIME: 14.39791, Nr of characters: 21, Nr of words: 4
+Nr of characters: 84 : Nr of words: 16 : Time: 29.10173
+PHRASENR: 496, WPM: 23.99965, GMP 22.85681, TIME: 10.50017, Nr of characters: 21, Nr of words: 4
+PHRASENR: 497, WPM: 70.21625, GMP 66.87262, TIME: 3.588921, Nr of characters: 21, Nr of words: 4
+PHRASENR: 498, WPM: 31.98374, GMP 30.4607, TIME: 7.879017, Nr of characters: 21, Nr of words: 4
+PHRASENR: 496, WPM: 38.50288, GMP 36.6694, TIME: 6.544983, Nr of characters: 21, Nr of words: 4
+PHRASENR: 497, WPM: 63.89439, GMP 60.85181, TIME: 3.944016, Nr of characters: 21, Nr of words: 4
+498: east west north south: nr of Backspaces: 13
+PHRASENR: 498, WPM: 21.21029, GMP 20.20027, TIME: 11.88104, Nr of characters: 21, Nr of words: 4
+PHRASENR: 499, WPM: 62.89246, GMP 59.89758, TIME: 4.006847, Nr of characters: 21, Nr of words: 4
+Nr of characters: 84 : Nr of words: 16 : Time: 26.38067
+PHRASENR: 496, WPM: 34.56148, GMP 32.91568, TIME: 7.291376, Nr of characters: 21, Nr of words: 4
+497: east west north south: nr of Backspaces: 22
+PHRASENR: 497, WPM: 14.90324, GMP 14.19356, TIME: 16.90908, Nr of characters: 21, Nr of words: 4
+PHRASENR: 498, WPM: 67.91267, GMP 64.67873, TIME: 3.710655, Nr of characters: 21, Nr of words: 4
+------------------------------------------------------------
+UP DOWN LEFT-----------------------------------------------58.04
+
+PHRASENR: 496, WPM: 15.54809, GMP 17.27566, TIME: 13.8924, Nr of characters: 18, Nr of words: 4
+497: up down left right: nr of Backspaces: 14
+PHRASENR: 497, WPM: 13.65353, GMP 15.17058, TIME: 15.8201, Nr of characters: 18, Nr of words: 4
+PHRASENR: 498, WPM: 31.60634, GMP 35.11815, TIME: 6.83408, Nr of characters: 18, Nr of words: 4
+PHRASENR: 499, WPM: 45.53395, GMP 50.59328, TIME: 4.743717, Nr of characters: 18, Nr of words: 4
+Nr of characters: 72 : Nr of words: 16 : Time: 41.29332
+PHRASENR: 496, WPM: 8.422719, GMP 9.358577, TIME: 25.64494, Nr of characters: 18, Nr of words: 4
+497: up down left right: nr of Backspaces: 8
+PHRASENR: 497, WPM: 12.64735, GMP 14.05261, TIME: 17.07868, Nr of characters: 18, Nr of words: 4
+498: up down left right: nr of Backspaces: 14
+PHRASENR: 498, WPM: 14.30472, GMP 15.89413, TIME: 15.09992, Nr of characters: 18, Nr of words: 4
+PHRASENR: 499, WPM: 56.68364, GMP 62.98182, TIME: 3.810631, Nr of characters: 18, Nr of words: 4
+Nr of characters: 72 : Nr of words: 16 : Time: 61.63718
+496: up down left right: nr of Backspaces: 1
+PHRASENR: 496, WPM: 22.23351, GMP 24.7039, TIME: 9.715079, Nr of characters: 18, Nr of words: 4
+PHRASENR: 497, WPM: 38.90015, GMP 43.22239, TIME: 5.552683, Nr of characters: 18, Nr of words: 4
+PHRASENR: 498, WPM: 24.63634, GMP 27.3737, TIME: 8.767544, Nr of characters: 18, Nr of words: 4
+PHRASENR: 499, WPM: 58.03896, GMP 64.48774, TIME: 3.721642, Nr of characters: 18, Nr of words: 4
+Nr of characters: 72 : Nr of words: 16 : Time: 27.75992

@@ -14,6 +14,7 @@ namespace WordGestureKeyboard {
         HashSet<string> wordsInLexicon = new HashSet<string>();
         public Dictionary<string, int> wordRanking = new Dictionary<string, int>();
         public Dictionary<string, Tuple<List<float>, List<string>>> layoutKeys;
+        public bool isLoading = false;
 
         public FileHandler(string layout) {
             this.layout = layout;
@@ -28,6 +29,7 @@ namespace WordGestureKeyboard {
         /// <param name="layout">Layout from which the sokgraphs should be loaded.</param>
         async public void loadWordGraphs(string layout) {
             await Task.Run(() => {
+                isLoading = true;
                 locationWordsPointsDict = new Dictionary<string, List<Vector2>>();
                 normalizedWordsPointsDict = new Dictionary<string, List<Vector2>>();
 
@@ -73,12 +75,13 @@ namespace WordGestureKeyboard {
                     }
 
                     //Debug.Log("SOMETHING TO TEST: " + splits[0]);
-                    locationWordsPointsDict.Add(splits[0], locationPoints);
+                    locationWordsPointsDict.Add(splits[0], locationPoints); // WHY DOUBLE WORDS???
                     normalizedWordsPointsDict.Add(splits[0], normalizedPoints);
 
                     normalizedPoints = new List<Vector2>();
                     locationPoints = new List<Vector2>();
                 }
+                isLoading = false;
             });
         }
 

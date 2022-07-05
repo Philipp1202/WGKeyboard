@@ -25,6 +25,7 @@ namespace WordGestureKeyboard {
                 transform.parent.parent.parent.Find("WGKeyboard").GetComponent<WGKMain>().changeLayout(layout);
             } else {
                 transform.GetComponent<MeshRenderer>().material = whiteMat;
+                //transform.parent.parent.parent.Find("WGKeyboard").GetComponent<WGKMain>().enterLayoutChoose(this.transform, true);
             }
         }
     }
