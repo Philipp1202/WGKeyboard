@@ -54,15 +54,13 @@ namespace WordGestureKeyboard {
 
         bool isWriting;
         Transform col = null;
+        string lastInputWord = "";
 
         bool notEnded = false;
         bool isOptionsOpen = false;
         bool isAddingNewWord = false;
         bool isChoosingLayout = false;
         bool isChangeSizeOpen = false;
-
-        string queryInput = "";
-        string lastInputWord = "";
 
         float startTime = 0;
 
@@ -234,7 +232,6 @@ namespace WordGestureKeyboard {
                     previewWord.transform.GetChild(0).GetChild(0).GetChild(0).GetComponent<Text>().text = GPC.bestWord;
                 }
             } else if (!UIH.getIsSampling() && notEnded) {   // these two bools tell us, whether the calculation has ended and notEnded tells us, if the user input has been further processed
-                startTime = Time.realtimeSinceStartup;
                 List<Vector2> pointsList = UIH.getTransformedPoints();
 
                 if (pointsList.Count != 0) {    // user pressed trigger button, but somehow it didn^t register any points
@@ -243,44 +240,26 @@ namespace WordGestureKeyboard {
 
                     if (GPC.isBackSpaceOrSpace(pointsList, KH.backSpaceHitbox, KH.spaceHitbox) == -1) {
                         wordInputSound.Play();
-                        int count = lastInputWord.Length;
-                        if (count > 1) {
-                            for (int i = 0; i <= count; i++) {
+                        if (isAddingNewWord) {
+                            if (text.text != "") {
                                 text.text = text.text.Substring(0, text.text.Length - 1);
-                                queryInput = queryInput.Substring(0, queryInput.Length - 1);
-                                // TODO invoke backspace
-                                if (queryInput == "") {
-                                    break;
-                                }
                             }
-                            deleteEvent.Invoke();
-                            lastInputWord = "";
                         } else {
-                            if (queryInput != "" && text.text != "") {
-                                text.text = text.text.Substring(0, text.text.Length - 1);
-                                queryInput = queryInput.Substring(0, queryInput.Length - 1);
-                                // TODO invoke backspace
-                            }
                             deleteEvent.Invoke();
-                            lastInputWord = "";
                         }
+
                         for (int i = 0; i < 4; i++) {
                             chooseObjects.transform.GetChild(i).gameObject.SetActive(false);
                         }
                     } else if (GPC.isBackSpaceOrSpace(pointsList, KH.backSpaceHitbox, KH.spaceHitbox) == 1) {
                         wordInputSound.Play();
-                        text.text += " ";
-                        queryInput += " ";
-                        // TODO: invoke inputtext with " "
                         result.Invoke(" ");
-                        lastInputWord = "";
                         for (int i = 0; i < 4; i++) {
                             chooseObjects.transform.GetChild(i).gameObject.SetActive(false);
                         }
                     } else {
                         GPC.calcBestWords(pointsList, 20, FH.getLocationWordsPointsDict(), FH.getNormalizedWordsPointsDict(), KH.delta, KH.keyRadius, FH.wordRanking, false);
                     }
-                    //print("TIME NEEDED: " + (Time.realtimeSinceStartup - startTime));
                     notEnded = false;
                 }
             } else if (GPC.sortedDict != null) {
@@ -291,31 +270,18 @@ namespace WordGestureKeyboard {
                 if (bestWordsDictLength != 0) {
                     wordInputSound.Play();
                     previewWord.transform.GetChild(0).GetChild(0).GetChild(0).GetComponent<Text>().text = GPC.sortedDict[0];
-                    //print("THIS WAS THE MOST PROBABLE WORD: " + GPC.sortedDict[bestWordsDictLength - 1] +" YES IT IS INDEED");
                     if (isAddingNewWord) {  // putting text into textfield from keyboard
                         text.text += GPC.sortedDict[0];
-                        queryInput += GPC.sortedDict[0];
                     } else {    // putting text into inputfield of query
-                        if (GPC.sortedDict[0].Length == 1) { //single letter
-
-                            result.Invoke(GPC.sortedDict[0]);
-                            text.text += GPC.sortedDict[0];
-                            queryInput += GPC.sortedDict[0];
-                            lastInputWord = GPC.sortedDict[0];
-                        } else {    // not single letter but word
-                            for (int i = 0; i < bestWordsDictLength - 1; i++) {
-                                if (i > 3) {    // maximum of 4 best words apart from top word
-                                    break;
-                                }
-                                chooseObjects.transform.GetChild(i).GetChild(0).GetChild(0).GetComponent<Text>().text = GPC.sortedDict[i + 1];
-                                chooseObjects.transform.GetChild(i).gameObject.SetActive(true);
+                        for (int i = 0; i < bestWordsDictLength - 1; i++) {
+                            if (i > 3) {    // maximum of 4 best words apart from top word
+                                break;
                             }
-
-                            result.Invoke(GPC.sortedDict[0]);
-                            text.text += GPC.sortedDict[0];
-                            queryInput += GPC.sortedDict[0];
-                            lastInputWord = GPC.sortedDict[0];
+                            chooseObjects.transform.GetChild(i).GetChild(0).GetChild(0).GetComponent<Text>().text = GPC.sortedDict[i + 1];
+                            chooseObjects.transform.GetChild(i).gameObject.SetActive(true);
                         }
+                        lastInputWord = GPC.sortedDict[0];
+                        result.Invoke(GPC.sortedDict[0]);
                     }
                 } else {
                     UnityEngine.Debug.Log("no word found");
@@ -407,7 +373,7 @@ namespace WordGestureKeyboard {
                     foreach (Transform child in this.transform) {
                         child.GetComponent<BoxCollider>().enabled = true;
                     }
-                    lastInputWord = ""; // for now, maybe changes, if everything with the query inputfield works, and text field is for addWordMode only
+                    lastInputWord = "";
                     text.text = "";
 
                     for (int i = 0; i < 4; i++) {
@@ -510,20 +476,12 @@ namespace WordGestureKeyboard {
 
         public void changeWord(Text t, string word) {
             wordInputSound.Play();
-            int count = lastInputWord.Length;
-            for (int i = 0; i <= count; i++) {
-                text.text = text.text.Substring(0, text.text.Length - 1);
-                if (text.text == "") {
-                    break;
-                }
-            }
+
             t.text = lastInputWord;
+            lastInputWord = word;
 
             deleteEvent.Invoke();
             result.Invoke(word);
-            text.text += word;
-            queryInput += word;
-            lastInputWord = word;
         }
 
         async public void delayActivateLayoutButtons() {
