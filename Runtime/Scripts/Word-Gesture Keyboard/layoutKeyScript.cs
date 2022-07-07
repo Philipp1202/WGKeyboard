@@ -6,11 +6,13 @@ using UnityEngine.UI;
 namespace WordGestureKeyboard {
     public class layoutKeyScript : MonoBehaviour {
 
-        public Material whiteMat;
-        public Material grayMat;
+        public MaterialHolder materials;
+        Material whiteMat;
+        Material grayMat;
         // Start is called before the first frame update
         void Start() {
-
+            whiteMat = materials.whiteMat;
+            grayMat = materials.grayMat;
         }
 
         // Update is called once per frame
@@ -25,7 +27,6 @@ namespace WordGestureKeyboard {
                 transform.parent.parent.parent.Find("WGKeyboard").GetComponent<WGKMain>().changeLayout(layout);
             } else {
                 transform.GetComponent<MeshRenderer>().material = whiteMat;
-                //transform.parent.parent.parent.Find("WGKeyboard").GetComponent<WGKMain>().enterLayoutChoose(this.transform, true);
             }
         }
     }

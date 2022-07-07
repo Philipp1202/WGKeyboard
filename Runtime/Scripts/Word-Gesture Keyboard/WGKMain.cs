@@ -13,22 +13,21 @@ using System.Threading.Tasks;
 namespace WordGestureKeyboard {
     public class WGKMain : MonoBehaviour {
 
-        public Text userInputText;  // remove, only for evaluation
-        EvaluationManager evaluationManager; // remove, only for evaluation
-
         [Serializable]
         public class TextInputEvent : UnityEvent<string> {
         }
 
+        [Serializable]
+        public class WordDeleteEvent : UnityEvent {
+        }
+
+        public MaterialHolder materials;
         public AudioSource wordInputSound;
-        public GameObject Key;
-        public Material whiteMat;
-        public Material grayMat;
-        public Material keyboardHoverMat;
-        public Material keyboardMat;
+        public GameObject key;
         public GameObject layoutKey;
-        public string layout;
+        public string startingLayout;
         public TextInputEvent result;
+        public WordDeleteEvent deleteEvent;
         public GameObject optionObjects;
         public GameObject chooseObjects;
         public GameObject optionsKey;
@@ -49,6 +48,10 @@ namespace WordGestureKeyboard {
         FileHandler FH;
         KeyboardHelper KH;
 
+        Material whiteMat;
+        Material grayMat;
+        Material keyboardMat;
+
         bool isWriting;
         Transform col = null;
 
@@ -65,9 +68,11 @@ namespace WordGestureKeyboard {
 
         // Start is called before the first frame update
         void Start() {
-            evaluationManager = GameObject.Find("EvaluationPhraseHolder").GetComponent<EvaluationManager>();
-
             startTime = Time.realtimeSinceStartup;
+
+            whiteMat = materials.whiteMat;
+            grayMat = materials.grayMat;
+            keyboardMat = materials.keyboardMat;
 
             subOptionButtons.Add(optionObjects);
             subOptionButtons.Add(addKey);
@@ -82,21 +87,21 @@ namespace WordGestureKeyboard {
 
             isWriting = false;
 
-            if (layout == "") { // if user didn't specify another layout, the standard qwertz layout will be used
-                layout = "qwertz";
+            if (startingLayout == "") { // if user didn't specify another layout, the standard qwertz layout will be used
+                startingLayout = "qwertz";
             }
             //loadLayouts();
             //loadWordGraphs(layout);
-            FH = new FileHandler(layout);
+            FH = new FileHandler(startingLayout);
             FH.loadLayouts();
-            KH = new KeyboardHelper(this.transform, Key, boxCollider, FH);
-            KH.createKeyboardOverlay(layout);
+            KH = new KeyboardHelper(this.transform, key, boxCollider, FH);
+            KH.createKeyboardOverlay(startingLayout);
             UIH = new UserInputHandler(LR, this.transform);
             GPC = new GraphPointsCalculator();
             
             //FH.addKeyboardLettersToLexicon(GPC);
-            FH.loadWordGraphs(layout);
-            KH.checkForSpaceAndBackspace(FH.getLayoutKeys(), layout);
+            FH.loadWordGraphs(startingLayout);
+            KH.checkForSpaceAndBackspace(FH.getLayoutKeys(), startingLayout);
 
             // maybe change next 4 lines
             //optionObjects = transform.parent.Find("OptionObjects").gameObject;
@@ -243,25 +248,22 @@ namespace WordGestureKeyboard {
                             for (int i = 0; i <= count; i++) {
                                 text.text = text.text.Substring(0, text.text.Length - 1);
                                 queryInput = queryInput.Substring(0, queryInput.Length - 1);
-
-                                userInputText.text = userInputText.text.Substring(0, userInputText.text.Length - 1);
                                 // TODO invoke backspace
                                 if (queryInput == "") {
                                     break;
                                 }
                             }
+                            deleteEvent.Invoke();
                             lastInputWord = "";
                         } else {
                             if (queryInput != "" && text.text != "") {
                                 text.text = text.text.Substring(0, text.text.Length - 1);
                                 queryInput = queryInput.Substring(0, queryInput.Length - 1);
-
-                                userInputText.text = userInputText.text.Substring(0, userInputText.text.Length - 1);
                                 // TODO invoke backspace
                             }
+                            deleteEvent.Invoke();
                             lastInputWord = "";
                         }
-                        evaluationManager.nrBackspaces += 1;
                         for (int i = 0; i < 4; i++) {
                             chooseObjects.transform.GetChild(i).gameObject.SetActive(false);
                         }
@@ -269,9 +271,8 @@ namespace WordGestureKeyboard {
                         wordInputSound.Play();
                         text.text += " ";
                         queryInput += " ";
-
-                        userInputText.text += " ";
                         // TODO: invoke inputtext with " "
+                        result.Invoke(" ");
                         lastInputWord = "";
                         for (int i = 0; i < 4; i++) {
                             chooseObjects.transform.GetChild(i).gameObject.SetActive(false);
@@ -289,12 +290,11 @@ namespace WordGestureKeyboard {
                 int bestWordsDictLength = GPC.sortedDict.Count;
                 if (bestWordsDictLength != 0) {
                     wordInputSound.Play();
+                    previewWord.transform.GetChild(0).GetChild(0).GetChild(0).GetComponent<Text>().text = GPC.sortedDict[0];
                     //print("THIS WAS THE MOST PROBABLE WORD: " + GPC.sortedDict[bestWordsDictLength - 1] +" YES IT IS INDEED");
                     if (isAddingNewWord) {  // putting text into textfield from keyboard
                         text.text += GPC.sortedDict[0];
                         queryInput += GPC.sortedDict[0];
-
-                        userInputText.text += GPC.sortedDict[0];
                     } else {    // putting text into inputfield of query
                         if (GPC.sortedDict[0].Length == 1) { //single letter
 
@@ -302,8 +302,6 @@ namespace WordGestureKeyboard {
                             text.text += GPC.sortedDict[0];
                             queryInput += GPC.sortedDict[0];
                             lastInputWord = GPC.sortedDict[0];
-
-                            userInputText.text += GPC.sortedDict[0];
                         } else {    // not single letter but word
                             for (int i = 0; i < bestWordsDictLength - 1; i++) {
                                 if (i > 3) {    // maximum of 4 best words apart from top word
@@ -313,12 +311,10 @@ namespace WordGestureKeyboard {
                                 chooseObjects.transform.GetChild(i).gameObject.SetActive(true);
                             }
 
-                            result.Invoke(GPC.sortedDict[0] + " ");
-                            text.text += GPC.sortedDict[0] + " ";
-                            queryInput += GPC.sortedDict[0] + " ";
+                            result.Invoke(GPC.sortedDict[0]);
+                            text.text += GPC.sortedDict[0];
+                            queryInput += GPC.sortedDict[0];
                             lastInputWord = GPC.sortedDict[0];
-
-                            userInputText.text += GPC.sortedDict[0] + " ";
                         }
                     }
                 } else {
@@ -414,8 +410,6 @@ namespace WordGestureKeyboard {
                     lastInputWord = ""; // for now, maybe changes, if everything with the query inputfield works, and text field is for addWordMode only
                     text.text = "";
 
-                    userInputText.text = "";
-
                     for (int i = 0; i < 4; i++) {
                         chooseObjects.transform.GetChild(i).gameObject.SetActive(false);
                     }
@@ -460,7 +454,7 @@ namespace WordGestureKeyboard {
             foreach (Transform child in this.transform) {
                 GameObject.Destroy(child.gameObject);
             }
-            this.layout = layout;
+            startingLayout = layout;
             FH.layout = layout;
             KH.createKeyboardOverlay(layout);
             FH.loadWordGraphs(layout);
@@ -479,7 +473,7 @@ namespace WordGestureKeyboard {
                     child.GetComponent<BoxCollider>().isTrigger = true;
                     child.GetComponent<BoxCollider>().enabled = true;
                 }
-                transform.GetComponent<MeshRenderer>().material = keyboardHoverMat;
+                transform.GetComponent<MeshRenderer>().material = whiteMat;
             }
         }
 
@@ -501,8 +495,6 @@ namespace WordGestureKeyboard {
                 string newWord = text.text; // maybe needs to be changed, but maybe let it be with Text Object for adding a word -> wouldn't interfere with input in query
                 FH.addNewWordToDict(newWord, GPC);
                 text.text = "";
-
-                userInputText.text = "";
             } else {
                 addKey.GetComponent<MeshRenderer>().material = whiteMat;
             }
@@ -510,7 +502,7 @@ namespace WordGestureKeyboard {
 
         public void hoverKeyboard(bool b) {
             if (b) {
-                transform.GetComponent<MeshRenderer>().material = keyboardHoverMat;
+                transform.GetComponent<MeshRenderer>().material = whiteMat;
             } else if (!b && !isWriting) {  // don't want to make keyboard write when interacting with in in sense of writing on it
                 transform.GetComponent<MeshRenderer>().material = keyboardMat;
             }
@@ -521,19 +513,17 @@ namespace WordGestureKeyboard {
             int count = lastInputWord.Length;
             for (int i = 0; i <= count; i++) {
                 text.text = text.text.Substring(0, text.text.Length - 1);
-                userInputText.text = userInputText.text.Substring(0, userInputText.text.Length - 1);
                 if (text.text == "") {
                     break;
                 }
             }
             t.text = lastInputWord;
 
-            result.Invoke(word + " ");
-            text.text += word + " ";
-            queryInput += word + " ";
+            deleteEvent.Invoke();
+            result.Invoke(word);
+            text.text += word;
+            queryInput += word;
             lastInputWord = word;
-
-            userInputText.text += word + " ";
         }
 
         async public void delayActivateLayoutButtons() {

@@ -129,6 +129,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ec8a6c043a216ff42b0b8b09e458e632, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  disablesPointer: 1
   onInteraction:
     m_PersistentCalls:
       m_Calls:
@@ -165,8 +166,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 1bd9f97960926df4eb2d2b63c57a6f64, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  whiteMat: {fileID: 2100000, guid: 201ca18badb4a7c45bf1d80f5e4e7c1a, type: 2}
-  grayMat: {fileID: 2100000, guid: 21bb89acc7e6fd64f9351ab370f889a2, type: 2}
+  materials: {fileID: 7897214852118176417, guid: 58b3dc64846240f498686b318bb2cd7a,
+    type: 3}
 --- !u!1 &6720965589808451152
 GameObject:
   m_ObjectHideFlags: 0
