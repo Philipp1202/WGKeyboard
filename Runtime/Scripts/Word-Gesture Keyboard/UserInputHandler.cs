@@ -1,53 +1,47 @@
-using System.Collections;
 using System.Collections.Generic;
-using UnityEngine;
-using System.Linq;  // for Max(), Min(), ...
 using System.Threading.Tasks;
+using UnityEngine;
 
 namespace WordGestureKeyboard {
     public class UserInputHandler {
-        bool isSamplingPoints;
         LineRenderer LR;
         Transform transform;
-        int pointCount;
-        bool lastDistShort = false;
+        int pointCount = 0;
+        bool isSamplingPoints = false;
+        bool isLastDistShort = false;
 
         public UserInputHandler(LineRenderer LR, Transform t) {
-            isSamplingPoints = false;
             this.LR = LR;
             this.transform = t;
-            pointCount = 0;
         }
 
         /// <summary>
-        /// Casts a ray in the direction "forward" and looks, if it hits an Collider with the layer "WGKeyboard". 
-        /// If yes, it return the point, where the ray hit the object, else it returns a Vector3(1000,1000,1000)
+        /// Takes the position of the object that interacts with the WGKeyboard and then returns the point transformed such that it lies on the WGKeyboard.
         /// </summary>
-        /// <param name="colPos">Position of the origin of the ray (normally VR controller)</param>
-        /// <param name="forward">Direction of the ray.</param>
-        public Vector3 getHitPoint(Vector3 colPos, Vector3 forward) {
-            int layerMask = LayerMask.GetMask("Default");
-            RaycastHit hit;
+        /// <param name="colPos">Position of the object interacting with the WGKeyboard (controller)</param>
+        /// <returns>The given point's position on the WGKeyboard</returns>
+        public Vector3 GetHitPoint(Vector3 colPos) {
             Vector3 transformedPoint = transform.parent.InverseTransformPoint(colPos);
             Vector3 point = new Vector3(transformedPoint.x, 0.008f, transformedPoint.z);
             transformedPoint = transform.parent.TransformPoint(point);
-            Debug.Log("POINTTT " + transformedPoint);
-            Debug.Log("ON KEYBOARD " + point);
             return transformedPoint;
-            /*if (Physics.Raycast(colPos, forward, out hit, Mathf.Infinity, layerMask)) {
-                Debug.Log("RIGHTPOINT " + hit.point);
-                return hit.point;
-            } else if (Physics.Raycast(colPos, -forward, out hit, Mathf.Infinity, layerMask)) {
-                return hit.point;
-                Debug.Log("RIGHTPOINT " + hit.point);
-            }
-            return new Vector3(1000, 1000, 1000);// return this, because Vector3 can't be null*/
         }
 
+        /// <summary>
+        /// Checks if the given point is within the WGKeyboard's boundary.
+        /// </summary>
+        /// <param name="point">Point to check (not in localspace of WGKeyboard)</param>
+        /// <returns>Yes if it is within the WGKeyboard's boundary, no if it is outside of the WGKeyboard's boundary</returns>
         public bool checkPoint(Vector3 point) {
             float keyboardLength = transform.localScale.x;
             float keyboardWidth = transform.localScale.y;
             Vector3 localTransformedPoint = transform.parent.InverseTransformPoint(point);
+            if (keyboardLength / 2 >= Mathf.Abs(localTransformedPoint.x) && keyboardWidth / 2 >= Mathf.Abs(localTransformedPoint.z)) {
+                return true;
+            }
+            return false;
+
+            /*
             Vector2 pointOnKeyboard = new Vector2((localTransformedPoint.x + keyboardLength / 2) / Mathf.Max(keyboardLength, keyboardWidth), (localTransformedPoint.z + keyboardWidth / 2) / Mathf.Max(keyboardLength, keyboardWidth));
             float xMax = 1;
             float yMax = 1;
@@ -56,7 +50,6 @@ namespace WordGestureKeyboard {
             } else {
                 xMax = keyboardLength / keyboardWidth;
             }
-            Debug.Log("CHECKPOINT VALUES: " + pointOnKeyboard + " : " + xMax + " : " + yMax);
 
             if (0 > pointOnKeyboard.x || pointOnKeyboard.x > xMax) {
                 return false;
@@ -65,6 +58,7 @@ namespace WordGestureKeyboard {
                 return false;
             }
             return true;
+            */
         }
 
         /// <summary>
@@ -84,7 +78,7 @@ namespace WordGestureKeyboard {
             }
             pointCount = 0;
             LR.positionCount = 0;
-            lastDistShort = false;
+            isLastDistShort = false;
             return pointsList;
         }
 
@@ -130,7 +124,7 @@ namespace WordGestureKeyboard {
                     } else {
                         Vector3 lastPoint;
                         if (Vector3.Angle(middlePoint - startPoint, hitPoint - middlePoint) < minAngle) { // set Point if almost a straight line
-                            if (lastDistShort) {
+                            if (isLastDistShort) {
                                 setPoint = true;
                                 lastPoint = startPoint;
                             } else {
@@ -139,12 +133,12 @@ namespace WordGestureKeyboard {
                                 lastPoint = middlePoint;
                             }
                             if ((hitPoint - lastPoint).magnitude < minSegmentDist) {
-                                lastDistShort = true;
+                                isLastDistShort = true;
                             } else {
-                                lastDistShort = false;
+                                isLastDistShort = false;
                             }
                         } else {
-                            if (lastDistShort) {
+                            if (isLastDistShort) {
                                 setPoint = true;
                                 lastPoint = startPoint;
                             } else {
@@ -153,9 +147,9 @@ namespace WordGestureKeyboard {
                                 lastPoint = middlePoint;
                             }
                             if ((hitPoint - lastPoint).magnitude < minSegmentDist / 5) {
-                                lastDistShort = true;
+                                isLastDistShort = true;
                             } else {
-                                lastDistShort = false;
+                                isLastDistShort = false;
                             }
                         }
                     }
@@ -171,7 +165,7 @@ namespace WordGestureKeyboard {
             isSamplingPoints = false;
         }
 
-        public bool getIsSampling() {
+        public bool GetIsSamplingPoints() {
             return isSamplingPoints;
         }
     }

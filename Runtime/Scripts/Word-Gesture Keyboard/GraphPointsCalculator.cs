@@ -7,19 +7,11 @@ using System;
 
 namespace WordGestureKeyboard {
     public class GraphPointsCalculator {
-
-        //public float keyRadius;
         public float deltaNormal;
         public bool isSampling = false;
-        //public IOrderedEnumerable<KeyValuePair<string, float>> sortedDict = null;
         public List<string> sortedDict = null;
         public string bestWord = "";
         public bool isCalculatingPreview = false;
-        //public float numKeysOnLongestLine;
-        /*
-        public GraphPointsCalculator(float n) {
-            numKeysOnLongestLine = n;
-        }*/
 
         /// <summary>
         /// Calculates the costs for every word given in "locationWordsPointDict" with respect to the "inputpoints". This is the cost of the not normalized points more or less according to SHARK2.
@@ -93,6 +85,21 @@ namespace WordGestureKeyboard {
                 if (cost < keyRadius * 2) {
                     costList.Add(word.Key, cost);
                 }
+            }
+            return costList;
+        }
+
+        Dictionary<string, float> LocationCostsSingleCharacter(Dictionary<string, List<Vector2>> locationWordsPointDict, List<Vector2> inputPoints) {
+            Dictionary<string, float> costList = new Dictionary<string, float>();
+            float d;
+
+            foreach (var word in locationWordsPointDict) {
+                d = 0;
+                int j = 0;
+                foreach (Vector2 p in word.Value) {
+                    d += (p - inputPoints[j]).magnitude;
+                }
+                costList.Add(word.Key, d);
             }
             return costList;
         }
@@ -207,114 +214,128 @@ namespace WordGestureKeyboard {
             }
             sortedDict = null;
             //Debug.Log("IIIIII AMMMMMMM HEREEREREREEEE 1");
-            await Task.Run(() => {    // need await, because I couln't access the text of Text in task.run(() => {});
-                //Debug.Log("IIIIII AMMMMMMM HEREEREREREEEE 2");
+            await Task.Run(() => {    // need await, because I couldn't access the text of Text in task.run(() => {});
                 List<Vector2> inputPoints = getWordGraphStepPoint(userInputPoints, steps);
-                for (int i = 0; i < inputPoints.Count; i++) {
-                    //               print(inputPoints[i]);
-                }
-                List<Vector2> normalizedInputPoints = normalize(inputPoints, 2);
-
                 Dictionary<string, List<Vector2>>[] filteredWordsPoints = seKeyPosition(inputPoints, locationWordsPointsDict, normalizedWordsPointsDict, steps, keyRadius);
-                Dictionary<string, float> normalizedCostList = normalizedPointsCost(filteredWordsPoints[1], normalizedInputPoints, steps, keyRadius);
-                Dictionary<string, float> locationCostList = locationCosts(filteredWordsPoints[0], inputPoints, steps, keyRadius);
 
                 List<string> wordList = new List<string>();
-                foreach (var word in normalizedCostList) {   // look which word had a good cost in shape and location
-                    if (locationCostList.ContainsKey(word.Key)) {
-                        if (isSingleLetter(userInputPoints, keyRadius)) {
-                            if (word.Key.Length == 1) {
-                                wordList.Add(word.Key);
-                            }
-                        } else {
+                if (isSingleLetter(userInputPoints, keyRadius)) {
+                    foreach (var pair in filteredWordsPoints[0]) {
+                        if (pair.Key.Length == 1) {
+                            wordList.Add(pair.Key);
+                        }
+                    }
+                    List<string> keys = filteredWordsPoints[0].Keys.ToList();
+                    foreach (string key in keys) {
+                        if (!wordList.Contains(key)) {
+                            filteredWordsPoints[0].Remove(key);
+                        }
+                    }
+                    Dictionary<string, float> distances = LocationCostsSingleCharacter(filteredWordsPoints[0], inputPoints);
+                    string lowestDistChar = distances.OrderByDescending(x => x.Value).Last().Key;
+                    if (isWriting) {
+                        bestWord = lowestDistChar;
+                        isCalculatingPreview = false;
+                    } else {
+                        sortedDict = new List<string>();
+                        sortedDict.Add(lowestDistChar);
+                    }
+                    
+                } else {
+                    List<Vector2> normalizedInputPoints = normalize(inputPoints, 2);
+                    Dictionary<string, float> normalizedCostList = normalizedPointsCost(filteredWordsPoints[1], normalizedInputPoints, steps, keyRadius);
+                    Dictionary<string, float> locationCostList = locationCosts(filteredWordsPoints[0], inputPoints, steps, keyRadius);
+
+                    foreach (var word in normalizedCostList) {   // look which word had a good cost in shape and location
+                        if (locationCostList.ContainsKey(word.Key)) {
                             wordList.Add(word.Key);
                         }
                     }
-                }
 
-                if (wordList.Count > 0) {
-                    List<float> tempShapeCosts = new List<float>();
-                    List<float> tempLocationCosts = new List<float>();
-                    foreach (string word in wordList) {
-                        float shapeCost = normalizedCostList[word];
-                        float locationCost = locationCostList[word];
-                        float shapeProb = 1 / (delta * Mathf.Sqrt(2 * Mathf.PI)) * Mathf.Exp((float)(-0.5 * Mathf.Pow(shapeCost / delta, 2)));
-                        float locationProb = 1 / (delta * Mathf.Sqrt(2 * Mathf.PI)) * Mathf.Exp((float)(-0.5 * Mathf.Pow(locationCost / delta, 2)));
-                        ///print("LOCCOST: " + locationCost);
-                        ///print("LOCPROB: " + locationProb);
-                        tempShapeCosts.Add(shapeProb);
-                        tempLocationCosts.Add(locationProb);
-                    }
-
-                    float sum = 0;
-                    float sum2 = 0;
-                    int numWords = wordList.Count;
-                    for (int i = 0; i < numWords; i++) {
-                        sum += tempShapeCosts[i];
-                        ///print("sum1= " + sum);
-                        sum2 += tempLocationCosts[i];
-                        ///print("sum2= " + sum2);
-                    }
-                    for (int i = 0; i < numWords; i++) {
-                        tempShapeCosts[i] /= sum;
-                        tempLocationCosts[i] /= sum2;
-                    }
-
-                    List<float> tempCosts2 = new List<float>();
-                    sum = 0;
-                    for (int i = 0; i < numWords; i++) {
-                        sum += tempShapeCosts[i] * tempLocationCosts[i];
-                        ///print("sum3= " + sum);
-                    }
-                    for (int i = 0; i < numWords; i++) {
-                        tempCosts2.Add(tempShapeCosts[i] * tempLocationCosts[i] / sum);
-                    }
-
-                    Dictionary<string, float> finalCosts = new Dictionary<string, float>();
-                    int q = 0;
-                    foreach (string word in wordList) {
-                        finalCosts.Add(word, tempCosts2[q]);
-                        q += 1;
-                    }
-                    foreach (var k in finalCosts.Keys) {
-                        Debug.Log(k + ": " + finalCosts[k]);
-                    }
-
-                    IOrderedEnumerable<KeyValuePair<string, float>> sorted = null;
-                    sorted = from entry in finalCosts orderby entry.Value descending select entry;
-
-                    List<KeyValuePair<string, float>> betterSortedDict;
-                    List<string> sortedList;
-
-                    betterSortedDict = sorted.ToList();
-                    sortedList = sorted.Select(pair => pair.Key).ToList();  // only take words into a list, not their probabilities
-                    float highestValue = betterSortedDict[0].Value;
-                    Dictionary<string, int> bestMatches = new Dictionary<string, int>();
-                    foreach (var pair in betterSortedDict) {
-                        if (pair.Value == highestValue) {
-                            bestMatches[pair.Key] = wordRanking[pair.Key];
+                    if (wordList.Count > 0) {
+                        List<float> tempShapeCosts = new List<float>();
+                        List<float> tempLocationCosts = new List<float>();
+                        foreach (string word in wordList) {
+                            float shapeCost = normalizedCostList[word];
+                            float locationCost = locationCostList[word];
+                            float shapeProb = 1 / (delta * Mathf.Sqrt(2 * Mathf.PI)) * Mathf.Exp((float)(-0.5 * Mathf.Pow(shapeCost / delta, 2)));
+                            float locationProb = 1 / (delta * Mathf.Sqrt(2 * Mathf.PI)) * Mathf.Exp((float)(-0.5 * Mathf.Pow(locationCost / delta, 2)));
+                            ///print("LOCCOST: " + locationCost);
+                            ///print("LOCPROB: " + locationProb);
+                            tempShapeCosts.Add(shapeProb);
+                            tempLocationCosts.Add(locationProb);
                         }
-                    }
-                    IOrderedEnumerable<KeyValuePair<string, int>> sortedBestMatches = null;
-                    sortedBestMatches = from entry in bestMatches orderby entry.Value ascending select entry;
 
-                    int p = 0;
-                    foreach (var pair in sortedBestMatches) {
-                        sortedList[p] = pair.Key;
-                        p++;
-                    }
-                    if (!isWriting) {
-                        sortedDict = sortedList;
-                        foreach (var k in sortedDict) {
-                            Debug.Log(k);
+                        float sum = 0;
+                        float sum2 = 0;
+                        int numWords = wordList.Count;
+                        for (int i = 0; i < numWords; i++) {
+                            sum += tempShapeCosts[i];
+                            ///print("sum1= " + sum);
+                            sum2 += tempLocationCosts[i];
+                            ///print("sum2= " + sum2);
                         }
-                    } else {
-                        bestWord = sortedList[0];
+                        for (int i = 0; i < numWords; i++) {
+                            tempShapeCosts[i] /= sum;
+                            tempLocationCosts[i] /= sum2;
+                        }
+
+                        List<float> tempCosts2 = new List<float>();
+                        sum = 0;
+                        for (int i = 0; i < numWords; i++) {
+                            sum += tempShapeCosts[i] * tempLocationCosts[i];
+                            ///print("sum3= " + sum);
+                        }
+                        for (int i = 0; i < numWords; i++) {
+                            tempCosts2.Add(tempShapeCosts[i] * tempLocationCosts[i] / sum);
+                        }
+
+                        Dictionary<string, float> finalCosts = new Dictionary<string, float>();
+                        int q = 0;
+                        foreach (string word in wordList) {
+                            finalCosts.Add(word, tempCosts2[q]);
+                            q += 1;
+                        }
+                        foreach (var k in finalCosts.Keys) {
+                            Debug.Log(k + ": " + finalCosts[k]);
+                        }
+
+                        IOrderedEnumerable<KeyValuePair<string, float>> sorted = null;
+                        sorted = from entry in finalCosts orderby entry.Value descending select entry;
+
+                        List<KeyValuePair<string, float>> betterSortedDict;
+                        List<string> sortedList;
+
+                        betterSortedDict = sorted.ToList();
+                        sortedList = sorted.Select(pair => pair.Key).ToList();  // only take words into a list, not their probabilities
+                        float highestValue = betterSortedDict[0].Value;
+                        Dictionary<string, int> bestMatches = new Dictionary<string, int>();
+                        foreach (var pair in betterSortedDict) {
+                            if (pair.Value == highestValue) {
+                                bestMatches[pair.Key] = wordRanking[pair.Key];
+                            }
+                        }
+                        IOrderedEnumerable<KeyValuePair<string, int>> sortedBestMatches = null;
+                        sortedBestMatches = from entry in bestMatches orderby entry.Value ascending select entry;
+
+                        int p = 0;
+                        foreach (var pair in sortedBestMatches) {
+                            sortedList[p] = pair.Key;
+                            p++;
+                        }
+                        if (!isWriting) {
+                            sortedDict = sortedList;
+                            foreach (var k in sortedDict) {
+                                Debug.Log(k);
+                            }
+                        } else {
+                            bestWord = sortedList[0];
+                            isCalculatingPreview = false;
+                        }
+                    } else if (isWriting) {
+                        bestWord = "";
                         isCalculatingPreview = false;
                     }
-                } else if (isWriting) {
-                    bestWord = "";
-                    isCalculatingPreview = false;
                 }
             });
         }
@@ -541,10 +562,14 @@ namespace WordGestureKeyboard {
         /// <param name="steps">Number steps used to sample points.</param>
         /// <param name="keyRadius">Radius of a key of the keyboard.</param>
         // TODO: change name, because it doesnt calc any points but the new wordlists where words got discarded
-        Dictionary<string, List<Vector2>>[] seKeyPosition(List<Vector2> input, Dictionary<string, List<Vector2>> locWordsPoints, Dictionary<string, List<Vector2>> normWordsPoints, int steps, float keyRadius) {
+        Dictionary<string, List<Vector2>>[] seKeyPosition(List<Vector2> input, Dictionary<string, List<Vector2>> locWordPoints, Dictionary<string, List<Vector2>> normWordPoints, int steps, float keyRadius) {
             Dictionary<string, List<Vector2>> newLocWordsPoints = new Dictionary<string, List<Vector2>>();
             Dictionary<string, List<Vector2>> newNormWordsPoints = new Dictionary<string, List<Vector2>>();
             //Debug.Log("HOW MANY WORDS I CAN CHOOSE FROM?: " + locWordsPoints.Count);
+            //Debug.Log("----------------------------------------------------------------------------------");
+            /*Debug.Log("START");
+            List<string> locPruning = new List<string>();
+            int count = 0;
             foreach (var word in locWordsPoints) {
                 if (word.Key == "pololoop") {
                     //Debug.Log("TEST FOR SEPOSITION: " + input[0] + " : " + word.Value[0] + input[steps - 1] + " : " + word.Value[steps - 1]);
@@ -552,10 +577,21 @@ namespace WordGestureKeyboard {
                 if ((input[0] - word.Value[0]).magnitude < keyRadius * 2 && (input[steps - 1] - word.Value[steps - 1]).magnitude < keyRadius * 2) {
                     newLocWordsPoints.Add(word.Key, word.Value);
                     newNormWordsPoints.Add(word.Key, normWordsPoints[word.Key]);
-                    //Debug.Log("POSSIBLE WORDS: " + word.Key);
+                    Debug.Log("POSSIBLE WORDS: " + word.Key);
+                    count++;
+                    locPruning.Add(word.Key);
                 }
             }
-            //print("LENGTH: " + newLocWordsPoints.Count);
+            Debug.Log("NR POSSIBLE WORDS: " + count);
+            */
+            /////////////////////////////REMOVE
+            List<Vector2> norInput = normalize(input, 2);
+            foreach (var word in normWordPoints) {
+                if ((norInput[0] - word.Value[0]).magnitude < keyRadius * deltaNormal && (norInput[steps - 1] - word.Value[steps - 1]).magnitude < keyRadius * deltaNormal) {
+                    newLocWordsPoints.Add(word.Key, locWordPoints[word.Key]);
+                    newNormWordsPoints.Add(word.Key, word.Value);
+                }
+            }
             return new Dictionary<string, List<Vector2>>[] { newLocWordsPoints, newNormWordsPoints };
         }
 

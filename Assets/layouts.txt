@@ -86,3 +86,10 @@ ef$$
 gh$$
 ij$$
 -----
+qwertz_weird
+1234567890_-$$0
+qwertzuiopü$$0.5
+asdfghjklöä$$0.75
+yxcvbnm$$1.25
+< $$1.75
+-----

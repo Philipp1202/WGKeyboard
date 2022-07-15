@@ -34,13 +34,12 @@ namespace WordGestureKeyboard {
         public GameObject addKey;
         public GameObject layoutsObjects;
         public GameObject scaleObjects;
-
         public GameObject previewWord;
 
         List<GameObject> subOptionButtons = new List<GameObject>();
 
         BoxCollider boxCollider;
-        Text text;
+        Text keyboardText;
         LineRenderer LR;
 
         UserInputHandler UIH;
@@ -52,9 +51,9 @@ namespace WordGestureKeyboard {
         Material grayMat;
         Material keyboardMat;
 
-        bool isWriting;
-        Transform col = null;
+        bool isWriting = false;
         string lastInputWord = "";
+        Transform controller = null;
 
         bool notEnded = false;
         bool isOptionsOpen = false;
@@ -78,146 +77,37 @@ namespace WordGestureKeyboard {
             subOptionButtons.Add(scaleObjects);
 
             boxCollider = transform.parent.GetComponent<BoxCollider>();
-            text = transform.parent.GetChild(1).GetChild(0).GetComponent<Text>();
+            keyboardText = transform.parent.Find("Canvas").GetChild(0).GetComponent<Text>();
             LR = GetComponent<LineRenderer>();
             LR.numCapVertices = 5;
             LR.numCornerVertices = 5;
 
-            isWriting = false;
-
             if (startingLayout == "") { // if user didn't specify another layout, the standard qwertz layout will be used
                 startingLayout = "qwertz";
             }
-            //loadLayouts();
-            //loadWordGraphs(layout);
+
             FH = new FileHandler(startingLayout);
-            FH.loadLayouts();
+            FH.LoadLayouts();
             KH = new KeyboardHelper(this.transform, key, boxCollider, FH);
             KH.createKeyboardOverlay(startingLayout);
             UIH = new UserInputHandler(LR, this.transform);
             GPC = new GraphPointsCalculator();
             
-            //FH.addKeyboardLettersToLexicon(GPC);
-            FH.loadWordGraphs(startingLayout);
-            KH.checkForSpaceAndBackspace(FH.getLayoutKeys(), startingLayout);
+            FH.LoadWordGraphs(startingLayout);
+            KH.MakeSpaceAndBackspaceHitbox(FH.GetLayoutCompositions()[startingLayout]);
 
-            // maybe change next 4 lines
-            //optionObjects = transform.parent.Find("OptionObjects").gameObject;
-            //optionObjects.SetActive(false);
-            //addNewWordKey = transform.parent.Find("Add").gameObject;
-            //addNewWordKey.SetActive(false);
-
-            //optionsKey = transform.parent.Find("Options");
-            //optionObjects = transform.parent.Find("OptionObjects");
-            //addKey = transform.parent.Find("Add");
-            //layoutsObjects = transform.parent.Find("Layouts");
-
-            updateOptionPositions();
+            UpdateObjectPositions();
 
             print("Time needed for startup: " + (Time.realtimeSinceStartup - startTime));
-
         }
-
-        // Update is called once per frame
-        /*
-        void Update() {
-            if (isWriting) {
-                if (!UIH.getIsSampling()) {
-                    Vector3 hitPoint = UIH.getHitPoint(col.position, transform.forward);
-                    print(hitPoint);
-                    if (hitPoint != new Vector3(1000, 1000, 1000)) {
-                        UIH.samplePoints(hitPoint);
-                    }
-                }
-            } else if (!UIH.getIsSampling() && notEnded) {   // these two bools tell us, whether the calculation has ended and notEnded tells us, if the user input has been further processed
-                startTime = Time.realtimeSinceStartup;
-                List<Vector2> pointsList = UIH.getTransformedPoints();
-
-                boxCollider.center = new Vector3(boxCollider.center.x, 0.03f, boxCollider.center.z);
-                boxCollider.size = new Vector3(boxCollider.size.x, 0.05f, boxCollider.size.z);
-
-                if (GPC.isBackSpaceOrSpace(pointsList, KH.backSpaceHitbox, KH.spaceHitbox) == -1) {
-                    int count = lastInputWord.Length;
-                    if (count != 0) {
-                        for (int i = 0; i < count; i++) {
-                            
-                            text.text = text.text.Substring(0, text.text.Length - 1);
-                            queryInput = queryInput.Substring(0, queryInput.Length - 1);
-                            // TODO invoke backspace
-                            if (queryInput == "") {
-                                break;
-                            }
-                        }
-                        lastInputWord = "";
-                    } else {
-                        text.text = text.text.Substring(0, text.text.Length - 1);
-                        queryInput = queryInput.Substring(0, queryInput.Length - 1);
-                        // TODO invoke backspace
-                    }
-                    for (int i = 0; i < 4; i++) {
-                        chooseWord.transform.GetChild(i).gameObject.SetActive(false);
-                    }
-                    isLastSingleLetter = false;
-                } else if (GPC.isBackSpaceOrSpace(pointsList, KH.backSpaceHitbox, KH.spaceHitbox) == 1) {
-                    text.text += " ";
-                    queryInput += " ";
-                    // TODO: invoke inputtext with " "
-                } else {
-                    GPC.calcBestWords(pointsList, 20, FH.getLocationWordsPointsDict(), FH.getNormalizedWordsPointsDict(), KH.delta, KH.keyRadius);
-                }
-                print("TIME NEEDED: " + (Time.realtimeSinceStartup - startTime));
-                notEnded = false;
-            } else if (GPC.sortedDict != null) {
-                for (int i = 0; i < 4; i++) {
-                    chooseWord.transform.GetChild(i).gameObject.SetActive(false);
-                }
-                int bestWordsDictLength = GPC.sortedDict.Count;
-                if (isAddingNewWord) {  // putting text into textfield from keyboard
-                    text.text += GPC.sortedDict[bestWordsDictLength - 1];
-                } else {    // putting text into inputfield of query
-                    if (GPC.sortedDict[bestWordsDictLength - 1].Length == 1) { //single letter
-                        if (isLastSingleLetter) {
-                            result.Invoke(GPC.sortedDict[bestWordsDictLength - 1]);
-                            text.text += GPC.sortedDict[bestWordsDictLength - 1];
-                            queryInput += GPC.sortedDict[bestWordsDictLength - 1];
-                        } else {
-                            result.Invoke(" " + GPC.sortedDict[bestWordsDictLength - 1]);
-                            text.text += " " + GPC.sortedDict[bestWordsDictLength - 1];
-                            queryInput += " " + GPC.sortedDict[bestWordsDictLength - 1];
-                        }
-                        isLastSingleLetter = true;
-                        lastInputWord = GPC.sortedDict[bestWordsDictLength - 1];
-                    } else {    // not single letter but word
-                        for (int i = 0; i < bestWordsDictLength - 1; i++) {
-                            if (i > 3) {    // maximum of 4 best words apart from top word
-                                break;
-                            }
-                            chooseWord.transform.GetChild(i).GetChild(0).GetChild(0).GetComponent<Text>().text = GPC.sortedDict[bestWordsDictLength - 2 - i];
-                            chooseWord.transform.GetChild(i).gameObject.SetActive(true);
-                        }
-                        if (queryInput != "") { // not first word
-                            result.Invoke(" ");
-                            text.text += " ";
-                            queryInput += " ";
-                        }
-                        result.Invoke(GPC.sortedDict[bestWordsDictLength - 1]);
-                        text.text += GPC.sortedDict[bestWordsDictLength - 1];
-                        queryInput += GPC.sortedDict[bestWordsDictLength - 1];
-                        lastInputWord = GPC.sortedDict[bestWordsDictLength - 1];
-                        isLastSingleLetter = false;
-                    }
-                }
-                GPC.sortedDict = null;
-            }
-        }*/
 
         void Update() {
             if (isWriting) {
                 for (int i = 0; i < 4; i++) {
                     chooseObjects.transform.GetChild(i).gameObject.SetActive(false);
                 }
-                if (!UIH.getIsSampling()) {
-                    Vector3 hitPoint = UIH.getHitPoint(col.position, transform.forward);
+                if (!UIH.GetIsSamplingPoints()) {
+                    Vector3 hitPoint = UIH.GetHitPoint(controller.position);
                     //print(hitPoint);
                     if (UIH.checkPoint(hitPoint)) {
                         UIH.samplePoints(hitPoint);
@@ -226,23 +116,20 @@ namespace WordGestureKeyboard {
                         List<Vector2> pointsList = UIH.getTransformedPoints2();
                         UnityEngine.Debug.Log("pointslist: " + pointsList.Count);
                         if (pointsList.Count != 0) {
-                            GPC.calcBestWords(pointsList, 20, FH.getLocationWordsPointsDict(), FH.getNormalizedWordsPointsDict(), KH.delta, KH.keyRadius, FH.wordRanking, true);
+                            GPC.calcBestWords(pointsList, 20, FH.getLocationWordPointsDict(), FH.getNormalizedWordPointsDict(), KH.delta, KH.keyRadius, FH.wordRanking, true);
                         }
                     }
                     previewWord.transform.GetChild(0).GetChild(0).GetChild(0).GetComponent<Text>().text = GPC.bestWord;
                 }
-            } else if (!UIH.getIsSampling() && notEnded) {   // these two bools tell us, whether the calculation has ended and notEnded tells us, if the user input has been further processed
+            } else if (!UIH.GetIsSamplingPoints() && notEnded) {   // these two bools tell us, whether the calculation has ended and notEnded tells us, if the user input has been further processed
                 List<Vector2> pointsList = UIH.getTransformedPoints();
 
                 if (pointsList.Count != 0) {    // user pressed trigger button, but somehow it didn^t register any points
-                    boxCollider.center = new Vector3(boxCollider.center.x, 0.03f, boxCollider.center.z);
-                    boxCollider.size = new Vector3(boxCollider.size.x, 0.05f, boxCollider.size.z);
-
                     if (GPC.isBackSpaceOrSpace(pointsList, KH.backSpaceHitbox, KH.spaceHitbox) == -1) {
                         wordInputSound.Play();
                         if (isAddingNewWord) {
-                            if (text.text != "") {
-                                text.text = text.text.Substring(0, text.text.Length - 1);
+                            if (keyboardText.text != "") {
+                                keyboardText.text = keyboardText.text.Substring(0, keyboardText.text.Length - 1);
                             }
                         } else {
                             deleteEvent.Invoke();
@@ -258,7 +145,7 @@ namespace WordGestureKeyboard {
                             chooseObjects.transform.GetChild(i).gameObject.SetActive(false);
                         }
                     } else {
-                        GPC.calcBestWords(pointsList, 20, FH.getLocationWordsPointsDict(), FH.getNormalizedWordsPointsDict(), KH.delta, KH.keyRadius, FH.wordRanking, false);
+                        GPC.calcBestWords(pointsList, 20, FH.getLocationWordPointsDict(), FH.getNormalizedWordPointsDict(), KH.delta, KH.keyRadius, FH.wordRanking, false);
                     }
                     notEnded = false;
                 }
@@ -271,7 +158,7 @@ namespace WordGestureKeyboard {
                     wordInputSound.Play();
                     previewWord.transform.GetChild(0).GetChild(0).GetChild(0).GetComponent<Text>().text = GPC.sortedDict[0];
                     if (isAddingNewWord) {  // putting text into textfield from keyboard
-                        text.text += GPC.sortedDict[0];
+                        keyboardText.text += GPC.sortedDict[0];
                     } else {    // putting text into inputfield of query
                         for (int i = 0; i < bestWordsDictLength - 1; i++) {
                             if (i > 3) {    // maximum of 4 best words apart from top word
@@ -289,20 +176,53 @@ namespace WordGestureKeyboard {
                 GPC.sortedDict = null;
             }
         }
-        
-        void updateOptionPositions() {
+
+        /// <summary>
+        /// Updates the positions of all objects of the WGKeyboard (especially needed if layout changes)
+        /// </summary>
+        void UpdateObjectPositions() {
             optionsKey.transform.localPosition = new Vector3(0.5f * KH.keyboardLength + optionsKey.transform.localScale.x * 0.5f + 0.005f, 0, transform.localScale.y * 0.5f - optionsKey.transform.localScale.z * 0.5f);
             optionObjects.transform.localPosition = new Vector3(0.5f * KH.keyboardLength + optionObjects.transform.localScale.x * 0.5f + 0.005f, optionObjects.transform.localPosition.y, optionsKey.transform.localPosition.z + (MathF.Sin((90 - 360 + optionObjects.transform.localEulerAngles.x) * Mathf.PI / 180)) * (optionObjects.transform.localScale.z * 3));//optionObjects.transform.localPosition.z + transform.localScale.y * 0.5f - optionsKey.transform.localScale.z * 0.5f);
-            //print("beta: " + (MathF.Sin((90 - 360 + optionObjects.transform.localEulerAngles.x) * Mathf.PI / 180)) + " term " + (optionObjects.transform.localScale.z * 3));
-            addKey.transform.localPosition = new Vector3(0.5f * KH.keyboardLength + addKey.transform.localScale.x * 0.5f + 0.005f, 0, -transform.localScale.y * 0.5f + addKey.transform.localScale.z);
-            //layoutsObjects.transform.localPosition = new Vector3(0.5f * KH.keyboardLength + layoutsObjects.transform.localScale.x * 0.5f + 0.0075f + optionObjects.transform.localScale.x, optionObjects.transform.localPosition.y, optionObjects.transform.localPosition.z);
-            chooseObjects.transform.localPosition = new Vector3(0, chooseObjects.transform.localPosition.y, transform.localScale.y * 0.5f + 0.035f);
-            //previewWord.transform.localPosition = new Vector3(0, previewWord.transform.localPosition.y + 0.1f, transform.localScale.y * 0.5f + 0.135f);
+            addKey.transform.localPosition = new Vector3(0.5f * KH.keyboardLength + addKey.transform.localScale.x * 0.5f + 0.005f, 0, -transform.localScale.y * 0.5f + addKey.transform.localScale.z * 0.5f);
             previewWord.transform.localPosition = new Vector3(0, previewWord.transform.localPosition.y, transform.localScale.y * 0.5f + previewWord.transform.localScale.z * 0.5f * 1.1f + 0.001f);
-            //scaleObjects.transform.localPosition = new Vector3(0.5f * KH.keyboardLength + layoutsObjects.transform.localScale.x * 0.5f + 0.0075f + optionObjects.transform.localScale.x, scaleObjects.transform.localPosition.y, scaleObjects.transform.localPosition.z);
+            chooseObjects.transform.localPosition = new Vector3(0, chooseObjects.transform.localPosition.y, previewWord.transform.localPosition.z + previewWord.transform.localScale.z * 0.5f + chooseObjects.transform.localScale.y * 0.35f);
             UnityEngine.Debug.Log("addPos: " + addKey.transform.localPosition + ", scalePos: " + addKey.transform.localScale + ", optsPos: " + optionsKey.transform.localPosition + ", optsScale" + optionsKey.transform.localScale);
             if (((addKey.transform.localPosition + (addKey.transform.localScale * 0.5f)) - (optionsKey.transform.localPosition - (optionsKey.transform.localScale * 0.5f))).z >= 0) {
                 addKey.transform.localPosition = new Vector3(addKey.transform.localPosition.x, addKey.transform.localPosition.y, optionsKey.transform.localPosition.z - (optionsKey.transform.localScale.z * 0.5f) - (addKey.transform.localScale.z * 0.5f) - 0.02f);
+            }
+        }
+
+        /// <summary>
+        /// Used if user interacts with keyboard with the correct controller button.
+        /// If they press said button, the WGKeyboard is set in "drawing mode" which means, it modifies the hitbox of the WGKeyboard itself and activates the character keys' hitboxes.
+        /// </summary>
+        /// <param name="t">Transform that interacts with WGKeyboard's hitbox</param>
+        /// <param name="b">Boolean that indicates if the controller button is pressed (true) or released (false)</param>
+        public void DrawWord(Transform t, bool b) {
+            if (b) {
+                isWriting = true;
+                controller = t;
+                boxCollider.center = new Vector3(boxCollider.center.x, 0.007f, boxCollider.center.z);
+                boxCollider.size = new Vector3(boxCollider.size.x, 0.001f, boxCollider.size.z);
+                foreach (Transform child in this.transform) {
+                    child.GetComponent<BoxCollider>().isTrigger = true;
+                }
+                transform.GetComponent<MeshRenderer>().material = whiteMat;
+            } else {
+                isWriting = false;
+                notEnded = true;
+                boxCollider.center = new Vector3(boxCollider.center.x, 0.03f, boxCollider.center.z);
+                boxCollider.size = new Vector3(boxCollider.size.x, 0.05f, boxCollider.size.z);
+                foreach (Transform child in this.transform) {
+                    child.GetComponent<BoxCollider>().isTrigger = false;
+                }
+                Vector3 center = boxCollider.center;
+                Vector3 size = boxCollider.size;
+                Vector3 posOnCollider = boxCollider.transform.InverseTransformPoint(controller.position) - center;
+                if (!(Mathf.Abs(posOnCollider.x) < size.x / 2 && Mathf.Abs(posOnCollider.y) < size.y / 2 && Mathf.Abs(posOnCollider.z) < size.z / 2)) {
+                    transform.GetComponent<MeshRenderer>().material = keyboardMat;
+                }
+                print("POS ON COLLIDER: " + posOnCollider + " : " + size);
             }
         }
 
@@ -374,7 +294,7 @@ namespace WordGestureKeyboard {
                         child.GetComponent<BoxCollider>().enabled = true;
                     }
                     lastInputWord = "";
-                    text.text = "";
+                    keyboardText.text = "";
 
                     for (int i = 0; i < 4; i++) {
                         chooseObjects.transform.GetChild(i).gameObject.SetActive(false);
@@ -423,44 +343,18 @@ namespace WordGestureKeyboard {
             startingLayout = layout;
             FH.layout = layout;
             KH.createKeyboardOverlay(layout);
-            FH.loadWordGraphs(layout);
+            FH.LoadWordGraphs(layout);
             //delayActivateLayoutButtons();
-            KH.checkForSpaceAndBackspace(FH.getLayoutKeys(), layout);
-            updateOptionPositions();
-        }
-
-        public void drawWord(Transform t, bool b) {
-            if (b) {
-                isWriting = true;
-                col = t;
-                boxCollider.center = new Vector3(boxCollider.center.x, 0.01f, boxCollider.center.z);
-                boxCollider.size = new Vector3(boxCollider.size.x, 0.001f, boxCollider.size.z);
-                foreach (Transform child in this.transform) {
-                    child.GetComponent<BoxCollider>().isTrigger = true;
-                    child.GetComponent<BoxCollider>().enabled = true;
-                }
-                transform.GetComponent<MeshRenderer>().material = whiteMat;
-            }
-        }
-
-        public void endWord(Transform t, bool b) {
-            if (!b) {
-                notEnded = true;
-                isWriting = false;
-                foreach (Transform child in this.transform) {
-                    child.GetComponent<BoxCollider>().isTrigger = false;
-                    //child.GetComponent<BoxCollider>().enabled = false;
-                    //child.GetComponent<KeyManager>().setColorDefault();
-                }
-            }
+            KH.MakeSpaceAndBackspaceHitbox(FH.GetLayoutCompositions()[layout]);
+            UpdateObjectPositions();
         }
 
         public void addNewWordToDict(Transform t, bool b) {
             if (b) {
                 addKey.GetComponent<MeshRenderer>().material = grayMat;
-                string newWord = text.text; // maybe needs to be changed, but maybe let it be with Text Object for adding a word -> wouldn't interfere with input in query
+                string newWord = keyboardText.text; // maybe needs to be changed, but maybe let it be with Text Object for adding a word -> wouldn't interfere with input in query
                 FH.addNewWordToDict(newWord, GPC);
-                text.text = "";
+                keyboardText.text = "";
             } else {
                 addKey.GetComponent<MeshRenderer>().material = whiteMat;
             }

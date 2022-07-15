@@ -7,7 +7,7 @@ using System;
 namespace WordGestureKeyboard {
     public class KeyboardHelper {
 
-        GameObject Key;
+        GameObject key;
         Transform transform;
         BoxCollider boxCollider;
         FileHandler FH;
@@ -20,10 +20,11 @@ namespace WordGestureKeyboard {
         public float[] spaceHitbox = new float[4]{0,0,0,0};
         public float delta;
         public float keyboardScale = 1;
+        float keyboardKeyWidth = 0.05f;
 
-        public KeyboardHelper(Transform t, GameObject K, BoxCollider b, FileHandler f) {
+        public KeyboardHelper(Transform t, GameObject k, BoxCollider b, FileHandler f) {
             transform = t;
-            Key = K;
+            key = k;
             boxCollider = b;
             FH = f;
         }
@@ -33,8 +34,8 @@ namespace WordGestureKeyboard {
         /// </summary>
         /// <param name="layout">Keyboard layout to be generated.</param>
         public void createKeyboardOverlayOld(string layout) { // implementation does not work, if first row is not the longest (has most characters) (first.length > allOther.length)
-            List<string> keyList = FH.layoutKeys[layout].Item2;
-            List<float> paddingList = FH.layoutKeys[layout].Item1;
+            List<string> keyList = FH.layoutCompositions[layout].Item2;
+            List<float> paddingList = FH.layoutCompositions[layout].Item1;
             int count = keyList.Count;
             numKeysOnLongestLine = 0;
             for (int i = 0; i < count; i++) {
@@ -73,7 +74,7 @@ namespace WordGestureKeyboard {
                 }
 
                 foreach (var letter in s) {
-                    GameObject specificKey = GameObject.Instantiate(Key) as GameObject;
+                    GameObject specificKey = GameObject.Instantiate(key) as GameObject;
                     int scale = 1;
                     if (letter.ToString() == "<") {
                         scale = 2;
@@ -117,12 +118,12 @@ namespace WordGestureKeyboard {
         /// </summary>
         /// <param name="layout">Keyboard layout to be generated.</param>
         public void createKeyboardOverlay(string layout) {
-            List<string> keyList = FH.layoutKeys[layout].Item2;
-            List<float> paddingList = FH.layoutKeys[layout].Item1;
+            List<string> keyList = FH.layoutCompositions[layout].Item2;
+            List<float> indentList = FH.layoutCompositions[layout].Item1;
             int count = keyList.Count;
             numKeysOnLongestLine = 0;
             for (int i = 0; i < count; i++) {
-                float lineLength = keyList[i].Length + Mathf.Abs(paddingList[i]);
+                float lineLength = keyList[i].Length + Mathf.Abs(indentList[i]);
                 if (keyList[i].Contains(" ")) {
                     lineLength += 7;    // because length of spacebar is 8 * normal keysize, that means 7 * keysize extra
                 }
@@ -136,24 +137,23 @@ namespace WordGestureKeyboard {
             Debug.Log("numkeysonlongestline: " + numKeysOnLongestLine);
             delta = 1 / numKeysOnLongestLine;
             keyRadius = 1 / numKeysOnLongestLine / 2;   // keyradius after transformation of x to length 1
-            transform.localScale = new Vector3(0.05f * numKeysOnLongestLine, 0.05f * count, transform.localScale.z); // keyboard gets bigger if more keys on one line, but keys always have the same size
-            keyboardLength = transform.localScale.x;
-            keyboardWidth = transform.localScale.y;
+            keyboardLength = keyboardKeyWidth * numKeysOnLongestLine;
+            keyboardWidth = keyboardKeyWidth * count;
+            transform.localScale = new Vector3(keyboardLength, keyboardWidth, transform.localScale.z); // keyboard gets bigger if more keys on one line, but keys always have the same size
             boxCollider.size = new Vector3(keyboardLength, 0.05f, keyboardWidth);
-            //boxCollider.center = new Vector3(boxCollider.center.x, 0.03f, boxCollider.center.z);
 
             float startTime = Time.realtimeSinceStartup;
             Quaternion tempRot = transform.parent.localRotation;
             transform.parent.localRotation = new Quaternion(0, 0, 0, 0);    // set to 0,0,0,0, because otherwise could lead to wrong positions and rotations for keys, when attached to keyboard
             transform.parent.localScale = new Vector3(1, 1, 1);
-            float l = keyboardLength / (numKeysOnLongestLine * 1.1f);
+            float l = keyboardKeyWidth / 1.1f;
             int y = count - 1;
             foreach (string s in keyList) {
-                float offset = paddingList[count - y - 1] * keyRadius * keyboardLength * 2;
+                float offset = indentList[count - y - 1] * keyboardKeyWidth;
                 float offsetSpecial = 0;
                 int x = 0;
                 foreach (var letter in s) {
-                    GameObject specificKey = GameObject.Instantiate(Key) as GameObject;
+                    GameObject specificKey = GameObject.Instantiate(key) as GameObject;
                     int scale = 1;
                     offsetSpecial = 0;
                     if (letter.ToString() == "<") {
@@ -171,9 +171,9 @@ namespace WordGestureKeyboard {
                         borderLeft.localScale = new Vector3(borderLeft.localScale.x / scale, borderLeft.localScale.y, borderLeft.localScale.z);
                         borderRight.localScale = new Vector3(borderRight.localScale.x / scale, borderRight.localScale.y, borderRight.localScale.z);
                     }
-                    specificKey.transform.position = new Vector3(transform.position.x + (-keyboardLength / numKeysOnLongestLine) * ((numKeysOnLongestLine) / 2 - x) + offset + offsetSpecial + keyRadius * keyboardLength, transform.position.y + 0.005f, transform.position.z - (-keyboardWidth / count) * (-count / 2.0f + y + 1) - keyRadius * keyboardLength);
+                    specificKey.transform.position = new Vector3(transform.position.x + (-keyboardKeyWidth) * ((numKeysOnLongestLine) / 2 - x) + offset + offsetSpecial + keyboardKeyWidth / 2, transform.position.y + 0.005f, transform.position.z + (-keyboardKeyWidth) * (count / 2.0f - y - 1) - keyboardKeyWidth / 2);
                     specificKey.transform.Find("Canvas").Find("Text").GetComponent<Text>().text = letter.ToString();
-                    specificKey.transform.localScale = new Vector3(l + (keyRadius * keyboardLength) * (scale - 1) * 2, l, specificKey.transform.localScale.z);
+                    specificKey.transform.localScale = new Vector3(l + keyboardKeyWidth * (scale - 1), l, specificKey.transform.localScale.z);
                     offset += offsetSpecial * 2;    // to get all the keys in right position that are behind the special-sized keys
 
                     
@@ -189,53 +189,54 @@ namespace WordGestureKeyboard {
             Debug.Log("KEYBOARD CREATION TIME: " + (Time.realtimeSinceStartup - startTime));
         }
 
-        public void checkForSpaceAndBackspace(Dictionary<string, Tuple<List<float>, List<string>>> layoutKeys, string layout) {
-            bool charFound = false;
-            int count = layoutKeys[layout].Item2.Count;
-            for (int y = 0; y < layoutKeys[layout].Item2.Count; y++) {
-                for (int x = 0; x < layoutKeys[layout].Item2[count - y - 1].Length; x++) {
-                    if (layoutKeys[layout].Item2[count - y - 1][x].ToString() == "<") {
-                        charFound = true;
+        /// <summary>
+        /// Finds the hitboxes for the space and backspace keys if they are present in the keyboard layout.
+        /// </summary>
+        /// <param name="layoutComposition">The composition of the layout for which the space and backspace hitboxes have to be found.</param>
+        public void MakeSpaceAndBackspaceHitbox(Tuple<List<float>, List<string>> layoutComposition) {
+            bool backspaceFound = false;
+            bool spaceFound = false;
+            int xIndent;    // needed if space and backspace are on the same line, have to consider that they have a bigger size than 1
+            int count = layoutComposition.Item2.Count;
+            for (int y = 0; y < count; y++) {
+                xIndent = 0;
+                for (int x = 0; x < layoutComposition.Item2[count - y - 1].Length; x++) {
+                    if (layoutComposition.Item2[count - y - 1][x].ToString() == "<") {
+                        backspaceFound = true;
                         int scale = 2;
-                        float offset = layoutKeys[layout].Item1[count - y - 1];
+                        float offset = layoutComposition.Item1[count - y - 1];
                         float offsetSpecial = scale / 2;
                         float xPos = x + offset + offsetSpecial;
                         float yPos = y + 0.5f;
-                        backSpaceHitbox[0] = (xPos - offsetSpecial + 1) / numKeysOnLongestLine - 1 / (numKeysOnLongestLine * 1.1f);
-                        backSpaceHitbox[1] = (xPos + offsetSpecial - 1) / numKeysOnLongestLine + 1 / (numKeysOnLongestLine * 1.1f);
+                        backSpaceHitbox[0] = (xPos - offsetSpecial + xIndent) / numKeysOnLongestLine;
+                        backSpaceHitbox[1] = (xPos + offsetSpecial + xIndent) / numKeysOnLongestLine;
                         backSpaceHitbox[2] = (yPos - 0.5f) / numKeysOnLongestLine;
                         backSpaceHitbox[3] = (yPos + 0.5f) / numKeysOnLongestLine;
+                        xIndent += scale - 1;
+                    } else if (layoutComposition.Item2[count - y - 1][x].ToString() == " ") {
+                        spaceFound = true;
+                        int scale = 8;
+                        float offset = layoutComposition.Item1[count - y - 1];
+                        float offsetSpecial = scale / 2;
+                        float xPos = x + offset + offsetSpecial;
+                        float yPos = y + 0.5f;
+                        spaceHitbox[0] = (xPos - offsetSpecial + xIndent) / numKeysOnLongestLine;
+                        spaceHitbox[1] = (xPos + offsetSpecial + xIndent) / numKeysOnLongestLine;
+                        spaceHitbox[2] = (yPos - 0.5f) / numKeysOnLongestLine;
+                        spaceHitbox[3] = (yPos + 0.5f) / numKeysOnLongestLine;
+                        xIndent += scale - 1;
                     }
                 }
             }
 
-            if (!charFound) {
+            if (!backspaceFound) {
                 backSpaceHitbox[0] = 0;
                 backSpaceHitbox[1] = 0;
                 backSpaceHitbox[2] = 0;
                 backSpaceHitbox[3] = 0;
             }
 
-            charFound = false;
-            for (int y = 0; y < layoutKeys[layout].Item2.Count; y++) {
-                for (int x = 0; x < layoutKeys[layout].Item2[count - y - 1].Length; x++) {
-                    if (layoutKeys[layout].Item2[count - y - 1][x].ToString() == " ") {
-                        charFound = true;
-                        int scale = 8;
-                        float offset = layoutKeys[layout].Item1[count - y - 1];
-                        float offsetSpecial = scale / 2;
-                        float xPos = x + offset + offsetSpecial;
-                        float yPos = y + 0.5f;
-                        spaceHitbox[0] = (xPos - offsetSpecial + 1) / numKeysOnLongestLine - 1 / (numKeysOnLongestLine * 1.1f);
-                        spaceHitbox[1] = (xPos + offsetSpecial - 1) / numKeysOnLongestLine + 1 / (numKeysOnLongestLine * 1.1f);
-                        spaceHitbox[2] = (yPos - 0.5f) / numKeysOnLongestLine;
-                        spaceHitbox[3] = (yPos + 0.5f) / numKeysOnLongestLine;
-                        Debug.Log("XPOS: " + xPos + ":" + offset / keyboardLength + " : YPOS: " + yPos);
-                        Debug.Log(spaceHitbox[0] + " " + spaceHitbox[1] + " " + spaceHitbox[2] + " " + spaceHitbox[3]);
-                    }
-                }
-            }
-            if (!charFound) {
+            if (!spaceFound) {
                 spaceHitbox[0] = 0;
                 spaceHitbox[1] = 0;
                 spaceHitbox[2] = 0;
