@@ -9,6 +9,8 @@ namespace WordGestureKeyboard {
         int pointCount = 0;
         bool isSamplingPoints = false;
         bool isLastDistShort = false;
+        float minAngle = 10;
+        float minSegmentDist = 0.015f;
 
         public UserInputHandler(LineRenderer LR, Transform t) {
             this.LR = LR;
@@ -28,11 +30,11 @@ namespace WordGestureKeyboard {
         }
 
         /// <summary>
-        /// Checks if the given point is within the WGKeyboard's boundary.
+        /// Checks if the given point is within the WGKeyboard's boundaries.
         /// </summary>
         /// <param name="point">Point to check (not in localspace of WGKeyboard)</param>
-        /// <returns>Yes if it is within the WGKeyboard's boundary, no if it is outside of the WGKeyboard's boundary</returns>
-        public bool checkPoint(Vector3 point) {
+        /// <returns>True if it is within the WGKeyboard's boundaries, false if it is outside of the WGKeyboard's boundaries</returns>
+        public bool CheckPoint(Vector3 point) {
             float keyboardLength = transform.localScale.x;
             float keyboardWidth = transform.localScale.y;
             Vector3 localTransformedPoint = transform.parent.InverseTransformPoint(point);
@@ -62,106 +64,76 @@ namespace WordGestureKeyboard {
         }
 
         /// <summary>
-        /// Transforms all points of the LineRenderer to the local space of the parent of the wgkeyboard and normalizes them to be in x range 0-1. (used to transform user input into 2D space)
+        /// Transforms all points of the LineRenderer LR such that they lie in x-y-range 0-1. (longer side 0-1, shorter side 0-(shorter side / longer side)).
         /// </summary>
-        public List<Vector2> getTransformedPoints() {   // gives point lieing in 0-1 on x-axis
+        /// <param name="modify">boolean, if true, it changes some additional values (needed if this function is called, when the user ends writing)</param>
+        /// <returns>A List of transformed points made from points of the LineRenderer</returns>
+        public List<Vector2> GetTransformedPoints(bool modify) {
             List<Vector2> pointsList = new List<Vector2>();
             Vector3 point;
-
             for (int i = 0; i < LR.positionCount; i++) {
                 point = LR.GetPosition(i);
                 Vector3 localTransformedPoint = transform.parent.InverseTransformPoint(point);
                 float keyboardLength = transform.localScale.x;
                 float keyboardWidth = transform.localScale.y;
-                pointsList.Add(new Vector2((localTransformedPoint[0] + keyboardLength / 2) / keyboardLength, (localTransformedPoint[2] + keyboardWidth / 2) / keyboardLength)); // adding magnitudes, such that lower left corner of "coordinate system" is at (0/0) and not middle point at (0/0)
-                //Debug.Log("PONT: " + pointsList[i]);
+                pointsList.Add(new Vector2((localTransformedPoint.x + keyboardLength / 2) / Mathf.Max(keyboardLength, keyboardWidth), (localTransformedPoint.z + keyboardWidth / 2) / Mathf.Max(keyboardLength, keyboardWidth)));   // lower left corner of WGKeyboard is at (0/0)
             }
-            pointCount = 0;
-            LR.positionCount = 0;
-            isLastDistShort = false;
-            return pointsList;
-        }
-
-        public List<Vector2> getTransformedPoints2() {   // gives point lieing in 0-1 on x-axis
-            List<Vector2> pointsList = new List<Vector2>();
-            Vector3 point;
-
-            for (int i = 0; i < LR.positionCount; i++) {
-                point = LR.GetPosition(i);
-                Vector3 localTransformedPoint = transform.parent.InverseTransformPoint(point);
-                float keyboardLength = transform.localScale.x;
-                float keyboardWidth = transform.localScale.y;
-                pointsList.Add(new Vector2((localTransformedPoint[0] + keyboardLength / 2) / keyboardLength, (localTransformedPoint[2] + keyboardWidth / 2) / keyboardLength)); // adding magnitudes, such that lower left corner of "coordinate system" is at (0/0) and not middle point at (0/0)
-                //Debug.Log("PONT: " + pointsList[i]);
+            if (modify) {
+                pointCount = 0;
+                LR.positionCount = 0;
+                isLastDistShort = false;
             }
             return pointsList;
         }
 
         /// <summary>
-        /// The LineRenderer would normally take all the points the user inputs. This function looks, if it's okay to drop some previous set points considering the new one.
+        /// The LineRenderer would normally take all the points the user inputs. This function looks, if it is okay to drop the previous set point considering the new one.
         /// </summary>
-        /// <param name="hitPoint">New Point to consider or to discard.</param>
-        async public void samplePoints(Vector3 hitPoint) { // I worked with async, because FPS dropped from 90 to (worst case observed) around 40. Can't use Linerenderer functions in async Task.Run(), therefore worked with some "unnecessary" variables
+        /// <param name="hitPoint">New Point to consider</param>
+        async public void SamplePoints(Vector3 hitPoint) { // I worked with async, because FPS dropped from 90 to (worst case observed) around 40. Can't use Linerenderer functions in async Task.Run(), therefore worked with some "unnecessary" variables
             isSamplingPoints = true;
             int posCount = LR.positionCount;
-            Debug.Log(posCount);
-            bool setPoint = false;
             Vector3 startPoint = new Vector3(0, 0, 0);
             Vector3 middlePoint = new Vector3(0, 0, 0);
             if (posCount > 2) {
                 startPoint = LR.GetPosition(pointCount - 2);
                 middlePoint = LR.GetPosition(pointCount - 1);
             }
-            //Debug.Log("BEFORE ASYNC");
             await Task.Run(() => {
-                //Debug.Log("IN ASYNC");
-                float minAngle = 10;
-                float minSegmentDist = 0.015f;
-                if (hitPoint != new Vector3(1000, 1000, 1000)) { // check if point needs to get set or if it can be ignored
-                    if (pointCount < 3) {
-                        pointCount++;
-                        setPoint = true;
-                    } else {
-                        Vector3 lastPoint;
-                        if (Vector3.Angle(middlePoint - startPoint, hitPoint - middlePoint) < minAngle) { // set Point if almost a straight line
-                            if (isLastDistShort) {
-                                setPoint = true;
-                                lastPoint = startPoint;
-                            } else {
-                                pointCount++;
-                                setPoint = true;
-                                lastPoint = middlePoint;
-                            }
-                            if ((hitPoint - lastPoint).magnitude < minSegmentDist) {
-                                isLastDistShort = true;
-                            } else {
-                                isLastDistShort = false;
-                            }
+                if (pointCount < 3) {
+                    pointCount++;
+                } else {
+                    Vector3 lastPoint;
+                    float angle = Vector3.Angle(middlePoint - startPoint, hitPoint - middlePoint);
+                    if (angle < minAngle || angle > 180 - minAngle) {
+                        if (isLastDistShort) {
+                            lastPoint = startPoint;
                         } else {
-                            if (isLastDistShort) {
-                                setPoint = true;
-                                lastPoint = startPoint;
-                            } else {
-                                pointCount++;
-                                setPoint = true;
-                                lastPoint = middlePoint;
-                            }
-                            if ((hitPoint - lastPoint).magnitude < minSegmentDist / 5) {
-                                isLastDistShort = true;
-                            } else {
-                                isLastDistShort = false;
-                            }
+                            pointCount++;
+                            lastPoint = middlePoint;
+                        }
+                        if ((hitPoint - lastPoint).magnitude < minSegmentDist) {
+                            isLastDistShort = true;
+                        } else {
+                            isLastDistShort = false;
+                        }
+                    } else {
+                        if (isLastDistShort) {
+                            lastPoint = startPoint;
+                        } else {
+                            pointCount++;
+                            lastPoint = middlePoint;
+                        }
+                        if ((hitPoint - lastPoint).magnitude < minSegmentDist / 5) {
+                            isLastDistShort = true;
+                        } else {
+                            isLastDistShort = false;
                         }
                     }
                 }
             });
-            if (setPoint) {
-                LR.positionCount = pointCount;
-                //print("HERE MIGHT BE AN ERROR: " + LR.positionCount + " , " + pointCount);
-                LR.SetPosition(pointCount - 1, hitPoint);
-
-            }
-            setPoint = false;
+            LR.positionCount = pointCount;
+            LR.SetPosition(pointCount - 1, hitPoint);
             isSamplingPoints = false;
         }
 

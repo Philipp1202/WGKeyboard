@@ -24,17 +24,17 @@ namespace WordGestureKeyboard {
         }
 
         /// <summary>
-        /// Loads the sokgraph (perfect graph for word) points that have been generated for a certain keyboard layout in a file called "sokgraph_'layout'.txt".
+        /// Loads the points for the perfect graphs for the words that have been generated for a certain keyboard layout in a file called "graph_'layout'.txt".
         /// Saves the information in the locationWordPointsDict and normalizedWordPointsDict.
         /// </summary>
-        /// <param name="layout">Layout from which the sokgraphs should be loaded.</param>
+        /// <param name="layout">Layout from which the graphs should be loaded</param>
         async public void LoadWordGraphs(string layout) {
             await Task.Run(() => {
                 isLoading = true;
                 locationWordPointsDict = new Dictionary<string, List<Vector2>>();
                 normalizedWordPointsDict = new Dictionary<string, List<Vector2>>();
 
-                string path = "Packages/com.unibas.wgkeyboard/Assets/sokgraph_" + layout + ".txt";
+                string path = "Packages/com.unibas.wgkeyboard/Assets/graph_" + layout + ".txt";
 
                 StreamReader sr = new StreamReader(path);
                 Debug.Log("HERE IS BEGINNING OF LOADGRAPHS");
@@ -86,121 +86,26 @@ namespace WordGestureKeyboard {
         }
 
         /// <summary>
-        /// Looks, if the new word to be added already exists in the dictionary. If yes, then this function does nothing, else it writes the word in the words txt-file,
-        /// adds the sokgraph points to the corresponding files and also adds these to the normalizedWordPointsDict and locationWordPointsDict.
+        /// Checks if the word "newWord" already exists in the dictionary. If true, then this function does nothing, else it writes the word in the lexicon file and
+        /// adds the graph points to the corresponding files. Additionally, it also adds these to the normalizedWordPointsDict and locationWordPointsDict, such that they can be immediately used with the active layout.
         /// </summary>
         /// <param name="newWord">New word that should be added to the dicitonary.</param>
-        public void addNewWordToDict(string newWord, GraphPointsCalculator GPC) {
-            if (newWord.Length != 0 && !newWord.Contains(" ")) {
-                StreamReader sr = new StreamReader(pathToLexicon);
-                bool isIn = false;
-                string line;
+        public void AddNewWordToDict(string newWord, GraphPointsCalculator GPC) {
+            if (newWord.Length != 0 && !newWord.Contains(" ") && !wordsInLexicon.Contains(newWord)) {
+                StreamWriter sw = File.AppendText(pathToLexicon);
+                sw.WriteLine(newWord);
+                sw.Close();
 
-                float starttime = Time.realtimeSinceStartup;
-                while (true) {
-                    line = sr.ReadLine();
-                    if (line == newWord) {  //word already in lexicon
-                        isIn = true;
-                        break;
+                foreach (var l in layouts) {
+                    List<Vector2> wordLocationPoints = GPC.GetWordPoints(newWord, layoutCompositions[l]);
+                    if (wordLocationPoints == null) {
+                        continue;   // word cannot be written with given layout
                     }
-                    if (line == null) {
-                        break;
-                    }
-                }
-                if (wordsInLexicon.Contains(newWord)) {
-                    isIn = true;
-                }
+                    List<Vector2> wordNormPoints = GPC.Normalize(wordLocationPoints, 2);
 
-                sr.Close();
-                if (!isIn) {    // word to be added to the lexicon is new and not already in it
-                    StreamWriter sw = File.AppendText(pathToLexicon);
-                    sw.WriteLine(newWord);
-                    sw.Close();
-
-                    foreach (var l in layouts) {
-                        Debug.Log(l);
-                        List<Vector2> wordLocationPoints = GPC.getWordPoints(newWord, layoutCompositions[l]);
-                        if (wordLocationPoints == null) {
-                            Debug.Log("CANT BE WRITTEN IN: " + l);
-                            continue;
-                        }
-                        List<Vector2> wordNormPoints = GPC.normalize(wordLocationPoints, 2);
-
-                        string path = "Packages/com.unibas.wgkeyboard/Assets/sokgraph_" + l + ".txt";
-                        sw = File.AppendText(path);
-                        string newLine = newWord + ":";
-                        for (int i = 0; i < wordLocationPoints.Count; i++) {
-                            newLine += wordLocationPoints[i].x.ToString() + "," + wordLocationPoints[i].y.ToString();
-                            if (i < wordLocationPoints.Count - 1) {
-                                newLine += ",";
-                            }
-                        }
-                        newLine += ":";
-                        for (int i = 0; i < wordNormPoints.Count; i++) {
-                            newLine += wordNormPoints[i].x.ToString() + "," + wordNormPoints[i].y.ToString();
-                            if (i < wordLocationPoints.Count - 1) {
-                                newLine += ",";
-                            }
-                        }
-                        sw.WriteLine(newLine);
-                        sw.Close();
-
-                        if (l == this.layout) {
-                            normalizedWordPointsDict.Add(newWord, wordNormPoints);
-                            locationWordPointsDict.Add(newWord, wordLocationPoints);
-                        }
-                    }
-                    wordsInLexicon.Add(newWord);
-                    wordRanking[newWord] = 20000;
-                }
-            }
-
-            // Calculate graph of new word and add it to the dict/list
-        }
-
-        public void addKeyboardLettersToLexicon(GraphPointsCalculator GPC) {
-            HashSet<string> allCharacters = new HashSet<string>();
-            foreach (string layout in layouts) {
-                foreach (string l in layoutCompositions[layout].Item2) {
-                    foreach (char character in l.ToLower()) {
-                        if (!allCharacters.Contains(character.ToString())) {
-                            allCharacters.Add(character.ToString());
-                        }
-                    }
-                }
-            }
-            HashSet<string> allCharactersCopy = new HashSet<string>();
-            foreach (string s in allCharacters) {
-                allCharactersCopy.Add(s);
-            }
-            StreamReader sr = new StreamReader(pathToLexicon);
-            string line;
-            while (true) {
-                line = sr.ReadLine();
-                foreach (string s in allCharactersCopy) {
-                    if (line == s) {
-                        allCharacters.Remove(s);
-                    }
-                }
-                if (line == null) {
-                    break;
-                }
-            }
-            sr.Close();
-            StreamWriter sw = File.AppendText(pathToLexicon);
-            foreach (string s in allCharacters) {
-                sw.WriteLine(s);
-            }
-            sw.Close();
-
-            foreach (var l in layouts) {
-                string path = "Packages/com.unibas.wgkeyboard/Assets/sokgraph_" + l + ".txt";
-                sw = File.AppendText(path);
-                foreach (string s in allCharacters) {
-                    List<Vector2> wordLocationPoints = GPC.getWordPoints(s, layoutCompositions[l]);
-                    List<Vector2> wordNormPoints = GPC.normalize(wordLocationPoints, 2);
-
-                    string newLine = s + ":";
+                    string path = "Packages/com.unibas.wgkeyboard/Assets/graph_" + l + ".txt";
+                    sw = File.AppendText(path);
+                    string newLine = newWord + ":";
                     for (int i = 0; i < wordLocationPoints.Count; i++) {
                         newLine += wordLocationPoints[i].x.ToString() + "," + wordLocationPoints[i].y.ToString();
                         if (i < wordLocationPoints.Count - 1) {
@@ -210,45 +115,20 @@ namespace WordGestureKeyboard {
                     newLine += ":";
                     for (int i = 0; i < wordNormPoints.Count; i++) {
                         newLine += wordNormPoints[i].x.ToString() + "," + wordNormPoints[i].y.ToString();
-                        if (i < wordLocationPoints.Count - 1) {
+                        if (i < wordNormPoints.Count - 1) {
                             newLine += ",";
                         }
                     }
                     sw.WriteLine(newLine);
-                }
-                sw.Close();
-            }
-        }
+                    sw.Close();
 
-        /// <summary>
-        /// Loads the layouts from the file in Assets/layouts.txt.
-        /// It stores the layout names in "layouts" and the order of the keys with the layout name in the dict "layoutCompositions".
-        /// </summary>
-        void loadLayoutsOld() {
-            layouts = new List<string>();
-            //layoutCompositions = new Dictionary<string, List<string>>();
-            string path = "Packages/com.unibas.wgkeyboard/Assets/layouts.txt";
-            StreamReader sr = new StreamReader(path);
-            string line;
-            string l = "";  // layoutname
-            List<string> keys = new List<string>();
-            while (true) {
-                line = sr.ReadLine();
-                if (line == null) { // end of file reached
-                    break;
-                } else if (l == "") {
-                    l = line;
-                    layouts.Add(line);
-                    continue;
-                } else if (line == "-----") {
-                    List<string> k = keys;
-                    //layoutCompositions.Add(l, k);
-                    keys = new List<string>();
-                    l = "";
-                    continue;
+                    if (l == this.layout) { // add word and points to these two dictionaries so that this word can be written as gesture with the active layout without reloading
+                        normalizedWordPointsDict.Add(newWord, wordNormPoints);
+                        locationWordPointsDict.Add(newWord, wordLocationPoints);
+                    }
                 }
-
-                keys.Add(line);
+                wordsInLexicon.Add(newWord);
+                wordRanking[newWord] = 100;
             }
         }
 
@@ -334,7 +214,7 @@ namespace WordGestureKeyboard {
             return new Tuple<HashSet<string>, Dictionary<string, int>>(words, wordsWithRank);
         }
 
-        public List<string> getLayouts() {
+        public List<string> GetLayouts() {
             return layouts;
         }
 
@@ -342,11 +222,11 @@ namespace WordGestureKeyboard {
             return layoutCompositions;
         }
 
-        public Dictionary<string, List<Vector2>> getLocationWordPointsDict() {
+        public Dictionary<string, List<Vector2>> GetLocationWordPointsDict() {
             return locationWordPointsDict;
         }
 
-        public Dictionary<string, List<Vector2>> getNormalizedWordPointsDict() {
+        public Dictionary<string, List<Vector2>> GetNormalizedWordPointsDict() {
             return normalizedWordPointsDict;
         }
     }

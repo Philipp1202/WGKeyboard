@@ -134,8 +134,8 @@ MonoBehaviour:
     m_PersistentCalls:
       m_Calls:
       - m_Target: {fileID: -337834908931705726}
-        m_TargetAssemblyTypeName: layoutKeyScript, unibas.wgkeyboard
-        m_MethodName: chooseLayout
+        m_TargetAssemblyTypeName: WordGestureKeyboard.LayoutKeyScript, unibas.wgkeyboard
+        m_MethodName: ChooseLayout
         m_Mode: 0
         m_Arguments:
           m_ObjectArgument: {fileID: 0}

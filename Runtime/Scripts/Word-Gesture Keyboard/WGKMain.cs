@@ -60,6 +60,7 @@ namespace WordGestureKeyboard {
         bool isAddingNewWord = false;
         bool isChoosingLayout = false;
         bool isChangeSizeOpen = false;
+        bool generatedLayoutKeys = false;
 
         float startTime = 0;
 
@@ -89,7 +90,7 @@ namespace WordGestureKeyboard {
             FH = new FileHandler(startingLayout);
             FH.LoadLayouts();
             KH = new KeyboardHelper(this.transform, key, boxCollider, FH);
-            KH.createKeyboardOverlay(startingLayout);
+            KH.CreateKeyboardOverlay(FH.GetLayoutCompositions()[startingLayout]);
             UIH = new UserInputHandler(LR, this.transform);
             GPC = new GraphPointsCalculator();
             
@@ -103,29 +104,26 @@ namespace WordGestureKeyboard {
 
         void Update() {
             if (isWriting) {
-                for (int i = 0; i < 4; i++) {
-                    chooseObjects.transform.GetChild(i).gameObject.SetActive(false);
-                }
                 if (!UIH.GetIsSamplingPoints()) {
                     Vector3 hitPoint = UIH.GetHitPoint(controller.position);
-                    //print(hitPoint);
-                    if (UIH.checkPoint(hitPoint)) {
-                        UIH.samplePoints(hitPoint);
+                    if (UIH.CheckPoint(hitPoint)) {
+                        UIH.SamplePoints(hitPoint);
                     }
-                    if(!GPC.isCalculatingPreview) {
-                        List<Vector2> pointsList = UIH.getTransformedPoints2();
-                        UnityEngine.Debug.Log("pointslist: " + pointsList.Count);
-                        if (pointsList.Count != 0) {
-                            GPC.calcBestWords(pointsList, 20, FH.getLocationWordPointsDict(), FH.getNormalizedWordPointsDict(), KH.delta, KH.keyRadius, FH.wordRanking, true);
+                }
+                if(!GPC.isCalculatingPreview) {
+                    previewWord.transform.GetChild(0).GetChild(0).GetChild(0).GetComponent<Text>().text = GPC.bestWord;
+                    List<Vector2> pointsList = UIH.GetTransformedPoints(false);
+                    if (pointsList.Count != 0) {
+                        if (GPC.IsBackSpaceOrSpace(pointsList, KH.backSpaceHitbox, KH.spaceHitbox) == 0) {
+                            GPC.CalcBestWords(pointsList, FH.GetLocationWordPointsDict(), FH.GetNormalizedWordPointsDict(), KH.sigma, KH.keyRadius, FH.wordRanking, true);
+                            //Task.Run(async () => await GPC.calcBestWords(pointsList, FH.GetLocationWordPointsDict(), FH.GetNormalizedWordPointsDict(), KH.sigma, KH.keyRadius, FH.wordRanking, true));
                         }
                     }
-                    previewWord.transform.GetChild(0).GetChild(0).GetChild(0).GetComponent<Text>().text = GPC.bestWord;
                 }
             } else if (!UIH.GetIsSamplingPoints() && notEnded) {   // these two bools tell us, whether the calculation has ended and notEnded tells us, if the user input has been further processed
-                List<Vector2> pointsList = UIH.getTransformedPoints();
-
-                if (pointsList.Count != 0) {    // user pressed trigger button, but somehow it didn^t register any points
-                    if (GPC.isBackSpaceOrSpace(pointsList, KH.backSpaceHitbox, KH.spaceHitbox) == -1) {
+                List<Vector2> pointsList = UIH.GetTransformedPoints(true);
+                if (pointsList.Count != 0) {    // user pressed trigger button, but somehow it didn't register any points
+                    if (GPC.IsBackSpaceOrSpace(pointsList, KH.backSpaceHitbox, KH.spaceHitbox) == -1) {
                         wordInputSound.Play();
                         if (isAddingNewWord) {
                             if (keyboardText.text != "") {
@@ -134,25 +132,20 @@ namespace WordGestureKeyboard {
                         } else {
                             deleteEvent.Invoke();
                         }
-
-                        for (int i = 0; i < 4; i++) {
-                            chooseObjects.transform.GetChild(i).gameObject.SetActive(false);
-                        }
-                    } else if (GPC.isBackSpaceOrSpace(pointsList, KH.backSpaceHitbox, KH.spaceHitbox) == 1) {
-                        wordInputSound.Play();
-                        result.Invoke(" ");
-                        for (int i = 0; i < 4; i++) {
-                            chooseObjects.transform.GetChild(i).gameObject.SetActive(false);
+                        SetChooseObjectsFalse();
+                    } else if (GPC.IsBackSpaceOrSpace(pointsList, KH.backSpaceHitbox, KH.spaceHitbox) == 1) {
+                        if (!isAddingNewWord) {
+                            wordInputSound.Play();
+                            result.Invoke(" ");
+                            SetChooseObjectsFalse();
                         }
                     } else {
-                        GPC.calcBestWords(pointsList, 20, FH.getLocationWordPointsDict(), FH.getNormalizedWordPointsDict(), KH.delta, KH.keyRadius, FH.wordRanking, false);
+                        GPC.CalcBestWords(pointsList, FH.GetLocationWordPointsDict(), FH.GetNormalizedWordPointsDict(), KH.sigma, KH.keyRadius, FH.wordRanking, false);
                     }
                     notEnded = false;
                 }
             } else if (GPC.sortedDict != null) {
-                for (int i = 0; i < 4; i++) {
-                    chooseObjects.transform.GetChild(i).gameObject.SetActive(false);
-                }
+                SetChooseObjectsFalse();
                 int bestWordsDictLength = GPC.sortedDict.Count;
                 if (bestWordsDictLength != 0) {
                     wordInputSound.Play();
@@ -200,6 +193,7 @@ namespace WordGestureKeyboard {
         /// <param name="b">Boolean that indicates if the controller button is pressed (true) or released (false)</param>
         public void DrawWord(Transform t, bool b) {
             if (b) {
+                SetChooseObjectsFalse();
                 isWriting = true;
                 controller = t;
                 boxCollider.center = new Vector3(boxCollider.center.x, 0.007f, boxCollider.center.z);
@@ -226,7 +220,12 @@ namespace WordGestureKeyboard {
             }
         }
 
-        public void scalePlus(Transform t, bool b) {
+        /// <summary>
+        /// Makes the WGKeyboard larger if "b" is true.
+        /// </summary>
+        /// <param name="t">Transform (not further needed)</param>
+        /// <param name="b">True if WGKeyboard should get larger, otherwise false</param>
+        public void ScalePlus(Transform t, bool b) {
             if (b && transform.parent.localScale.x < 2) {
                 scaleObjects.transform.GetChild(0).GetComponent<MeshRenderer>().material = grayMat;
                 transform.parent.localScale += new Vector3(0.05f, 0.05f, 0.05f);
@@ -236,7 +235,12 @@ namespace WordGestureKeyboard {
             }
         }
 
-        public void scaleMinus(Transform t, bool b) {
+        /// <summary>
+        /// Makes the WGKeyboard smaller if "b" is true.
+        /// </summary>
+        /// <param name="t">Transform (not further needed)</param>
+        /// <param name="b">True if WGKeyboard should get smaller, otherwise false</param>
+        public void ScaleMinus(Transform t, bool b) {
             if (b && transform.parent.localScale.x > 0.5) {
                 scaleObjects.transform.GetChild(1).GetComponent<MeshRenderer>().material = grayMat;
                 transform.parent.localScale -= new Vector3(0.05f, 0.05f, 0.05f);
@@ -246,7 +250,13 @@ namespace WordGestureKeyboard {
             }
         }
 
-        public void changeSize(Transform t, bool b) {
+        /// <summary>
+        /// Every second time it is called with "b" being true, it expands the scale button by a "+" and a "-" button.
+        /// Every other second time, it is called with "b" being true, it collapses the scale button and sets the "+" and "-" buttons' visibility to false.
+        /// </summary>
+        /// <param name="t">Transform (not futher needed)</param>
+        /// <param name="b">If false, does not do anything, if true it either expands or collapses the "+" and "-" buttons</param>
+        public void ChangeSize(Transform t, bool b) {
             if (b) {
                 if (!isChangeSizeOpen) {
                     optionObjects.transform.GetChild(0).GetComponent<MeshRenderer>().material = grayMat;
@@ -259,14 +269,18 @@ namespace WordGestureKeyboard {
             }
         }
 
-        public void enterOptions(Transform t, bool b) {
+        /// <summary>
+        /// Every second time it is called with "b" being true, it expands the option button and shows the three sub buttons.
+        /// Every other second time it is called with "b" being true, it collapses the option button and does not show the three sub buttons any longer.
+        /// </summary>
+        /// <param name="t">Transform (not further needed)</param>
+        /// <param name="b">If false it does not do anything, if true it either expands or collapses the option button</param>
+        public void EnterOptions(Transform t, bool b) {
             if (b) {
                 if (!isOptionsOpen) {
                     optionsKey.GetComponent<MeshRenderer>().material = grayMat;
                     optionObjects.SetActive(true);
-                    for (int i = 0; i < 4; i++) {
-                        chooseObjects.transform.GetChild(i).gameObject.SetActive(false);
-                    }
+                    SetChooseObjectsFalse();
                 } else {
                     optionsKey.GetComponent<MeshRenderer>().material = whiteMat;
                     optionObjects.SetActive(false);
@@ -284,106 +298,140 @@ namespace WordGestureKeyboard {
             }
         }
 
-        public void enterAddWordMode(Transform t, bool b) {
+        /// <summary>
+        /// Every second time it is called with "b" being true, it expands the "add word" button and shows its sub button.
+        /// Every other second time it is called with "b" being true, it collapses the "add word" button and does not show its sub button any longer.
+        /// </summary>
+        /// <param name="t">Transform (not further needed)</param>
+        /// <param name="b">If false it does not do anything, if true it either expands or collapses the "add word" button</param>
+        public void EnterAddWordMode(Transform t, bool b) {
             if (b) {
-                isAddingNewWord = !isAddingNewWord;
-                if (isAddingNewWord) {
+                if (!isAddingNewWord) {
                     optionObjects.transform.GetChild(2).GetComponent<MeshRenderer>().material = grayMat;
                     addKey.SetActive(true);
-                    foreach (Transform child in this.transform) {
-                        child.GetComponent<BoxCollider>().enabled = true;
-                    }
                     lastInputWord = "";
                     keyboardText.text = "";
 
-                    for (int i = 0; i < 4; i++) {
-                        chooseObjects.transform.GetChild(i).gameObject.SetActive(false);
-                    }
+                    SetChooseObjectsFalse();
                 } else {
                     optionObjects.transform.GetChild(2).GetComponent<MeshRenderer>().material = whiteMat;
                     addKey.SetActive(false);
-                    foreach (Transform child in this.transform) {
-                        child.GetComponent<BoxCollider>().enabled = false;
-                    }
                 }
+                isAddingNewWord = !isAddingNewWord;
             }
         }
 
-        public void enterLayoutChoose(Transform t, bool b) {
+        /// <summary>
+        /// Every second time it is called with "b" being true, it expands the "change layout" button and shows its sub buttons (different layouts to choose from).
+        /// Every other second time it is called with "b" being true, it collapses the "change layout" button and does not show its sub buttons any longer.
+        /// </summary>
+        /// <param name="t">Transform (not further needed)</param>
+        /// <param name="b">If false it does not do anything, if true it either expands or collapses the "change layout" button</param>
+        public void EnterLayoutChoose(Transform t, bool b) {
             if (b) {
-                isChoosingLayout = !isChoosingLayout;
-                if (isChoosingLayout) {
-                    optionObjects.transform.GetChild(1).GetComponent<MeshRenderer>().material = grayMat;
-                    for (int i = 0; i < FH.layouts.Count; i++) {
-                        GameObject Key = Instantiate(layoutKey, layoutsObjects.transform, false) as GameObject;
-                        Key.transform.GetChild(0).GetChild(0).GetComponent<Text>().text = FH.layouts[i];
-                        //Key.transform.localPosition = new Vector3(Key.transform.localPosition.x, Key.transform.localPosition.y + Key.transform.localScale.y * 1.1f * i, Key.transform.localPosition.z);
-                        Key.transform.localPosition = new Vector3(0, 0, Key.transform.localScale.y * 1.1f * i);
-                        //Key.transform.SetParent(transform.parent.Find("Layouts"));
-                        //Key.transform.localScale = new Vector3(1.4f, 0.7f, 0.05f);
-                        //Key.transform.localPosition = new Vector3(1.571f, 0.575f + i, 1.273f);
-                        //Key.transform.localRotation = new Quaternion(0, 0, 0, 0);
-                        Key.SetActive(true);
+                if (!isChoosingLayout) {
+                    if (!generatedLayoutKeys) {
+                        for (int i = 0; i < FH.layouts.Count; i++) {
+                            GameObject Key = Instantiate(layoutKey, layoutsObjects.transform, false) as GameObject;
+                            Key.transform.GetChild(0).GetChild(0).GetComponent<Text>().text = FH.layouts[i];
+                            Key.transform.localPosition = new Vector3(0, 0, Key.transform.localScale.y * 1.1f * i);
+                            Key.SetActive(true);
+                            generatedLayoutKeys = true;
+                        }
                     }
+                    optionObjects.transform.GetChild(1).GetComponent<MeshRenderer>().material = grayMat;
                     layoutsObjects.SetActive(true);
                 } else {
                     optionObjects.transform.GetChild(1).GetComponent<MeshRenderer>().material = whiteMat;
-                    foreach (Transform child in layoutsObjects.transform) {
-                        GameObject.Destroy(child.gameObject);
-                    }
+                    //foreach (Transform child in layoutsObjects.transform) {
+                    //    Destroy(child.gameObject);
+                    //}
                     layoutsObjects.SetActive(false);
                 }
+                isChoosingLayout = !isChoosingLayout;
             }
         }
 
+        /// <summary>
+        /// Changes the WGKeyboard's layout and updates all positions of all buttons according to the WGKeyboard's size changes.
+        /// </summary>
+        /// <param name="layout">The layout to which the WGKeyboard should be switched</param>
         public void changeLayout(string layout) {
             foreach (Transform child in this.transform) {
                 GameObject.Destroy(child.gameObject);
             }
             startingLayout = layout;
             FH.layout = layout;
-            KH.createKeyboardOverlay(layout);
+            KH.CreateKeyboardOverlay(FH.GetLayoutCompositions()[layout]);
             FH.LoadWordGraphs(layout);
             //delayActivateLayoutButtons();
             KH.MakeSpaceAndBackspaceHitbox(FH.GetLayoutCompositions()[layout]);
             UpdateObjectPositions();
         }
 
-        public void addNewWordToDict(Transform t, bool b) {
+        /// <summary>
+        /// Calls another function that adds the word written in the WGKeyboard's text field to the lexicon.
+        /// </summary>
+        /// <param name="t">Transform (not further needed)</param>
+        /// <param name="b">If false it only changes the "add word to dict" button's color to white, if true it sets its color to gray and calls a function to add the word written in the WGKeyboard's text field to the lexicon</param>
+        public void AddNewWord(Transform t, bool b) {
             if (b) {
                 addKey.GetComponent<MeshRenderer>().material = grayMat;
                 string newWord = keyboardText.text; // maybe needs to be changed, but maybe let it be with Text Object for adding a word -> wouldn't interfere with input in query
-                FH.addNewWordToDict(newWord, GPC);
+                FH.AddNewWordToDict(newWord, GPC);
                 keyboardText.text = "";
             } else {
                 addKey.GetComponent<MeshRenderer>().material = whiteMat;
             }
         }
 
-        public void hoverKeyboard(bool b) {
+        /// <summary>
+        /// Changes the WGKeyboard's color.
+        /// </summary>
+        /// <param name="b">If true it changes the WGKeyboard's color to white, if false (and user is not writing) it changes the WGKeyboard's color to a gray tone</param>
+        public void HoverKeyboard(bool b) {
             if (b) {
                 transform.GetComponent<MeshRenderer>().material = whiteMat;
-            } else if (!b && !isWriting) {  // don't want to make keyboard write when interacting with in in sense of writing on it
+            } else if (!b && !isWriting) {  // don't want to make keyboard white when interacting with in (in sense of writing on it)
                 transform.GetComponent<MeshRenderer>().material = keyboardMat;
             }
         }
 
-        public void changeWord(Text t, string word) {
+        /// <summary>
+        /// Swaps the last inputted word in the text field with the word written in the text object given as "text".
+        /// </summary>
+        /// <param name="text">Text object of the "choose word" key</param>
+        public void ChangeWord(Text text) {
             wordInputSound.Play();
 
-            t.text = lastInputWord;
-            lastInputWord = word;
+            string tempWord = text.text;
+            text.text = lastInputWord;
+            lastInputWord = tempWord;
 
             deleteEvent.Invoke();
-            result.Invoke(word);
+            result.Invoke(tempWord);
         }
 
-        async public void delayActivateLayoutButtons() {
+        /// <summary>
+        /// Makes layout keys invisible until FileHandler loaded all graphs (otherwise can be possible that it is loading multple graphs parallel, which leads to errors).
+        /// </summary>
+        async public void DelayActivateLayoutButtons() {
             layoutsObjects.SetActive(false);
-            while (FH.isLoading) {
-                await Task.Delay(1);
-            }
+            await Task.Run(() => {
+                while (FH.isLoading) {
+                    Task.Delay(10);
+                }
+            });
             layoutsObjects.SetActive(true);
+        }
+
+        /// <summary>
+        /// Sets the gameobjects of the buttons from which the user can choose a word to false.
+        /// </summary>
+        public void SetChooseObjectsFalse() {
+            for (int i = 0; i < 4; i++) {
+                chooseObjects.transform.GetChild(i).gameObject.SetActive(false);
+            }
         }
     }
 }

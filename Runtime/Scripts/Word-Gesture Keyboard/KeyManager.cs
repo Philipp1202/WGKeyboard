@@ -6,42 +6,22 @@ using UnityEngine.UI;
 namespace WordGestureKeyboard {
     public class KeyManager : MonoBehaviour {
 
-        public Material keyHoverMat;
-        public Material normalMat;
-        /*
-        Transform parent;
-        string letter;
-        Text text;
-        bool hoverEnter = true;
-        public Material whiteMat;
-        public Material grayMat;
+        public MaterialHolder materials;
+        Material keyHoverMat;
+        Material normalMat;
+
 
         // Start is called before the first frame update
         void Start()
         {
-            parent = transform.parent;
-            //text = parent.parent.GetChild(1).GetChild(0).GetComponent<Text>();
-            letter = this.transform.GetChild(0).GetChild(0).GetComponent<Text>().text;
+            keyHoverMat = materials.keyHoverMat;
+            normalMat = materials.keyMat;
         }
 
-        // Update is called once per frame
-        void Update()
-        {
-        
-        }
-
-        public void writeLetter() {
-            if (parent.GetComponent<WGKTest>().modeArr[1] || parent.GetComponent<WGKTest>().modeArr[2]) {
-                if (hoverEnter) {
-                    parent.GetComponent<WGKTest>().writeWord(letter);
-                    this.GetComponent<MeshRenderer>().material = grayMat;
-                } else {
-                    this.GetComponent<MeshRenderer>().material = whiteMat;
-                }
-                hoverEnter = !hoverEnter;
-            }
-        }*/
-
+        /// <summary>
+        /// Changes the color of a key object.
+        /// </summary>
+        /// <param name="b">If true, changes color to a gray tone, otherwise if false, it changes the color to a brighter tone</param>
         public void IsHovered(bool b) {
             if (b) {
                 transform.GetComponent<MeshRenderer>().material = keyHoverMat;
@@ -50,7 +30,10 @@ namespace WordGestureKeyboard {
             }
         }
 
-        public void setColorDefault() {
+        /// <summary>
+        /// Changes the color of a key object to its default color.
+        /// </summary>
+        public void SetColorDefault() {
             transform.GetComponent<MeshRenderer>().material = normalMat;
         }
     }
