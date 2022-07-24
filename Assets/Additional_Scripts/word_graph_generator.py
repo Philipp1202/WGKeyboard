@@ -291,9 +291,9 @@ def main():
 
     start_time = time.time()
     try:
-        f = open(os.path.dirname(pathlib.Path().resolve()) + "/graph_" + layout + ".txt", "r+", encoding="utf-8")  # delete content of file and write new content in it
+        f = open(os.path.dirname(pathlib.Path().resolve()) + "/Graph_Files/graph_" + layout + ".txt", "r+", encoding="utf-8")  # delete content of file and write new content in it
     except:
-        f = open(os.path.dirname(pathlib.Path().resolve()) + "/graph_" + layout + ".txt", "a", encoding="utf-8")   # create file for layout, if there isn't one
+        f = open(os.path.dirname(pathlib.Path().resolve()) + "/Graph_Files/graph_" + layout + ".txt", "a", encoding="utf-8")   # create file for layout, if there isn't one
     #for k in range(0, 1000):
     f.truncate(0)
     charPos = wsg.getCharacterPositions()

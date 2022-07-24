@@ -117,6 +117,9 @@ namespace WordGestureKeyboard {
                         if (GPC.IsBackSpaceOrSpace(pointsList, KH.backSpaceHitbox, KH.spaceHitbox) == 0) {
                             GPC.CalcBestWords(pointsList, FH.GetLocationWordPointsDict(), FH.GetNormalizedWordPointsDict(), KH.sigma, KH.keyRadius, FH.wordRanking, true);
                             //Task.Run(async () => await GPC.calcBestWords(pointsList, FH.GetLocationWordPointsDict(), FH.GetNormalizedWordPointsDict(), KH.sigma, KH.keyRadius, FH.wordRanking, true));
+                        } else {
+                            GPC.bestWord = "";
+                            previewWord.transform.GetChild(0).GetChild(0).GetChild(0).GetComponent<Text>().text = "";
                         }
                     }
                 }
@@ -132,6 +135,8 @@ namespace WordGestureKeyboard {
                         } else {
                             deleteEvent.Invoke();
                         }
+                        GPC.bestWord = "";
+                        previewWord.transform.GetChild(0).GetChild(0).GetChild(0).GetComponent<Text>().text = "";
                         SetChooseObjectsFalse();
                     } else if (GPC.IsBackSpaceOrSpace(pointsList, KH.backSpaceHitbox, KH.spaceHitbox) == 1) {
                         if (!isAddingNewWord) {
@@ -139,6 +144,8 @@ namespace WordGestureKeyboard {
                             result.Invoke(" ");
                             SetChooseObjectsFalse();
                         }
+                        GPC.bestWord = "";
+                        previewWord.transform.GetChild(0).GetChild(0).GetChild(0).GetComponent<Text>().text = "";
                     } else {
                         GPC.CalcBestWords(pointsList, FH.GetLocationWordPointsDict(), FH.GetNormalizedWordPointsDict(), KH.sigma, KH.keyRadius, FH.wordRanking, false);
                     }
@@ -310,12 +317,16 @@ namespace WordGestureKeyboard {
                     optionObjects.transform.GetChild(2).GetComponent<MeshRenderer>().material = grayMat;
                     addKey.SetActive(true);
                     lastInputWord = "";
+                    keyboardText.transform.gameObject.SetActive(true);
                     keyboardText.text = "";
+                    GPC.bestWord = "";
+                    previewWord.transform.GetChild(0).GetChild(0).GetChild(0).GetComponent<Text>().text = "";
 
                     SetChooseObjectsFalse();
                 } else {
                     optionObjects.transform.GetChild(2).GetComponent<MeshRenderer>().material = whiteMat;
                     addKey.SetActive(false);
+                    keyboardText.transform.gameObject.SetActive(false);
                 }
                 isAddingNewWord = !isAddingNewWord;
             }
@@ -357,6 +368,7 @@ namespace WordGestureKeyboard {
         /// </summary>
         /// <param name="layout">The layout to which the WGKeyboard should be switched</param>
         public void changeLayout(string layout) {
+            FH.isLoading = true;
             foreach (Transform child in this.transform) {
                 GameObject.Destroy(child.gameObject);
             }
@@ -364,9 +376,12 @@ namespace WordGestureKeyboard {
             FH.layout = layout;
             KH.CreateKeyboardOverlay(FH.GetLayoutCompositions()[layout]);
             FH.LoadWordGraphs(layout);
-            //delayActivateLayoutButtons();
+            DelayActivateLayoutButtons();
             KH.MakeSpaceAndBackspaceHitbox(FH.GetLayoutCompositions()[layout]);
             UpdateObjectPositions();
+            GPC.bestWord = "";
+            previewWord.transform.GetChild(0).GetChild(0).GetChild(0).GetComponent<Text>().text = "";
+            SetChooseObjectsFalse();
         }
 
         /// <summary>

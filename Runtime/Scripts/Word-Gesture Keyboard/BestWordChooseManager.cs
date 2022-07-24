@@ -12,7 +12,6 @@ namespace WordGestureKeyboard {
 
         // Start is called before the first frame update
         void Start() {
-            Debug.Log("ERROR HERE?: " + gameObject.name);
             whiteMat = materials.whiteMat;
             grayMat = materials.grayMat;
         }

@@ -30,14 +30,12 @@ namespace WordGestureKeyboard {
         /// <param name="layout">Layout from which the graphs should be loaded</param>
         async public void LoadWordGraphs(string layout) {
             await Task.Run(() => {
-                isLoading = true;
                 locationWordPointsDict = new Dictionary<string, List<Vector2>>();
                 normalizedWordPointsDict = new Dictionary<string, List<Vector2>>();
 
-                string path = "Packages/com.unibas.wgkeyboard/Assets/graph_" + layout + ".txt";
+                string path = "Packages/com.unibas.wgkeyboard/Assets/Graph_Files/graph_" + layout + ".txt";
 
                 StreamReader sr = new StreamReader(path);
-                Debug.Log("HERE IS BEGINNING OF LOADGRAPHS");
                 string line;
                 string[] splits;
                 string[] points;
@@ -103,7 +101,7 @@ namespace WordGestureKeyboard {
                     }
                     List<Vector2> wordNormPoints = GPC.Normalize(wordLocationPoints, 2);
 
-                    string path = "Packages/com.unibas.wgkeyboard/Assets/graph_" + l + ".txt";
+                    string path = "Packages/com.unibas.wgkeyboard/Assets/Graph_Files/graph_" + l + ".txt";
                     sw = File.AppendText(path);
                     string newLine = newWord + ":";
                     for (int i = 0; i < wordLocationPoints.Count; i++) {
@@ -156,26 +154,40 @@ namespace WordGestureKeyboard {
                     l = line;
                 } else if (line == "-----") {
                     HashSet<char> allCharacters = new HashSet<char>();
-                    bool isIllegalLayout = false;
                     foreach (string s in composition.Item2) {
                         foreach (char character in s.ToLower()) {
                             if (character.ToString() == " " || character.ToString() == "<") {
                                 continue;
                             }
                             if (allCharacters.Contains(character)) {
-                                isIllegalLayout = true;
                                 Debug.Log("THIS ISSSSSSSSSSSSSSS THE IMPOSTER CHARACTER!!!!!!!!: " + character);
                                 goto Illegal;
                             }
                             allCharacters.Add(character);
                         }
                     }
-                    Illegal:
-                    if (!isIllegalLayout) { // two or more times same character in layout
+
+                    float longestKeyboardLine = 0;
+                    for (int j = 0; j < composition.Item2.Count; j++) {
+                        float lineLength = composition.Item2[j].Length + Mathf.Abs(composition.Item1[j]);
+                        if (composition.Item2[j].Contains(" ")) {
+                            lineLength += 7;    // because length of spacebar is 8 * normal keysize, that means 7 * keysize extra
+                        }
+                        if (composition.Item2[j].Contains("<")) {
+                            lineLength += 1;    // because length of backspace is 2 * normal keysize, that means 1 * keysize extra
+                        }
+                        if (lineLength > longestKeyboardLine) {
+                            longestKeyboardLine = lineLength;
+                        }
+                    }
+                    bool isWiderThanHigh = longestKeyboardLine >= composition.Item2.Count;
+                    
+                    if (File.Exists("Packages/com.unibas.wgkeyboard/Assets/Graph_Files/graph_" + l + ".txt") && isWiderThanHigh) { // graph file does not exist / layout is higher than wide
                         layouts.Add(l);
                         layoutCompositions.Add(l, composition);
                         Debug.Log("JUST ADDED: " + l);
-                    } 
+                    }
+                    Illegal:
                     composition = new Tuple<List<float>, List<string>>(new List<float>(), new List<string>());
                     l = "";
                 } else {
