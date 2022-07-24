@@ -338,9 +338,13 @@ namespace WordGestureKeyboard {
                         } else {
                             sortedDict = sortedList;
                         }
-                    } else if (isWriting) {
-                        bestWord = "";
-                        isCalculatingPreview = false;
+                    } else {
+                        if (isWriting) {
+                            bestWord = "";
+                            isCalculatingPreview = false;
+                        } else {
+                            sortedDict = new List<string> {""};
+                        }
                     }
                 }
             });

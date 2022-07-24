@@ -151,16 +151,16 @@ namespace WordGestureKeyboard {
                     }
                     notEnded = false;
                 }
-            } else if (GPC.sortedDict != null) {
+            } else if (GPC.sortedDict != null && GPC.sortedDict.Count != 0) {
                 SetChooseObjectsFalse();
-                int bestWordsDictLength = GPC.sortedDict.Count;
-                if (bestWordsDictLength != 0) {
+                string word = GPC.sortedDict[0];
+                previewWord.transform.GetChild(0).GetChild(0).GetChild(0).GetComponent<Text>().text = word;
+                if (word != "") {
                     wordInputSound.Play();
-                    previewWord.transform.GetChild(0).GetChild(0).GetChild(0).GetComponent<Text>().text = GPC.sortedDict[0];
                     if (isAddingNewWord) {  // putting text into textfield from keyboard
                         keyboardText.text += GPC.sortedDict[0];
                     } else {    // putting text into inputfield of query
-                        for (int i = 0; i < bestWordsDictLength - 1; i++) {
+                        for (int i = 0; i < GPC.sortedDict.Count - 1; i++) {
                             if (i > 3) {    // maximum of 4 best words apart from top word
                                 break;
                             }
