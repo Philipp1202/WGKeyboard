@@ -160,7 +160,6 @@ namespace WordGestureKeyboard {
                                 continue;
                             }
                             if (allCharacters.Contains(character)) {
-                                Debug.Log("THIS ISSSSSSSSSSSSSSS THE IMPOSTER CHARACTER!!!!!!!!: " + character);
                                 goto Illegal;
                             }
                             allCharacters.Add(character);
@@ -185,7 +184,6 @@ namespace WordGestureKeyboard {
                     if (File.Exists("Packages/com.unibas.wgkeyboard/Assets/Graph_Files/graph_" + l + ".txt") && isWiderThanHigh) { // graph file does not exist / layout is higher than wide
                         layouts.Add(l);
                         layoutCompositions.Add(l, composition);
-                        Debug.Log("JUST ADDED: " + l);
                     }
                     Illegal:
                     composition = new Tuple<List<float>, List<string>>(new List<float>(), new List<string>());
@@ -199,7 +197,6 @@ namespace WordGestureKeyboard {
                         composition.Item1.Add(0);
                     }
                     composition.Item2.Add(splits[0]);
-                    Debug.Log("line: " + splits[0] + " : padding: " + f);
                 }
             }
         }

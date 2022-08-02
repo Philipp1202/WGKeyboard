@@ -55,7 +55,6 @@ namespace WordGestureKeyboard {
             transform.localScale = new Vector3(keyboardLength, keyboardWidth, transform.localScale.z); // keyboard gets bigger if more keys on one line, but keys always have the same size
             boxCollider.size = new Vector3(keyboardLength, 0.05f, keyboardWidth);
 
-            float startTime = Time.realtimeSinceStartup;
             Quaternion tempRot = transform.parent.localRotation;
             transform.parent.localRotation = new Quaternion(0, 0, 0, 0);    // set to 0,0,0,0, because otherwise could lead to wrong positions and rotations for keys, when attached to keyboard
             transform.parent.localScale = new Vector3(1, 1, 1);
@@ -97,8 +96,6 @@ namespace WordGestureKeyboard {
             }
             transform.parent.localScale = new Vector3(keyboardScale, keyboardScale, keyboardScale);
             transform.parent.localRotation = tempRot;
-            
-            Debug.Log("KEYBOARD CREATION TIME: " + (Time.realtimeSinceStartup - startTime));
         }
 
         /// <summary>

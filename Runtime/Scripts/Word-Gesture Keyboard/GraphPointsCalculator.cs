@@ -34,7 +34,6 @@ namespace WordGestureKeyboard {
                     newNormWordPoints.Add(word.Key, word.Value);
                 }
             }
-            Debug.Log("NR: " + newLocWordPoints.Count);
             return new Dictionary<string, List<Vector2>>[] { newLocWordPoints, newNormWordPoints };
         }
 

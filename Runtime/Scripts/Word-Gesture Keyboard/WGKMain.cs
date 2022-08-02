@@ -66,8 +66,6 @@ namespace WordGestureKeyboard {
 
         // Start is called before the first frame update
         void Start() {
-            startTime = Time.realtimeSinceStartup;
-
             whiteMat = materials.whiteMat;
             grayMat = materials.grayMat;
             keyboardMat = materials.keyboardMat;
@@ -98,8 +96,6 @@ namespace WordGestureKeyboard {
             KH.MakeSpaceAndBackspaceHitbox(FH.GetLayoutCompositions()[startingLayout]);
 
             UpdateObjectPositions();
-
-            print("Time needed for startup: " + (Time.realtimeSinceStartup - startTime));
         }
 
         void Update() {
@@ -186,7 +182,6 @@ namespace WordGestureKeyboard {
             addKey.transform.localPosition = new Vector3(0.5f * KH.keyboardLength + addKey.transform.localScale.x * 0.5f + 0.005f, 0, -transform.localScale.y * 0.5f + addKey.transform.localScale.z * 0.5f);
             previewWord.transform.localPosition = new Vector3(0, previewWord.transform.localPosition.y, transform.localScale.y * 0.5f + previewWord.transform.localScale.z * 0.5f * 1.1f + 0.001f);
             chooseObjects.transform.localPosition = new Vector3(0, chooseObjects.transform.localPosition.y, previewWord.transform.localPosition.z + previewWord.transform.localScale.z * 0.5f + chooseObjects.transform.localScale.y * 0.35f);
-            UnityEngine.Debug.Log("addPos: " + addKey.transform.localPosition + ", scalePos: " + addKey.transform.localScale + ", optsPos: " + optionsKey.transform.localPosition + ", optsScale" + optionsKey.transform.localScale);
             if (((addKey.transform.localPosition + (addKey.transform.localScale * 0.5f)) - (optionsKey.transform.localPosition - (optionsKey.transform.localScale * 0.5f))).z >= 0) {
                 addKey.transform.localPosition = new Vector3(addKey.transform.localPosition.x, addKey.transform.localPosition.y, optionsKey.transform.localPosition.z - (optionsKey.transform.localScale.z * 0.5f) - (addKey.transform.localScale.z * 0.5f) - 0.02f);
             }
@@ -223,7 +218,6 @@ namespace WordGestureKeyboard {
                 if (!(Mathf.Abs(posOnCollider.x) < size.x / 2 && Mathf.Abs(posOnCollider.y) < size.y / 2 && Mathf.Abs(posOnCollider.z) < size.z / 2)) {
                     transform.GetComponent<MeshRenderer>().material = keyboardMat;
                 }
-                print("POS ON COLLIDER: " + posOnCollider + " : " + size);
             }
         }
 
