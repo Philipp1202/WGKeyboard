@@ -214,9 +214,10 @@ namespace WordGestureKeyboard {
                 Vector3 center = boxCollider.center;
                 Vector3 size = boxCollider.size;
                 Vector3 posOnCollider = boxCollider.transform.InverseTransformPoint(controller.position) - center;
-                if (!(Mathf.Abs(posOnCollider.x) < size.x / 2 && Mathf.Abs(posOnCollider.y) < size.y / 2 && Mathf.Abs(posOnCollider.z) < size.z / 2)) {
+                if (!(Mathf.Abs(posOnCollider.x) - 0.006f <= size.x / 2 && Mathf.Abs(posOnCollider.y) - 0.01f <= size.y / 2 && Mathf.Abs(posOnCollider.z) - 0.006f <= size.z / 2)) {
                     transform.GetComponent<MeshRenderer>().material = keyboardMat;
                 }
+                print("SIZE: " + (size*100) + " : POS: " + (posOnCollider*100));
             }
         }
 
