@@ -6,9 +6,38 @@ This package includes a Word-Gesture Keyboard that can be used in VR.
 - [Adding new words](#how-to-add-new-words)
 - [Changing the layout of the keyboard](#how-to-create-and-use-new-layouts)
 
-## Important prefab and setup **TODO**
-You need to drag the "WGKeyboardObject" prefab into your scene. Then you need to connect your function to write words somewhere with the "name TBD"/WGKeyboard/WGKMain.cs script to the "result" variable.
-You then should be able to write with the Word-Gesture Keyboard.
+## Setup
+If you have successfully installed the package, then you need to drag the "WGKeyboardObject" prefab into your scene (it can be found under Packages/Word-Gesture Keyboard/Assets/Prefabs). 
+### Usage in vitrivr-VR
+Since the package uses the Grabable.cs and the EventInteractable.cs scripts, which are from vitrivr-VR, these do not have to be added. The only thing that needs to be added are the two functions to write and delete words. When clicking on the WGKeyboardObject/WgKeyboard you can see the WGKMain.cs script. There are two functions to add under "Result (String)" and "Delete Event ()". In the "Result (String)" you have to click the "+" button drag and drop the "QueryController" from the ModularInputScene into the field. Then click on the arrow of the field where "no function" is written and choose SceneTextInputController and then "InputWord". Do the same for "Delete Event ()" but choose the "DeleteWord" function instead of "InputWord".
+
+### Usage outside of vitrivr-VR
+You need your own script that allows you to drag objects but also to interact with them (by clicking the trigger button of the VR controller) and hover them (touching the object with the VR controller (no buttons pressed)). If you need inspiration, look for the vitrivr-VR project on GitHub and search for the Grabable.cs and EventInteractable.cs scripts. You will also need a script that has functions to give the keyboard the ability to write into text fields and delete from them.
+The script to grab objects needs to be attached to the "WGKeyboardObject" object. It is used to move the keyboard around when grabbing it inside its hitbox. The other script that allows you to hover objects and interact with them (it can also be the same script) needs to be attached to the following objects with the following functions:
+|Object|Hover/Interact|Function|
+|------|--------------|--------|
+|WGKeyboardObject|Interact|WGKMain.DrawWord|
+|WGKeyboardObject|Hover|WGKMain.HoverKeyboard|
+|WGKeyboardObject.Add|Interact|WGKMain.AddNewWord|
+|WGKeyboardObject.Options|Interact|WGKMain.EnterOptions|
+|WGKeyboardObject.OptionObjects.Option1|Interact|WGKMain.ChangeSize|
+|WGKeyboardObject.OptionObjects.Option2|Interact|WGKMain.EnterLayoutChoose|
+|WGKeyboardObject.OptionObjects.Option3|Interact|WGKMain.EnterAddWordMode|
+|WGKeyboardObject.OptionObjects.Scale.Plus|Interact|WGKMain.ScalePlus|
+|WGKeyboardObject.OptionObjects.Scale.Minus|Interact|WGKMain.ScaleMinus|
+|WGKeyboardObject.ChooseWord.Word1|Hover|BestWordChooseManager.ChooseWord|
+|WGKeyboardObject.ChooseWord.Word2|Hover|BestWordChooseManager.ChooseWord|
+|WGKeyboardObject.ChooseWord.Word3|Hover|BestWordChooseManager.ChooseWord|
+|WGKeyboardObject.ChooseWord.Word4|Hover|BestWordChooseManager.ChooseWord|
+
+|Prefab|Hover/Interact|Function|
+|------|--------------|--------|
+|Key|Hover|KeyManager.IsHovered|
+|LayoutKey|Interact|LayoutKeyScript.ChooseLayout|
+
+The WGKMain.cs script can be accessed, if you click on the "+" button (to add the function to hover/interaction) and drag and drop the WGKeyboard object there. For the other scripts: They are attached to the objects that need them.
+
+If you did this, there is one last step. When clicking on the WGKeyboardObject/WgKeyboard you can see the WGKMain.cs script. There are two functions to add under "Result (String)" and "Delete Event ()". In the "Result (String)" you have to add a function that allows you to write words (written with the keyboard) into a text field or something like that. In the "Delete Event ()" you have to add a function that allows you to delete characters (whole words or single characters).
 
 ## How to write words and characters
 To write words, the controller has to be in the keyboard's hitbox. Whether it is in it, can be seen from the color of the keyboard. If it is in, the color of the keyboard is white otherwise, it is gray. If it is in the hitbox, you can press the trigger button of the controller. Now, instead of tapping on every single character you want to input, you can make a gesture to input a whole word. Start pressing the trigger button when you are at the key displaying the first character of the word you want to input. Keep pressing the trigger button and move to the next character of the word and so on until you are at the last one, then release it. Now there are three possible outcomes. The first one is that the word you intended to write was written. In the second case, another word is written, but your intended word can be found on one of the buttons that hover slightly above the keyboard. To choose one of these buttons, simply move your controller to it and when it touches the button, the word just written gets swapped with the one of the button you just touched. In the third case, either no word or a wrong one is written and you cannot find your intended word in a button hovering slightly above the keyboard. Then you either have to delete the written word that is wrong by clicking on the backspace button once or try to write the word again.

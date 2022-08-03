@@ -17,23 +17,6 @@ class wordGraphGenerator:
         if layout not in self.layouts:
             print("Layout (", layout, ") not found. Maybe you wrote the layout's name wrong.")
             exit()
-
-        #if layout == "qwertz":
-        #    self.keyboardSet.append("1234567890_-")
-        #    self.keyboardSet.append("qwertzuiopü")
-        #    self.keyboardSet.append("asdfghjklöä")
-        #    self.keyboardSet.append("yxcvbnm")
-        #    self.keyboardSet.append(" ")
-        #elif layout == "qwerty":
-        #    self.keyboardSet.append("1234567890_-")
-        #    self.keyboardSet.append("qwertyuiopü")
-        #    self.keyboardSet.append("asdfghjklöä")
-        #    self.keyboardSet.append("zxcvbnm")
-        #    self.keyboardSet.append(" ")
-        #else:
-        #    pass # make other layouts
-
-        #self.testWords = ["test", "hello", "bye", "legendary", "official", "dark", "bright", "computer", "school", "university"]
         
         for i in range(0, len(self.layoutKeys[self.layout][0])):
             lineLength = len(self.layoutKeys[self.layout][1][i]) + np.abs(self.layoutKeys[self.layout][0][i])
@@ -56,10 +39,8 @@ class wordGraphGenerator:
                 if letter == "<":
                     x += 2
                     continue
-                #print(letter, " : ", y)
                 letterPos[letter.lower()] = np.array([x, y])
                 x += 1
-        print("LETTERPOS: ", letterPos)
         return letterPos
         
     # returns a list of points for the given word (points where the "pressed" letters lie)
@@ -68,28 +49,6 @@ class wordGraphGenerator:
         for letter in word.lower():
             points.append(letterPos.get(letter))    
         return points
-        #letterPos = {}
-        #for y in range(0, len(self.layoutKeys[self.layout][0])):
-        #    x = 0
-        #    if y == 3: # for the offset the different layers of the keyboard have
-        #        x = 0.5
-        #    elif y == 2:
-        #        x = 0.75
-        #    elif y == 1:
-        #        x = 1.25
-
-        #    if len(self.keyboardSet) != 5:    # no numbers in top row (doesn't need the first shift to the right, can be reversed)
-        #        x -= 0.5
-
-        #    for letter in self.layoutKeys[self.layout][1][len(self.keyboardSet) - 1 - y]:
-        #        letterPos[letter] = np.array([x, y])
-        #        x += 1
-
-        #points = []
-        #for letter in word:
-        #    points.append(letterPos.get(letter))    
-        #return points
-
 
     # returns summed up length for all distances between all given points
     def getLengthByPoints(self, pointsArr):
@@ -108,7 +67,6 @@ class wordGraphGenerator:
             if letter not in self.availableChars:
                 return None, None
         letterPoints = self.getPointsForWord(word, letterPos)
-        #letterPoints = normalize(letterPoints, 2) # for testing include this line
         length = self.getLengthByPoints(letterPoints)
         if length == 0:
             stepPoints = []
@@ -137,13 +95,11 @@ class wordGraphGenerator:
             distVec = distVecs[currDistVecNum]
             distVecLength = math.sqrt(distVec[0]**2 + distVec[1]**2) # much faster than using np.linalg.norm()
             if currStep != stepSize:
-                #print(distVecLength, " and ", currStep)
                 if distVecLength - currStep > -0.00001: # error for abandoned and acknowledged was here
                     numSteps += 1
                     currPos = currPos + distVec / distVecLength * currStep
                     distVecs[currDistVecNum] = letterPoints[currPosNum + 1] - currPos # calculate new distance vector
                     stepPoints.append((currPos + np.array([0.5,0.5]))/self.keyboardLength)
-                    #print(currPos)
                     currStep = stepSize
                 else:
                     currStep -= distVecLength
@@ -152,12 +108,10 @@ class wordGraphGenerator:
                     currPos = letterPoints[currPosNum]
                     
             elif int(distVecLength / stepSize + 0.00001) > 0: # adding 0.00001 to avoid rounding errors
-                #print(distVecLength, " and ", stepSize)
                 numPointsOnLine = int(distVecLength / stepSize + 0.00001)
                 numSteps += numPointsOnLine
                 for i in range(0, numPointsOnLine):
                     stepPoints.append(((currPos + (i+1) * (distVec / distVecLength * stepSize)) + np.array([0.5,0.5]))/self.keyboardLength)
-                    #print(currPos + (i+1) * (distVec / distVecLength * stepSize))
                 
                 if distVecLength - numPointsOnLine * stepSize > 0.00001:
                     currStep -= (distVecLength - numPointsOnLine * stepSize)
@@ -171,16 +125,15 @@ class wordGraphGenerator:
                 currDistVecNum += 1
                 currPosNum += 1
                 currPos = letterPoints[currPosNum]
-            #print(currDistVecNum)
             
         stepPointsNormalized = self.normalize(stepPoints, 2)
         return stepPoints, stepPointsNormalized
 
 
-    # normalizes the points according to the paper talking about SHARK2 (make all bounding boxes of shapes euqally big and
+    # normalizes the points according to the paper talking about SHARK2 (make all bounding boxes of shapes equally big and
     # put the center to the (0,0) point)
     # letterpoints: np.array list, points to normalize
-    # length: int, length the longest side of the boundingbox will have
+    # length: int, length the longest side of the bounding box will have
     def normalize(self, letterPoints, length):
         (x,y) = self.getXY(letterPoints)
         
@@ -200,7 +153,7 @@ class wordGraphGenerator:
             
         return newPoints
 
-    # functions below are only for showing the resulting plotted
+    # functions below are only for showing the results plotted
     def getXY(self, wordPoints):
         xPoints = []
         yPoints = []
@@ -255,7 +208,6 @@ class wordGraphGenerator:
                 except:
                     padding.append(0)
                 keys.append(splits[0])
-                # print(splits[0] + ", " + splits[1])
             print("available layouts: ", self.layouts)
 
         availableChars = ""
@@ -264,20 +216,15 @@ class wordGraphGenerator:
                 if character != " " and character != "<":
                     availableChars += character.lower()
         self.availableChars = availableChars
-        print(self.availableChars)
 
 
 def main():
-    
-    # print(pathlib.Path().resolve())
-    # print(os.path.dirname(pathlib.Path().resolve()))
     layout = sys.argv[1]
-    lexiconFilePath = os.path.dirname(pathlib.Path().resolve()) + "/" + sys.argv[2]   # sys.argv[2] has to be the name of the txt file, that lies in the Assets folder (the word lexicon)
+    lexiconFilePath = os.path.dirname(pathlib.Path().resolve()) + "/" + sys.argv[2]   # sys.argv[2] has to be the name of the txt file that lies in the Assets folder (the word lexicon)
     lexicon = []
     with open(lexiconFilePath, "r", encoding = "utf-8") as f:
         for line in f:
             lexicon.append(line.rstrip())
-    print(lexicon)
 
     wsg = wordGraphGenerator(layout)
 
@@ -294,7 +241,6 @@ def main():
         f = open(os.path.dirname(pathlib.Path().resolve()) + "/Graph_Files/graph_" + layout + ".txt", "r+", encoding="utf-8")  # delete content of file and write new content in it
     except:
         f = open(os.path.dirname(pathlib.Path().resolve()) + "/Graph_Files/graph_" + layout + ".txt", "a", encoding="utf-8")   # create file for layout, if there isn't one
-    #for k in range(0, 1000):
     f.truncate(0)
     charPos = wsg.getCharacterPositions()
     for word in lexicon:

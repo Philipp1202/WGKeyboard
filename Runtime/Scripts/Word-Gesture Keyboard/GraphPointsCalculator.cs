@@ -196,43 +196,47 @@ namespace WordGestureKeyboard {
         /// <returns>A dictionary of words with their confidence score or null</returns>
         public Dictionary<string, float> ChannelIntegration(Dictionary<string, float> shapeCosts, Dictionary<string, float> locationCosts, float sigma) {
             List<string> wordList = new List<string>();
-            foreach (var word in shapeCosts) {   // look which word had a good cost in shape and location
+            foreach (var word in shapeCosts) {
                 if (locationCosts.ContainsKey(word.Key)) {
                     wordList.Add(word.Key);
                 }
             }
-
             if (wordList.Count > 0) {
-                List<float> shapeProbs = new List<float>();
-                List<float> locationProbs = new List<float>();
-                foreach (string word in wordList) {
-                    float shapeCost = shapeCosts[word];
-                    float shapeProb = 1 / (sigma * Mathf.Sqrt(2 * Mathf.PI)) * Mathf.Exp((float)(-0.5 * Mathf.Pow(shapeCost / sigma, 2)));
-                    float locationCost = locationCosts[word];
-                    float locationProb = 1 / (sigma * Mathf.Sqrt(2 * Mathf.PI)) * Mathf.Exp((float)(-0.5 * Mathf.Pow(locationCost / sigma, 2)));
-                    shapeProbs.Add(shapeProb);
-                    locationProbs.Add(locationProb);
+                Dictionary<string, float> shapeProbs = new Dictionary<string, float>();
+                foreach (var pair in shapeCosts) {
+                    float shapeProb = 1 / ((sigma * sigmaNormal) * Mathf.Sqrt(2 * Mathf.PI)) * Mathf.Exp((float)(-0.5 * Mathf.Pow(pair.Value / (sigma * sigmaNormal), 2)));
+                    shapeProbs[pair.Key] = shapeProb;
+                }
+                Dictionary<string, float> locationProbs = new Dictionary<string, float>();
+                foreach (var pair in locationCosts) {
+                    float locationProb = 1 / (sigma * Mathf.Sqrt(2 * Mathf.PI)) * Mathf.Exp((float)(-0.5 * Mathf.Pow(pair.Value / sigma, 2)));
+                    locationProbs[pair.Key] = locationProb;
+                }
+                float sum = 0;
+                foreach (var pair in shapeProbs) {
+                    sum += pair.Value;
+                }
+                float sum2 = 0;
+                foreach (var pair in locationProbs) {
+                    sum2 += pair.Value;
                 }
 
-                float sum = 0;
-                float sum2 = 0;
-                int numWords = wordList.Count;
-                for (int i = 0; i < numWords; i++) {
-                    sum += shapeProbs[i];
-                    sum2 += locationProbs[i];
+                Dictionary<string, float> shapeProbs2 = new Dictionary<string, float>();
+                foreach (var pair in shapeProbs) {
+                    shapeProbs2[pair.Key] = shapeProbs[pair.Key] / sum;
                 }
-                for (int i = 0; i < numWords; i++) {
-                    shapeProbs[i] /= sum;
-                    locationProbs[i] /= sum2;
+                Dictionary<string, float> locationProbs2 = new Dictionary<string, float>();
+                foreach (var pair in locationProbs) {
+                    locationProbs2[pair.Key] = locationProbs[pair.Key] / sum2;
                 }
 
                 Dictionary<string, float> confidenceScores = new Dictionary<string, float>();
                 sum = 0;
-                for (int i = 0; i < numWords; i++) {
-                    sum += shapeProbs[i] * locationProbs[i];
+                foreach (string word in wordList) {
+                    sum += shapeProbs2[word] * locationProbs2[word];
                 }
-                for (int i = 0; i < numWords; i++) {
-                    confidenceScores[wordList[i]] = shapeProbs[i] * locationProbs[i] / sum;
+                foreach (string word in wordList) {
+                    confidenceScores[word] = shapeProbs2[word] * locationProbs2[word] / sum;
                 }
 
                 return confidenceScores;

@@ -61,8 +61,7 @@ namespace WordGestureKeyboard {
         bool isChoosingLayout = false;
         bool isChangeSizeOpen = false;
         bool generatedLayoutKeys = false;
-
-        float startTime = 0;
+        bool pressedChangeLayout = false;
 
         // Start is called before the first frame update
         void Start() {
@@ -362,20 +361,23 @@ namespace WordGestureKeyboard {
         /// </summary>
         /// <param name="layout">The layout to which the WGKeyboard should be switched</param>
         public void changeLayout(string layout) {
-            FH.isLoading = true;
-            foreach (Transform child in this.transform) {
-                GameObject.Destroy(child.gameObject);
+            if (!pressedChangeLayout) {
+                pressedChangeLayout = true;
+                FH.isLoading = true;
+                foreach (Transform child in this.transform) {
+                    GameObject.Destroy(child.gameObject);
+                }
+                startingLayout = layout;
+                FH.layout = layout;
+                KH.CreateKeyboardOverlay(FH.GetLayoutCompositions()[layout]);
+                FH.LoadWordGraphs(layout);
+                DelayActivateLayoutButtons();
+                KH.MakeSpaceAndBackspaceHitbox(FH.GetLayoutCompositions()[layout]);
+                UpdateObjectPositions();
+                GPC.bestWord = "";
+                previewWord.transform.GetChild(0).GetChild(0).GetChild(0).GetComponent<Text>().text = "";
+                SetChooseObjectsFalse();
             }
-            startingLayout = layout;
-            FH.layout = layout;
-            KH.CreateKeyboardOverlay(FH.GetLayoutCompositions()[layout]);
-            FH.LoadWordGraphs(layout);
-            DelayActivateLayoutButtons();
-            KH.MakeSpaceAndBackspaceHitbox(FH.GetLayoutCompositions()[layout]);
-            UpdateObjectPositions();
-            GPC.bestWord = "";
-            previewWord.transform.GetChild(0).GetChild(0).GetChild(0).GetComponent<Text>().text = "";
-            SetChooseObjectsFalse();
         }
 
         /// <summary>
@@ -432,6 +434,7 @@ namespace WordGestureKeyboard {
                 }
             });
             layoutsObjects.SetActive(true);
+            pressedChangeLayout = false;
         }
 
         /// <summary>

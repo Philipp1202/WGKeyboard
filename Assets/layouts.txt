@@ -39,45 +39,11 @@ mnopqr$$0
 stuvwx$$0
 yz<$$1
 -----
-test
-abcdef$$0
-stuvwx$$0
-ghklmn$$0
------
-utf-8
+special
 äüö£!$$0
 éèà?=)$$0
 +"*ç%&$$0
 <abc$$0
------
-qwertz2
-1234567890_-$$0
-qwertzuiopü$$0.5
- $$1.75
-asdfghjklöä$$0.75
-yxcvbnm<$$1.25
------
-Philipp
-1234567890_-$$0
-phil$$3
- $$1.75
-webrr$$3
------
-Philipp2
-1234567890_-$$0
-phil$$3
- $$1.75
-webrR$$3
------
-qwer_big
-1234567890_-$$0
-TEZRUI$$0.5
-AHSJDKFL$$0.75
-YMXNC<$$1.25
- $$1.75
------
-math
-/*$$
 -----
 high
 ab$$
@@ -85,11 +51,4 @@ cd$$
 ef$$
 gh$$
 ij$$
------
-qwertz_weird
-1234567890_-$$0
-qwertzuiopü$$0.5
-asdfghjklöä$$0.75
-yxcvbnm$$1.25
-< $$1.75
 -----
