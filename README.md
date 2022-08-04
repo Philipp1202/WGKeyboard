@@ -6,6 +6,8 @@ This package includes a Word-Gesture Keyboard that can be used in VR.
 - [Adding new words](#how-to-add-new-words)
 - [Changing the layout of the keyboard](#how-to-create-and-use-new-layouts)
 
+https://user-images.githubusercontent.com/71380589/182832671-901c8fef-fa50-4dfb-bd77-6a1dcb7be1c6.mov
+
 ## Setup
 If you have successfully installed the package, then you need to drag the "WGKeyboardObject" prefab into your scene (it can be found under Packages/Word-Gesture Keyboard/Assets/Prefabs). 
 ### Usage in vitrivr-VR
