@@ -27,6 +27,7 @@ class wordGraphGenerator:
             if lineLength > self.keyboardLength:
                 self.keyboardLength = lineLength
 
+    # returns a dictionary with all the characters of the layout as keys and its positions as value.
     def getCharacterPositions(self):
         letterPos = {}
         for y in range(0, len(self.layoutKeys[self.layout][0])):
@@ -43,14 +44,17 @@ class wordGraphGenerator:
                 x += 1
         return letterPos
         
-    # returns a list of points for the given word (points where the "pressed" letters lie)
+    # returns a list of points for the given word (points where its letters lie).
+    # "word" is the string for which the character positions should be returned
+    # "letterPos" is the dictionary containing all the characters and their positions
     def getPointsForWord(self, word, letterPos):
         points = []
         for letter in word.lower():
             points.append(letterPos.get(letter))    
         return points
 
-    # returns summed up length for all distances between all given points
+    # returns summed up length for all distances between all given points.
+    # "pointsArr" is an array of 2D points
     def getLengthByPoints(self, pointsArr):
         dist = 0
         for i in range(0, len(pointsArr) - 1):
@@ -58,10 +62,10 @@ class wordGraphGenerator:
             dist += math.sqrt(distVec[0]**2 + distVec[1]**2)
         return dist
 
-
-    # returns the sampled points with a gap of "steps" (walking the graph of a word) for the given string (word)
-    # word: string
-    # steps: int 
+    # returns the "steps" sampled points for the given string (word).
+    # "word" is a string
+    # "steps" is the number of sampling points
+    # "letterPos" is the dictionary containing all the characters and their positions
     def getWordGraphStepPoint(self, word, steps, letterPos):
         for letter in word:
             if letter not in self.availableChars:
@@ -132,8 +136,8 @@ class wordGraphGenerator:
 
     # normalizes the points according to the paper talking about SHARK2 (make all bounding boxes of shapes equally big and
     # put the center to the (0,0) point)
-    # letterpoints: np.array list, points to normalize
-    # length: int, length the longest side of the bounding box will have
+    # "letterpoints": np.array list, points to normalize
+    # "length": int, length the longest side of the bounding box will have
     def normalize(self, letterPoints, length):
         (x,y) = self.getXY(letterPoints)
         
@@ -153,30 +157,7 @@ class wordGraphGenerator:
             
         return newPoints
 
-    # functions below are only for showing the results plotted
-    def getXY(self, wordPoints):
-        xPoints = []
-        yPoints = []
-        for i in range(0, len(wordPoints)):
-            xPoints.append(wordPoints[i][0])
-            yPoints.append(wordPoints[i][1])
-        return (xPoints, yPoints)
-
-    def plotWordGraph(self, points):
-        plt.figure(figsize = [10,3])
-        plt.plot(points[0], points[1], 'ro-')
-        plt.axis([-0.1, 9.1, -0.1, 2.1])
-        
-    def plotWordGraphSteps(self, points):
-        plt.figure(figsize = [10,3])
-        plt.plot(points[0], points[1], 'ro')
-        plt.axis([-0.1, 9.1, -0.1, 2.1])
-        
-    def plotWordGraphStepsNormalized(self, points):
-        plt.figure(figsize = [10,3])
-        plt.plot(points[0], points[1], 'ro')
-        plt.axis([-2.1, 2.1, -2.1, 2.1])
-
+    # reads the file that contains all available layouts (does not return anything, but assigns things to the "layout" and "layoutKeys").
     def readLayoutsFile(self):
         path = os.path.dirname(pathlib.Path().resolve()) + "/layouts.txt"
         l = ""
@@ -216,6 +197,30 @@ class wordGraphGenerator:
                 if character != " " and character != "<":
                     availableChars += character.lower()
         self.availableChars = availableChars
+
+    def getXY(self, wordPoints):
+        xPoints = []
+        yPoints = []
+        for i in range(0, len(wordPoints)):
+            xPoints.append(wordPoints[i][0])
+            yPoints.append(wordPoints[i][1])
+        return (xPoints, yPoints)
+
+    # functions below are only for showing the results plotted
+    def plotWordGraph(self, points):
+        plt.figure(figsize = [10,3])
+        plt.plot(points[0], points[1], 'ro-')
+        plt.axis([-0.1, 9.1, -0.1, 2.1])
+        
+    def plotWordGraphSteps(self, points):
+        plt.figure(figsize = [10,3])
+        plt.plot(points[0], points[1], 'ro')
+        plt.axis([-0.1, 9.1, -0.1, 2.1])
+        
+    def plotWordGraphStepsNormalized(self, points):
+        plt.figure(figsize = [10,3])
+        plt.plot(points[0], points[1], 'ro')
+        plt.axis([-2.1, 2.1, -2.1, 2.1])
 
 
 def main():
