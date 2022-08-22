@@ -1,10 +1,10 @@
 {
-    "name": "com.unibas.wgkeyboard",
-    "version": "1.0.0",
-    "displayName": "Word-Gesture Keyboard",
-    "description": "Word-Gesture keyboard for VR",
-    "unity": "2021.2",
-    "author": {
-      "name": "Philipp Weber"
-    }
+  "name": "ch.unibas.wgkeyboard",
+  "version": "1.0.1",
+  "displayName": "Word-Gesture Keyboard",
+  "description": "Word-Gesture keyboard for VR",
+  "unity": "2021.3",
+  "author": {
+    "name": "Philipp Weber & Florian Spiess"
   }
+}
