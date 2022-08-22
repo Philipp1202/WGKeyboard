@@ -93,7 +93,6 @@ GameObject:
   - component: {fileID: 1157403622050763682}
   - component: {fileID: 1157403622050763683}
   - component: {fileID: 8088120275546456425}
-  - component: {fileID: -7851705415446300637}
   m_Layer: 0
   m_Name: Key
   m_TagString: Untagged
@@ -198,43 +197,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   materials: {fileID: 7897214852118176417, guid: 58b3dc64846240f498686b318bb2cd7a,
     type: 3}
---- !u!114 &-7851705415446300637
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1157403622050763692}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: ec8a6c043a216ff42b0b8b09e458e632, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  disablesPointer: 1
-  onInteraction:
-    m_PersistentCalls:
-      m_Calls: []
-  onGrab:
-    m_PersistentCalls:
-      m_Calls: []
-  onDrop:
-    m_PersistentCalls:
-      m_Calls: []
-  onHoverChange:
-    m_PersistentCalls:
-      m_Calls:
-      - m_Target: {fileID: 8088120275546456425}
-        m_TargetAssemblyTypeName: KeyManager, unibas.wgkeyboard
-        m_MethodName: IsHovered
-        m_Mode: 0
-        m_Arguments:
-          m_ObjectArgument: {fileID: 0}
-          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
-          m_IntArgument: 0
-          m_FloatArgument: 0
-          m_StringArgument: 
-          m_BoolArgument: 0
-        m_CallState: 2
 --- !u!1 &1157403622208271178
 GameObject:
   m_ObjectHideFlags: 0

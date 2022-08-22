@@ -9,13 +9,16 @@ This package includes a Word-Gesture Keyboard that can be used in VR.
 https://user-images.githubusercontent.com/71380589/182833864-12e28735-44af-475b-9acd-d0a7ab829412.mp4
 
 ## Setup
-If you have successfully installed the package, then you need to drag the "WGKeyboardObject" prefab into your scene (it can be found under Packages/Word-Gesture Keyboard/Assets/Prefabs). 
-### Usage in vitrivr-VR
-Since the package uses the Grabable.cs and the EventInteractable.cs scripts, which are from vitrivr-VR, these do not have to be added. The only thing that needs to be added are the two functions to write and delete words. When clicking on the WGKeyboardObject/WgKeyboard you can see the WGKMain.cs script. There are two functions to add under "Result (String)" and "Delete Event ()". In the "Result (String)" you have to click the "+" button and drag and drop the "QueryController" from the ModularInputScene into the field. Then click on the arrow of the field where "no function" is written and choose SceneTextInputController and then "InputWord". Do the same for "Delete Event ()" but choose the "DeleteWord" function instead of "InputWord".
+If you have successfully installed the package, then you need to drag the [WGKeyboardObject](Assets/Prefabs/WGKeyboardObject.prefab) prefab into your scene. 
 
-### Usage outside of vitrivr-VR
-You need your own script that allows you to drag objects but also to interact with them (by clicking the trigger button of the VR controller) and hover them (touching the object with the VR controller (no buttons pressed)). If you need inspiration, look for the vitrivr-VR project on GitHub and search for the Grabable.cs and EventInteractable.cs scripts. You will also need a script that has functions to give the keyboard the ability to write into text fields and delete from them.
-The script to grab objects needs to be attached to the "WGKeyboardObject" object. It is used to move the keyboard around when grabbing it inside its hitbox. The other script that allows you to hover objects and interact with them (it can also be the same script) needs to be attached to the following objects with the following functions:
+### Usage
+You need your own script that allows you to drag objects but also to interact with them (by clicking the trigger button of the VR controller) and hover them (touching the object with the VR controller).
+If you need inspiration, look for [vitrivr-VR](https://github.com/vitrivr/vitrivr-vr) and search for the `Grabable.cs` and `EventInteractable.cs` scripts.
+You will need a script that has functions to give the keyboard the ability to write into text fields and delete from them.
+This script should be connected to the `Result` and `Delete Event` events on the `Word Gesture Keyboard` script.
+Movement scripts should be attached to the root of the prefab.
+The other script that allows you to hover objects and interact with them (it can also be the same script) needs to be attached to the following objects with the following functions:
+
 |Object|Hover/Interact|Function|
 |------|--------------|--------|
 |WGKeyboardObject|Interact|WGKMain.DrawWord|

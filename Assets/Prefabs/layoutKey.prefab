@@ -13,10 +13,9 @@ GameObject:
   - component: {fileID: 6720965589483598394}
   - component: {fileID: 6720965589483598395}
   - component: {fileID: 6720965589483598396}
-  - component: {fileID: 6720965589483598397}
   - component: {fileID: -337834908931705726}
   m_Layer: 0
-  m_Name: LayoutKey
+  m_Name: layoutKey
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -117,43 +116,6 @@ Rigidbody:
   m_Interpolate: 0
   m_Constraints: 126
   m_CollisionDetection: 0
---- !u!114 &6720965589483598397
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 6720965589483598398}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: ec8a6c043a216ff42b0b8b09e458e632, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  disablesPointer: 1
-  onInteraction:
-    m_PersistentCalls:
-      m_Calls:
-      - m_Target: {fileID: -337834908931705726}
-        m_TargetAssemblyTypeName: WordGestureKeyboard.LayoutKeyScript, unibas.wgkeyboard
-        m_MethodName: ChooseLayout
-        m_Mode: 0
-        m_Arguments:
-          m_ObjectArgument: {fileID: 0}
-          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
-          m_IntArgument: 0
-          m_FloatArgument: 0
-          m_StringArgument: 
-          m_BoolArgument: 0
-        m_CallState: 2
-  onGrab:
-    m_PersistentCalls:
-      m_Calls: []
-  onDrop:
-    m_PersistentCalls:
-      m_Calls: []
-  onHoverChange:
-    m_PersistentCalls:
-      m_Calls: []
 --- !u!114 &-337834908931705726
 MonoBehaviour:
   m_ObjectHideFlags: 0

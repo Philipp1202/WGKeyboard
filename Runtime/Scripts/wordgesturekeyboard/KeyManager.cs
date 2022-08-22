@@ -1,3 +1,4 @@
+using System;
 using UnityEngine;
 
 namespace WordGestureKeyboard
@@ -18,10 +19,20 @@ namespace WordGestureKeyboard
     /// <summary>
     /// Changes the color of a key object.
     /// </summary>
-    /// <param name="b">If true, changes color to a gray tone, otherwise if false, it changes the color to a brighter tone</param>
-    public void IsHovered(bool b)
+    /// <param name="hovered">If true, changes color to a gray tone, otherwise if false, it changes the color to a brighter tone</param>
+    public void IsHovered(bool hovered)
     {
-      transform.GetComponent<MeshRenderer>().material = b ? _keyHoverMat : _normalMat;
+      transform.GetComponent<MeshRenderer>().material = hovered ? _keyHoverMat : _normalMat;
+    }
+
+    private void OnTriggerEnter(Collider other)
+    {
+      IsHovered(true);
+    }
+
+    private void OnTriggerExit(Collider other)
+    {
+      IsHovered(false);
     }
   }
 }

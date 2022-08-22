@@ -13,7 +13,6 @@ GameObject:
   - component: {fileID: 1269849713024089179}
   - component: {fileID: 1269849713024089178}
   - component: {fileID: 1269849713024089173}
-  - component: {fileID: 1269849713024089172}
   - component: {fileID: 1269849713024089177}
   m_Layer: 0
   m_Name: Word3
@@ -117,43 +116,6 @@ Rigidbody:
   m_Interpolate: 0
   m_Constraints: 126
   m_CollisionDetection: 0
---- !u!114 &1269849713024089172
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1269849713024089174}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: ec8a6c043a216ff42b0b8b09e458e632, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  disablesPointer: 1
-  onInteraction:
-    m_PersistentCalls:
-      m_Calls: []
-  onGrab:
-    m_PersistentCalls:
-      m_Calls: []
-  onDrop:
-    m_PersistentCalls:
-      m_Calls: []
-  onHoverChange:
-    m_PersistentCalls:
-      m_Calls:
-      - m_Target: {fileID: 1269849713024089177}
-        m_TargetAssemblyTypeName: WordGestureKeyboard.BestWordChooseManager, unibas.wgkeyboard
-        m_MethodName: ChooseWord
-        m_Mode: 0
-        m_Arguments:
-          m_ObjectArgument: {fileID: 0}
-          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
-          m_IntArgument: 0
-          m_FloatArgument: 0
-          m_StringArgument: 
-          m_BoolArgument: 0
-        m_CallState: 2
 --- !u!114 &1269849713024089177
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -917,7 +879,6 @@ GameObject:
   - component: {fileID: 1269849713618516269}
   - component: {fileID: 1269849713618516268}
   - component: {fileID: 1269849713618516271}
-  - component: {fileID: 1269849713618516270}
   - component: {fileID: 1269849713618516275}
   m_Layer: 0
   m_Name: Word2
@@ -1021,43 +982,6 @@ Rigidbody:
   m_Interpolate: 0
   m_Constraints: 126
   m_CollisionDetection: 0
---- !u!114 &1269849713618516270
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1269849713618516264}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: ec8a6c043a216ff42b0b8b09e458e632, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  disablesPointer: 1
-  onInteraction:
-    m_PersistentCalls:
-      m_Calls: []
-  onGrab:
-    m_PersistentCalls:
-      m_Calls: []
-  onDrop:
-    m_PersistentCalls:
-      m_Calls: []
-  onHoverChange:
-    m_PersistentCalls:
-      m_Calls:
-      - m_Target: {fileID: 1269849713618516275}
-        m_TargetAssemblyTypeName: WordGestureKeyboard.BestWordChooseManager, unibas.wgkeyboard
-        m_MethodName: ChooseWord
-        m_Mode: 0
-        m_Arguments:
-          m_ObjectArgument: {fileID: 0}
-          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
-          m_IntArgument: 0
-          m_FloatArgument: 0
-          m_StringArgument: 
-          m_BoolArgument: 0
-        m_CallState: 2
 --- !u!114 &1269849713618516275
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1085,7 +1009,6 @@ GameObject:
   - component: {fileID: 1269849713769562586}
   - component: {fileID: 1269849713769562581}
   - component: {fileID: 1269849713769562580}
-  - component: {fileID: 1269849713769562583}
   - component: {fileID: 1269849713769562584}
   m_Layer: 0
   m_Name: Word4
@@ -1189,43 +1112,6 @@ Rigidbody:
   m_Interpolate: 0
   m_Constraints: 126
   m_CollisionDetection: 0
---- !u!114 &1269849713769562583
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1269849713769562577}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: ec8a6c043a216ff42b0b8b09e458e632, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  disablesPointer: 1
-  onInteraction:
-    m_PersistentCalls:
-      m_Calls: []
-  onGrab:
-    m_PersistentCalls:
-      m_Calls: []
-  onDrop:
-    m_PersistentCalls:
-      m_Calls: []
-  onHoverChange:
-    m_PersistentCalls:
-      m_Calls:
-      - m_Target: {fileID: 1269849713769562584}
-        m_TargetAssemblyTypeName: WordGestureKeyboard.BestWordChooseManager, unibas.wgkeyboard
-        m_MethodName: ChooseWord
-        m_Mode: 0
-        m_Arguments:
-          m_ObjectArgument: {fileID: 0}
-          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
-          m_IntArgument: 0
-          m_FloatArgument: 0
-          m_StringArgument: 
-          m_BoolArgument: 0
-        m_CallState: 2
 --- !u!114 &1269849713769562584
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1253,7 +1139,6 @@ GameObject:
   - component: {fileID: 1269849713848468382}
   - component: {fileID: 1269849713848468377}
   - component: {fileID: 1269849713848468376}
-  - component: {fileID: 1269849713848468379}
   - component: {fileID: 1269849713848468380}
   m_Layer: 0
   m_Name: Word1
@@ -1357,43 +1242,6 @@ Rigidbody:
   m_Interpolate: 0
   m_Constraints: 126
   m_CollisionDetection: 0
---- !u!114 &1269849713848468379
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1269849713848468373}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: ec8a6c043a216ff42b0b8b09e458e632, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  disablesPointer: 1
-  onInteraction:
-    m_PersistentCalls:
-      m_Calls: []
-  onGrab:
-    m_PersistentCalls:
-      m_Calls: []
-  onDrop:
-    m_PersistentCalls:
-      m_Calls: []
-  onHoverChange:
-    m_PersistentCalls:
-      m_Calls:
-      - m_Target: {fileID: 1269849713848468380}
-        m_TargetAssemblyTypeName: WordGestureKeyboard.BestWordChooseManager, unibas.wgkeyboard
-        m_MethodName: ChooseWord
-        m_Mode: 0
-        m_Arguments:
-          m_ObjectArgument: {fileID: 0}
-          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
-          m_IntArgument: 0
-          m_FloatArgument: 0
-          m_StringArgument: 
-          m_BoolArgument: 0
-        m_CallState: 2
 --- !u!114 &1269849713848468380
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -2283,7 +2131,6 @@ GameObject:
   - component: {fileID: 1269849715014090788}
   - component: {fileID: 1269849715014090791}
   - component: {fileID: 1269849715014090790}
-  - component: {fileID: 1269849715014090785}
   m_Layer: 0
   m_Name: Minus
   m_TagString: Untagged
@@ -2386,43 +2233,6 @@ Rigidbody:
   m_Interpolate: 0
   m_Constraints: 126
   m_CollisionDetection: 0
---- !u!114 &1269849715014090785
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1269849715014090787}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: ec8a6c043a216ff42b0b8b09e458e632, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  disablesPointer: 1
-  onInteraction:
-    m_PersistentCalls:
-      m_Calls:
-      - m_Target: {fileID: 1269849713127488785}
-        m_TargetAssemblyTypeName: WordGestureKeyboard.WGKMain, unibas.wgkeyboard
-        m_MethodName: ScaleMinus
-        m_Mode: 0
-        m_Arguments:
-          m_ObjectArgument: {fileID: 0}
-          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
-          m_IntArgument: 0
-          m_FloatArgument: 0
-          m_StringArgument: 
-          m_BoolArgument: 0
-        m_CallState: 2
-  onGrab:
-    m_PersistentCalls:
-      m_Calls: []
-  onDrop:
-    m_PersistentCalls:
-      m_Calls: []
-  onHoverChange:
-    m_PersistentCalls:
-      m_Calls: []
 --- !u!1 &1269849715021581870
 GameObject:
   m_ObjectHideFlags: 0
@@ -2436,7 +2246,6 @@ GameObject:
   - component: {fileID: 1269849715021581875}
   - component: {fileID: 1269849715021581874}
   - component: {fileID: 1269849715021581869}
-  - component: {fileID: 1269849715021581868}
   m_Layer: 0
   m_Name: Plus
   m_TagString: Untagged
@@ -2539,43 +2348,6 @@ Rigidbody:
   m_Interpolate: 0
   m_Constraints: 126
   m_CollisionDetection: 0
---- !u!114 &1269849715021581868
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1269849715021581870}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: ec8a6c043a216ff42b0b8b09e458e632, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  disablesPointer: 1
-  onInteraction:
-    m_PersistentCalls:
-      m_Calls:
-      - m_Target: {fileID: 1269849713127488785}
-        m_TargetAssemblyTypeName: WordGestureKeyboard.WGKMain, unibas.wgkeyboard
-        m_MethodName: ScalePlus
-        m_Mode: 0
-        m_Arguments:
-          m_ObjectArgument: {fileID: 0}
-          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
-          m_IntArgument: 0
-          m_FloatArgument: 0
-          m_StringArgument: 
-          m_BoolArgument: 0
-        m_CallState: 2
-  onGrab:
-    m_PersistentCalls:
-      m_Calls: []
-  onDrop:
-    m_PersistentCalls:
-      m_Calls: []
-  onHoverChange:
-    m_PersistentCalls:
-      m_Calls: []
 --- !u!1 &1470452624069999195
 GameObject:
   m_ObjectHideFlags: 0
@@ -3830,7 +3602,6 @@ GameObject:
   - component: {fileID: 5639353636719150077}
   - component: {fileID: 5639353636719150066}
   - component: {fileID: 5639353636719150067}
-  - component: {fileID: 5639353636719150064}
   m_Layer: 0
   m_Name: Option3
   m_TagString: Untagged
@@ -3933,43 +3704,6 @@ Rigidbody:
   m_Interpolate: 0
   m_Constraints: 126
   m_CollisionDetection: 0
---- !u!114 &5639353636719150064
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 5639353636719150070}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: ec8a6c043a216ff42b0b8b09e458e632, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  disablesPointer: 1
-  onInteraction:
-    m_PersistentCalls:
-      m_Calls:
-      - m_Target: {fileID: 1269849713127488785}
-        m_TargetAssemblyTypeName: WordGestureKeyboard.WGKMain, unibas.wgkeyboard
-        m_MethodName: EnterAddWordMode
-        m_Mode: 0
-        m_Arguments:
-          m_ObjectArgument: {fileID: 0}
-          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
-          m_IntArgument: 0
-          m_FloatArgument: 0
-          m_StringArgument: 
-          m_BoolArgument: 0
-        m_CallState: 2
-  onGrab:
-    m_PersistentCalls:
-      m_Calls: []
-  onDrop:
-    m_PersistentCalls:
-      m_Calls: []
-  onHoverChange:
-    m_PersistentCalls:
-      m_Calls: []
 --- !u!1 &5639353636872950039
 GameObject:
   m_ObjectHideFlags: 0
@@ -3983,7 +3717,6 @@ GameObject:
   - component: {fileID: 5639353636872950034}
   - component: {fileID: 5639353636872950035}
   - component: {fileID: 5639353636872950032}
-  - component: {fileID: 5639353636872950033}
   m_Layer: 0
   m_Name: Option2
   m_TagString: Untagged
@@ -4086,43 +3819,6 @@ Rigidbody:
   m_Interpolate: 0
   m_Constraints: 126
   m_CollisionDetection: 0
---- !u!114 &5639353636872950033
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 5639353636872950039}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: ec8a6c043a216ff42b0b8b09e458e632, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  disablesPointer: 1
-  onInteraction:
-    m_PersistentCalls:
-      m_Calls:
-      - m_Target: {fileID: 1269849713127488785}
-        m_TargetAssemblyTypeName: WordGestureKeyboard.WGKMain, unibas.wgkeyboard
-        m_MethodName: EnterLayoutChoose
-        m_Mode: 0
-        m_Arguments:
-          m_ObjectArgument: {fileID: 0}
-          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
-          m_IntArgument: 0
-          m_FloatArgument: 0
-          m_StringArgument: 
-          m_BoolArgument: 0
-        m_CallState: 2
-  onGrab:
-    m_PersistentCalls:
-      m_Calls: []
-  onDrop:
-    m_PersistentCalls:
-      m_Calls: []
-  onHoverChange:
-    m_PersistentCalls:
-      m_Calls: []
 --- !u!1 &5639353637137059840
 GameObject:
   m_ObjectHideFlags: 0
@@ -4215,7 +3911,6 @@ GameObject:
   - component: {fileID: 5639353637331672915}
   - component: {fileID: 5639353637331672912}
   - component: {fileID: 5639353637331672913}
-  - component: {fileID: 5639353638517159353}
   m_Layer: 0
   m_Name: Add
   m_TagString: Untagged
@@ -4302,43 +3997,6 @@ BoxCollider:
   serializedVersion: 2
   m_Size: {x: 1, y: 1, z: 1}
   m_Center: {x: 0, y: 0, z: 0}
---- !u!114 &5639353638517159353
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 5639353637331672916}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: ec8a6c043a216ff42b0b8b09e458e632, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  disablesPointer: 1
-  onInteraction:
-    m_PersistentCalls:
-      m_Calls:
-      - m_Target: {fileID: 1269849713127488785}
-        m_TargetAssemblyTypeName: WordGestureKeyboard.WGKMain, unibas.wgkeyboard
-        m_MethodName: AddNewWord
-        m_Mode: 0
-        m_Arguments:
-          m_ObjectArgument: {fileID: 0}
-          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
-          m_IntArgument: 0
-          m_FloatArgument: 0
-          m_StringArgument: 
-          m_BoolArgument: 0
-        m_CallState: 2
-  onGrab:
-    m_PersistentCalls:
-      m_Calls: []
-  onDrop:
-    m_PersistentCalls:
-      m_Calls: []
-  onHoverChange:
-    m_PersistentCalls:
-      m_Calls: []
 --- !u!1 &5639353637386378094
 GameObject:
   m_ObjectHideFlags: 0
@@ -4824,7 +4482,6 @@ GameObject:
   - component: {fileID: 5639353638111416836}
   - component: {fileID: 5639353638111416837}
   - component: {fileID: 7245906206969925179}
-  - component: {fileID: 5639353638111416859}
   m_Layer: 0
   m_Name: Options
   m_TagString: Untagged
@@ -4927,43 +4584,6 @@ Rigidbody:
   m_Interpolate: 0
   m_Constraints: 126
   m_CollisionDetection: 0
---- !u!114 &5639353638111416859
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 5639353638111416857}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: ec8a6c043a216ff42b0b8b09e458e632, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  disablesPointer: 1
-  onInteraction:
-    m_PersistentCalls:
-      m_Calls:
-      - m_Target: {fileID: 1269849713127488785}
-        m_TargetAssemblyTypeName: WordGestureKeyboard.WGKMain, unibas.wgkeyboard
-        m_MethodName: EnterOptions
-        m_Mode: 0
-        m_Arguments:
-          m_ObjectArgument: {fileID: 0}
-          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
-          m_IntArgument: 0
-          m_FloatArgument: 0
-          m_StringArgument: 
-          m_BoolArgument: 0
-        m_CallState: 2
-  onGrab:
-    m_PersistentCalls:
-      m_Calls: []
-  onDrop:
-    m_PersistentCalls:
-      m_Calls: []
-  onHoverChange:
-    m_PersistentCalls:
-      m_Calls: []
 --- !u!1 &5639353638259879657
 GameObject:
   m_ObjectHideFlags: 0
@@ -5050,7 +4670,6 @@ GameObject:
   - component: {fileID: 5639353638356656057}
   - component: {fileID: 5639353638356656062}
   - component: {fileID: 5639353638356656063}
-  - component: {fileID: 5639353638356656060}
   m_Layer: 0
   m_Name: Option1
   m_TagString: Untagged
@@ -5153,43 +4772,6 @@ Rigidbody:
   m_Interpolate: 0
   m_Constraints: 126
   m_CollisionDetection: 0
---- !u!114 &5639353638356656060
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 5639353638356656050}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: ec8a6c043a216ff42b0b8b09e458e632, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  disablesPointer: 1
-  onInteraction:
-    m_PersistentCalls:
-      m_Calls:
-      - m_Target: {fileID: 1269849713127488785}
-        m_TargetAssemblyTypeName: WordGestureKeyboard.WGKMain, unibas.wgkeyboard
-        m_MethodName: ChangeSize
-        m_Mode: 0
-        m_Arguments:
-          m_ObjectArgument: {fileID: 0}
-          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
-          m_IntArgument: 0
-          m_FloatArgument: 0
-          m_StringArgument: 
-          m_BoolArgument: 0
-        m_CallState: 2
-  onGrab:
-    m_PersistentCalls:
-      m_Calls: []
-  onDrop:
-    m_PersistentCalls:
-      m_Calls: []
-  onHoverChange:
-    m_PersistentCalls:
-      m_Calls: []
 --- !u!1 &5639353638412487994
 GameObject:
   m_ObjectHideFlags: 0
@@ -5790,7 +5372,6 @@ GameObject:
   - component: {fileID: 5639353638709061197}
   - component: {fileID: 5639353638709061186}
   - component: {fileID: 5639353638709061187}
-  - component: {fileID: 5639353638709061184}
   m_Layer: 0
   m_Name: WGKeyboardObject
   m_TagString: Untagged
@@ -5850,56 +5431,6 @@ Rigidbody:
   m_Interpolate: 0
   m_Constraints: 126
   m_CollisionDetection: 0
---- !u!114 &5639353638709061184
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 5639353638709061185}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 11cac8de724f28d4ca9a7f4f946639ff, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  disablesPointer: 1
-  onInteraction:
-    m_PersistentCalls:
-      m_Calls:
-      - m_Target: {fileID: 1269849713127488785}
-        m_TargetAssemblyTypeName: WordGestureKeyboard.WGKMain, unibas.wgkeyboard
-        m_MethodName: DrawWord
-        m_Mode: 0
-        m_Arguments:
-          m_ObjectArgument: {fileID: 0}
-          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
-          m_IntArgument: 0
-          m_FloatArgument: 0
-          m_StringArgument: 
-          m_BoolArgument: 0
-        m_CallState: 2
-  onGrab:
-    m_PersistentCalls:
-      m_Calls: []
-  onDrop:
-    m_PersistentCalls:
-      m_Calls: []
-  onHoverChange:
-    m_PersistentCalls:
-      m_Calls:
-      - m_Target: {fileID: 1269849713127488785}
-        m_TargetAssemblyTypeName: WordGestureKeyboard.WGKMain, unibas.wgkeyboard
-        m_MethodName: HoverKeyboard
-        m_Mode: 0
-        m_Arguments:
-          m_ObjectArgument: {fileID: 0}
-          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
-          m_IntArgument: 0
-          m_FloatArgument: 0
-          m_StringArgument: 
-          m_BoolArgument: 0
-        m_CallState: 2
-  grabTransform: {fileID: 0}
 --- !u!1 &5639353638727728865
 GameObject:
   m_ObjectHideFlags: 0
