@@ -5373,7 +5373,7 @@ GameObject:
   - component: {fileID: 5639353638709061186}
   - component: {fileID: 5639353638709061187}
   m_Layer: 0
-  m_Name: WGKeyboardObject
+  m_Name: Word-Gesture Keyboard
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
