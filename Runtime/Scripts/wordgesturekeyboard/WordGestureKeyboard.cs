@@ -288,7 +288,7 @@ namespace WordGestureKeyboard
         var center1 = _boxCollider.center;
         _boxCollider.center = new Vector3(center1.x, 0.03f, center1.z);
         var size1 = _boxCollider.size;
-        _boxCollider.size = new Vector3(size1.x, 0.05f, size1.z);
+        _boxCollider.size = new Vector3(size1.x, 0.07f, size1.z);
         foreach (Transform child in transform)
         {
           child.GetComponent<BoxCollider>().isTrigger = false;

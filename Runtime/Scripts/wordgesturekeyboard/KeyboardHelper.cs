@@ -66,7 +66,7 @@ namespace WordGestureKeyboard
       _transform.localScale =
         new Vector3(keyboardLength, _keyboardWidth,
           _transform.localScale.z); // keyboard gets bigger if more keys on one line, but keys always have the same size
-      _boxCollider.size = new Vector3(keyboardLength, 0.05f, _keyboardWidth);
+      _boxCollider.size = new Vector3(keyboardLength, 0.07f, _keyboardWidth);
 
       var parent = _transform.parent;
       var tempRot = parent.localRotation;
