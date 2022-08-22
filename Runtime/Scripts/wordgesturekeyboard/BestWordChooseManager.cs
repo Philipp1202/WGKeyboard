@@ -22,7 +22,7 @@ namespace WordGestureKeyboard {
         /// <param name="b">If true it calls a function and swaps the word of the text field with the word on the key to which this script is attached and changes the color, if false it only changes the color</param>
         public void ChooseWord(bool b) {
             if (b) {
-                transform.parent.parent.Find("WGKeyboard").GetComponent<WGKMain>().ChangeWord(transform.GetChild(0).GetChild(0).GetComponent<Text>());
+                transform.parent.parent.Find("WGKeyboard").GetComponent<WordGestureKeyboard>().ChangeWord(transform.GetChild(0).GetChild(0).GetComponent<Text>());
                 transform.GetComponent<MeshRenderer>().material = grayMat;
             } else {
                 transform.GetComponent<MeshRenderer>().material = whiteMat;
