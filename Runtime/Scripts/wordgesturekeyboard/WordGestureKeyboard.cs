@@ -88,13 +88,13 @@ namespace WordGestureKeyboard
 
       _fh = new FileHandler(startingLayout);
       _fh.LoadLayouts();
-      _kh = new KeyboardHelper(transform, key, _boxCollider, _fh);
+      _kh = new KeyboardHelper(transform, key, _boxCollider);
       _kh.CreateKeyboardOverlay(_fh.GetLayoutCompositions()[startingLayout]);
       _uih = new UserInputHandler(_lr, transform);
       _gpc = new GraphPointsCalculator();
 
       _fh.LoadWordGraphs(startingLayout);
-      _kh.MakeSpaceAndBackspaceHitbox(_fh.GetLayoutCompositions()[startingLayout]);
+      _kh.MakeSpaceAndBackspaceHitBox(_fh.GetLayoutCompositions()[startingLayout]);
 
       UpdateObjectPositions();
     }
@@ -118,7 +118,7 @@ namespace WordGestureKeyboard
           var pointsList = _uih.GetTransformedPoints(false);
           if (pointsList.Count != 0)
           {
-            if (_gpc.IsBackSpaceOrSpace(pointsList, _kh.backSpaceHitbox, _kh.spaceHitbox) == 0)
+            if (GraphPointsCalculator.IsBackSpaceOrSpace(pointsList, _kh.backSpaceHitBox, _kh.spaceHitBox) == 0)
             {
               _gpc.CalcBestWords(pointsList, _fh.GetLocationWordPointsDict(), _fh.GetNormalizedWordPointsDict(),
                 _kh.sigma, _kh.keyRadius, _fh.wordRanking, true);
@@ -139,7 +139,7 @@ namespace WordGestureKeyboard
         if (pointsList.Count != 0)
         {
           // user pressed trigger button, but somehow it didn't register any points
-          if (_gpc.IsBackSpaceOrSpace(pointsList, _kh.backSpaceHitbox, _kh.spaceHitbox) == -1)
+          if (GraphPointsCalculator.IsBackSpaceOrSpace(pointsList, _kh.backSpaceHitBox, _kh.spaceHitBox) == -1)
           {
             wordInputSound.Play();
             if (_isAddingNewWord)
@@ -158,7 +158,7 @@ namespace WordGestureKeyboard
             previewWord.transform.GetChild(0).GetChild(0).GetChild(0).GetComponent<Text>().text = "";
             SetChooseObjectsFalse();
           }
-          else if (_gpc.IsBackSpaceOrSpace(pointsList, _kh.backSpaceHitbox, _kh.spaceHitbox) == 1)
+          else if (GraphPointsCalculator.IsBackSpaceOrSpace(pointsList, _kh.backSpaceHitBox, _kh.spaceHitBox) == 1)
           {
             if (!_isAddingNewWord)
             {
@@ -499,7 +499,7 @@ namespace WordGestureKeyboard
         _kh.CreateKeyboardOverlay(_fh.GetLayoutCompositions()[layout]);
         _fh.LoadWordGraphs(layout);
         DelayActivateLayoutButtons();
-        _kh.MakeSpaceAndBackspaceHitbox(_fh.GetLayoutCompositions()[layout]);
+        _kh.MakeSpaceAndBackspaceHitBox(_fh.GetLayoutCompositions()[layout]);
         UpdateObjectPositions();
         _gpc.bestWord = "";
         previewWord.transform.GetChild(0).GetChild(0).GetChild(0).GetComponent<Text>().text = "";
