@@ -16,7 +16,7 @@ namespace WordGestureKeyboard
     private readonly HashSet<string> _wordsInLexicon;
     public readonly Dictionary<string, int> wordRanking;
     public bool isLoading;
-    private const string PathToAssets = "Packages/com.unibas.wgkeyboard/Assets/";
+    private const string PathToAssets = "Packages/ch.unibas.wgkeyboard/Assets/";
     private const string PathToLexicon = PathToAssets + "10000_english_words.txt";
 
     public FileHandler(string layout)

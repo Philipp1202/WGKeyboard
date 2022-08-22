@@ -1,6 +1,6 @@
 {
-  "name": "com.unibas.wgkeyboard",
-  "version": "1.0.0",
+  "name": "ch.unibas.wgkeyboard",
+  "version": "1.0.1",
   "displayName": "Word-Gesture Keyboard",
   "description": "Word-Gesture keyboard for VR",
   "unity": "2021.3",
