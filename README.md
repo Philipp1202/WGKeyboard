@@ -13,7 +13,7 @@ https://user-images.githubusercontent.com/71380589/182833864-12e28735-44af-475b-
 ## Setup
 
 If you have successfully installed the package, then you need to drag
-the [Word-Gesture Keyboard ](Assets/Prefabs/Word-Gesture Keyboard.prefab) prefab into your scene.
+the [Word-Gesture Keyboard](Assets/Prefabs/Word-Gesture%20Keyboard.prefab) prefab into your scene.
 
 ### Usage
 
