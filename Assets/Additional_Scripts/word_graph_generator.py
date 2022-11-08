@@ -1,5 +1,6 @@
+import argparse
 import math
-import sys
+import os
 import time
 
 import numpy as np
@@ -205,10 +206,20 @@ class WordGraphGenerator:
 
 
 def main():
-    layout = sys.argv[1]
-    # sys.argv[2] has to be the path to the word lexicon
-    lexicon_file_path = sys.argv[2]
-    layouts_file_path = sys.argv[3]
+    parser = argparse.ArgumentParser()
+
+    parser.add_argument('layouts_file', help='The txt file containing the layout specifications.')
+    parser.add_argument('lexicon_file',
+                        help='The txt file containing the frequency sorted word list to use as lexicon.')
+    parser.add_argument('layout', help='The name of the layout specified in the layouts file to generate graphs for.')
+    parser.add_argument('output_directory', help='The directory into which to write the output graph files.')
+
+    args = parser.parse_args()
+
+    layout = args.layout
+    lexicon_file_path = args.lexicon_file
+    layouts_file_path = args.layouts_file
+    output_dir = args.output_directory
     with open(lexicon_file_path, "r", encoding="utf-8") as lexicon_file:
         lexicon = [line.rstrip() for line in lexicon_file]
 
@@ -221,7 +232,7 @@ def main():
             lexicon.append(char)
 
     start_time = time.time()
-    with open(f'graph_{layout}.txt', 'w') as graph_file:
+    with open(os.path.join(output_dir, f'graph_{layout}.txt'), 'w') as graph_file:
         char_pos = wsg.get_character_positions()
         for word in lexicon:
             graph_points, graph_points_normalized = wsg.get_word_graph_step_point(word, 20, char_pos)
