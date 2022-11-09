@@ -62,7 +62,7 @@ namespace WordGestureKeyboard
     private bool _pressedChangeLayout;
 
     // Start is called before the first frame update
-    private void Start()
+    private async void Start()
     {
       _whiteMat = materials.whiteMat;
       _grayMat = materials.grayMat;
@@ -93,7 +93,8 @@ namespace WordGestureKeyboard
       _uih = new UserInputHandler(_lr, transform);
       _gpc = new GraphPointsCalculator();
 
-      _fh.LoadWordGraphs(startingLayout);
+      await Task.Run(() => { _fh.LoadWordGraphs(startingLayout); });
+
       _kh.MakeSpaceAndBackspaceHitBox(_fh.GetLayoutCompositions()[startingLayout]);
 
       UpdateObjectPositions();

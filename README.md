@@ -78,22 +78,21 @@ word_graph_generator.py" file again (mentioned in the next section).
 
 ## How to create and use new layouts
 
-In the assets folder, you will find a file named "layouts.txt". The first six lines will be ignored by the program and
-give you some information about what is allowed and what is not.
-To create a new layout follow the instructions in the layouts.txt file.
-After you created a new layout according to the rules, you need to execute the "word_graph_generator.py" script in the "
-Assets/Additional_Scripts" folder. To do so, navigate to the "Assets/Additional_Scripts" folder with your terminal. Then
-type:  
-"python3 word_graph_generator.py ***layout*** ***wordlist***"  
-***layout*** is the name of the layout you want to be able to use afterwards  
-***wordlist*** is the name of the wordlist text file whose words you want to be able to write with the keyboard. (it
-must be in the assets folder (if something seems not to work with special characters, make sure your wordlist is an
-utf-8 text file)). Note that every word with uppercase characters will not be looked at because all words need to be
-written in lowercase.  
-After executing it, you have to wait some seconds, then it should have generated/overwritten a file for the chosen
-layout. Now you can start the program and should be able to write the words in the text file with gestures (if not all
-the characters of a certain word are available in the layout, this certain word will have been skipped and hence cannot
-be written with the keyboard if the newly created layout is active).
+In the `Assets` folder, you will find a file `layouts.txt`.
+The first six lines will be ignored by the program and give you some information about what is allowed and what is not.
+To create a new layout follow these instructions.
+After creating a new layout according to the rules, you need to execute the [word_graph_generator.py](Assets/Additional_Scripts/word_graph_generator.py) script:
+```bash
+$ python word_graph_generator.py <layouts_file> <lexicon_file> <layout> <output_directory>
+```
+Use the `-h` option for additional information.
+Note that every word with uppercase characters will not be looked at because all words need to be written in lowercase.  
+After executing it, you have to wait some seconds, then it should have generated/overwritten a file for the chosen layout.
+Now you can start the program and should be able to write the words in the text file with gestures (if not all the characters of a certain word are available in the layout, this certain word will have been skipped and hence cannot be written with the keyboard if the newly created layout is active). 
+
+### Included lexicon
+
+All source information about the lexicon, including its specific license, can be found in [lexicon_license.txt](Assets/lexicon/lexicon_license.txt).
 
 ## How to change the layout
 
