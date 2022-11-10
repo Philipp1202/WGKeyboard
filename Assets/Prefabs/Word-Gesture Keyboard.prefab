@@ -128,8 +128,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e489a512bcce03a4596113b0334aabeb, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  materials: {fileID: 7897214852118176417, guid: 58b3dc64846240f498686b318bb2cd7a,
-    type: 3}
+  materials: {fileID: 7897214852118176417, guid: 58b3dc64846240f498686b318bb2cd7a, type: 3}
 --- !u!1 &1269849713041476984
 GameObject:
   m_ObjectHideFlags: 0
@@ -994,8 +993,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e489a512bcce03a4596113b0334aabeb, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  materials: {fileID: 7897214852118176417, guid: 58b3dc64846240f498686b318bb2cd7a,
-    type: 3}
+  materials: {fileID: 7897214852118176417, guid: 58b3dc64846240f498686b318bb2cd7a, type: 3}
 --- !u!1 &1269849713769562577
 GameObject:
   m_ObjectHideFlags: 0
@@ -1124,8 +1122,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e489a512bcce03a4596113b0334aabeb, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  materials: {fileID: 7897214852118176417, guid: 58b3dc64846240f498686b318bb2cd7a,
-    type: 3}
+  materials: {fileID: 7897214852118176417, guid: 58b3dc64846240f498686b318bb2cd7a, type: 3}
 --- !u!1 &1269849713848468373
 GameObject:
   m_ObjectHideFlags: 0
@@ -1254,8 +1251,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e489a512bcce03a4596113b0334aabeb, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  materials: {fileID: 7897214852118176417, guid: 58b3dc64846240f498686b318bb2cd7a,
-    type: 3}
+  materials: {fileID: 7897214852118176417, guid: 58b3dc64846240f498686b318bb2cd7a, type: 3}
 --- !u!1 &1269849713848485388
 GameObject:
   m_ObjectHideFlags: 0
@@ -4496,8 +4492,8 @@ Transform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 5639353638111416857}
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -0.364, y: 0, z: 0}
+  m_LocalRotation: {x: -0.000000015335218, y: -0.0000000045961492, z: -0.000000018928404, w: 1}
+  m_LocalPosition: {x: 0.345, y: 6.661338e-15, z: 0.085}
   m_LocalScale: {x: 0.08, y: 0.002, z: 0.08}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -5625,13 +5621,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4531f167e60c61640995aea8584e8474, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  materials: {fileID: 7897214852118176417, guid: 58b3dc64846240f498686b318bb2cd7a,
-    type: 3}
+  materials: {fileID: 7897214852118176417, guid: 58b3dc64846240f498686b318bb2cd7a, type: 3}
   wordInputSound: {fileID: 4263064130954580416}
   key: {fileID: 1157403622050763692, guid: a021819a122e9c14d88720d33014e69a, type: 3}
-  layoutKey: {fileID: 6720965589483598398, guid: 575349431bcde8d4fa8f87b2cdc6b82f,
-    type: 3}
-  startingLayout: qwertz
+  layoutKey: {fileID: 6720965589483598398, guid: 575349431bcde8d4fa8f87b2cdc6b82f, type: 3}
+  startingLayout: qwerty
   result:
     m_PersistentCalls:
       m_Calls: []

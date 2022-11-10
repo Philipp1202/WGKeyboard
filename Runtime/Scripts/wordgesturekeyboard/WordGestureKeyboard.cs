@@ -82,8 +82,8 @@ namespace WordGestureKeyboard
 
       if (startingLayout == "")
       {
-        // if user didn't specify another layout, the standard qwertz layout will be used
-        startingLayout = "qwertz";
+        // if user didn't specify another layout, the standard qwerty layout will be used
+        startingLayout = "qwerty";
       }
 
       _fh = new FileHandler(startingLayout);
@@ -93,11 +93,11 @@ namespace WordGestureKeyboard
       _uih = new UserInputHandler(_lr, transform);
       _gpc = new GraphPointsCalculator();
 
-      await Task.Run(() => { _fh.LoadWordGraphs(startingLayout); });
-
       _kh.MakeSpaceAndBackspaceHitBox(_fh.GetLayoutCompositions()[startingLayout]);
 
       UpdateObjectPositions();
+
+      await Task.Run(() => { _fh.LoadWordGraphs(startingLayout); });
     }
 
     private void Update()
