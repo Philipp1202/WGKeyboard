@@ -38,51 +38,26 @@ namespace WordGestureKeyboard
 
       var path = $"{PathToAssets}Graph_Files/graph_{loadLayout}.txt";
 
-      var locationPoints = new List<Vector2>();
-      var normalizedPoints = new List<Vector2>();
       foreach (var line in File.ReadLines(path))
       {
+        var locationPoints = new List<Vector2>();
+        var normalizedPoints = new List<Vector2>();
+
         var splits = line.Split(":");
         var points = splits[1].Split(",");
-        var n = 0;
-        float v1 = 0;
-        foreach (var p in points)
+        var normalized = splits[2].Split(","); // normalized points
+        for (var i = 0; i < points.Length; i += 2)
         {
-          float.TryParse(p, out var d);
-          if (n % 2 == 0)
-          {
-            v1 = d;
-          }
-          else
-          {
-            locationPoints.Add(new Vector2(v1, d));
-          }
-
-          n += 1;
+          locationPoints.Add(new Vector2(float.Parse(points[i]), float.Parse(points[i + 1])));
         }
 
-        points = splits[2].Split(","); // normalized points
-        n = 0;
-        foreach (var p in points)
+        for (var i = 0; i < normalized.Length; i += 2)
         {
-          float.TryParse(p, out var d);
-          if (n % 2 == 0)
-          {
-            v1 = d;
-          }
-          else
-          {
-            normalizedPoints.Add(new Vector2(v1, d));
-          }
-
-          n += 1;
+          normalizedPoints.Add(new Vector2(float.Parse(normalized[i]), float.Parse(normalized[i + 1])));
         }
 
         _locationWordPointsDict.Add(splits[0], locationPoints);
         _normalizedWordPointsDict.Add(splits[0], normalizedPoints);
-
-        normalizedPoints = new List<Vector2>();
-        locationPoints = new List<Vector2>();
       }
 
       isLoading = false;
