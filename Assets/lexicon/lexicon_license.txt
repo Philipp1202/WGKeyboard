@@ -1,0 +1,3 @@
+Lexicon data source: https://www.kaggle.com/datasets/wheelercode/english-word-frequency-list
+Original source: Google Books Ngram Viewer Exports https://storage.googleapis.com/books/ngrams/books/datasetsv3.html
+License (applies to lexicon.txt): Creative Commons Attribution 3.0 Unported License https://creativecommons.org/licenses/by/3.0/

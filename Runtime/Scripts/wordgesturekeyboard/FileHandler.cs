@@ -17,7 +17,7 @@ namespace WordGestureKeyboard
     public readonly Dictionary<string, int> wordRanking;
     public bool isLoading;
     private const string PathToAssets = "Packages/ch.unibas.wgkeyboard/Assets/";
-    private const string PathToLexicon = PathToAssets + "10000_english_words.txt";
+    private const string PathToLexicon = PathToAssets + "lexicon/lexicon.txt";
 
     public FileHandler(string layout)
     {
@@ -38,69 +38,40 @@ namespace WordGestureKeyboard
 
       var path = $"{PathToAssets}Graph_Files/graph_{loadLayout}.txt";
 
-      var locationPoints = new List<Vector2>();
-      var normalizedPoints = new List<Vector2>();
       foreach (var line in File.ReadLines(path))
       {
+        var locationPoints = new List<Vector2>();
+        var normalizedPoints = new List<Vector2>();
+
         var splits = line.Split(":");
         var points = splits[1].Split(",");
-        var n = 0;
-        float v1 = 0;
-        foreach (var p in points)
+        var normalized = splits[2].Split(","); // normalized points
+        for (var i = 0; i < points.Length; i += 2)
         {
-          float.TryParse(p, out var d);
-          if (n % 2 == 0)
-          {
-            v1 = d;
-          }
-          else
-          {
-            locationPoints.Add(new Vector2(v1, d));
-          }
-
-          n += 1;
+          locationPoints.Add(new Vector2(float.Parse(points[i]), float.Parse(points[i + 1])));
         }
 
-        points = splits[2].Split(","); // normalized points
-        n = 0;
-        foreach (var p in points)
+        for (var i = 0; i < normalized.Length; i += 2)
         {
-          float.TryParse(p, out var d);
-          if (n % 2 == 0)
-          {
-            v1 = d;
-          }
-          else
-          {
-            normalizedPoints.Add(new Vector2(v1, d));
-          }
-
-          n += 1;
+          normalizedPoints.Add(new Vector2(float.Parse(normalized[i]), float.Parse(normalized[i + 1])));
         }
 
         _locationWordPointsDict.Add(splits[0], locationPoints);
         _normalizedWordPointsDict.Add(splits[0], normalizedPoints);
-
-        normalizedPoints = new List<Vector2>();
-        locationPoints = new List<Vector2>();
       }
 
       isLoading = false;
     }
 
     /// <summary>
-    /// Checks if the word "newWord" already exists in the dictionary. If true, then this function does nothing, else it writes the word in the lexicon file and
-    /// adds the graph points to the corresponding files. Additionally, it also adds these to the normalizedWordPointsDict and locationWordPointsDict, such that they can be immediately used with the active layout.
+    /// Checks if the word "newWord" already exists in the dictionary. If true, then this function does nothing, else it
+    /// adds the word and graphs to the normalizedWordPointsDict and locationWordPointsDict, such that they can be immediately used with the active layout.
     /// </summary>
     /// <param name="newWord">New word that should be added to the dictionary.</param>
     /// <param name="gpc">Graph points calculator to calculate the graph points.</param>
     public void AddNewWordToDict(string newWord, GraphPointsCalculator gpc)
     {
       if (newWord.Length == 0 || newWord.Contains(" ") || _wordsInLexicon.Contains(newWord)) return;
-
-      var sw = File.AppendText(PathToLexicon);
-      sw.WriteLine(newWord);
-      sw.Close();
 
       foreach (var l in layouts)
       {
@@ -111,14 +82,6 @@ namespace WordGestureKeyboard
         }
 
         var wordNormPoints = gpc.Normalize(wordLocationPoints, 2);
-
-        var path = $"{PathToAssets}Graph_Files/graph_{l}.txt";
-        sw = File.AppendText(path);
-        var newLine = newWord + ":" + string.Join(",", wordLocationPoints.Select(point => $"{point.x},{point.y}")) +
-                      ":" + string.Join(",", wordNormPoints.Select(point => $"{point.x},{point.y}"));
-
-        sw.WriteLine(newLine);
-        sw.Close();
 
         if (l != layout) continue;
         // add word and points to these two dictionaries so that this word can be written as gesture with the active layout without reloading
@@ -213,7 +176,8 @@ namespace WordGestureKeyboard
     }
 
     /// <summary>
-    /// Returns a tuple containing a hashset of all words in the lexicon and a dictionary with all the words and their rank (how frequently used in language)
+    /// Returns a tuple containing a hashset of all words in the lexicon and a dictionary with all the words and their
+    /// rank (how frequently used in language)
     /// </summary>
     /// <returns>The words in a lexicon and their rank</returns>
     private static Tuple<HashSet<string>, Dictionary<string, int>> GetAllWordsInLexicon()
@@ -229,11 +193,6 @@ namespace WordGestureKeyboard
       }
 
       return new Tuple<HashSet<string>, Dictionary<string, int>>(words, wordsWithRank);
-    }
-
-    public List<string> GetLayouts()
-    {
-      return layouts;
     }
 
     public Dictionary<string, Tuple<List<float>, List<string>>> GetLayoutCompositions()
